@@ -22,7 +22,7 @@ function nextLessonOf(lesson) {
   return secLessons[i + 1] || null;
 }
 
-export default function JuliaLearningApp() {
+export default function RStanLearningApp() {
   const [view, setView] = useState({ name: "home" });
   // done: クリア済み問題 / first: 初見(誤答なし)でクリアした問題。修了と測定を分ける2層設計(仕様5節)
   const [progress, setProgress] = useState({ done: {}, first: {} });
@@ -80,9 +80,9 @@ export default function JuliaLearningApp() {
         style={{
           background:
             "linear-gradient(90deg, " +
-            C.red + " 0%, " + C.red + " 33.4%, " +
-            C.green + " 33.4%, " + C.green + " 66.7%, " +
-            C.purple + " 66.7%, " + C.purple + " 100%)",
+            C.accent + " 0%, " + C.accent + " 33.4%, " +
+            C.ok + " 33.4%, " + C.ok + " 66.7%, " +
+            C.stan + " 66.7%, " + C.stan + " 100%)",
         }}
       />
       <div className="mx-auto flex w-full max-w-5xl justify-center gap-10 px-4 py-6 sm:py-10">

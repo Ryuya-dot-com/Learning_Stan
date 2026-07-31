@@ -44,8 +44,8 @@ function ChoiceEx({ ex, seedKey, solved, onCorrect }) {
           const correctPick = status === "correct" && oi === ex.ans;
           const wrongPick = status === "wrong" && sel === oi;
           let st = { background: "#FFFFFF", border: "1.5px solid " + C.line, color: C.ink };
-          if (correctPick) st = { background: C.greenSoft, border: "1.5px solid " + C.green, color: C.greenText };
-          else if (wrongPick) st = { background: C.redSoft, border: "1.5px solid " + C.red, color: C.redText };
+          if (correctPick) st = { background: C.okSoft, border: "1.5px solid " + C.ok, color: C.okText };
+          else if (wrongPick) st = { background: C.alertSoft, border: "1.5px solid " + C.alert, color: C.alertText };
           return (
             <button
               key={oi}
@@ -59,10 +59,10 @@ function ChoiceEx({ ex, seedKey, solved, onCorrect }) {
                 className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
                 style={
                   correctPick
-                    ? { background: C.greenText, color: "#FFFFFF" }
+                    ? { background: C.okText, color: "#FFFFFF" }
                     : wrongPick
-                    ? { background: C.red, color: "#FFFFFF" }
-                    : { background: C.purpleSoft, color: C.purpleDeep }
+                    ? { background: C.alert, color: "#FFFFFF" }
+                    : { background: C.accentSoft, color: C.accentDeep }
                 }
               >
                 {correctPick ? "✓" : wrongPick ? "✕" : String.fromCharCode(65 + pos)}
@@ -130,8 +130,8 @@ function FillEx({ ex, solved, onCorrect }) {
           style={{
             border:
               "1.5px solid " +
-              (status === "correct" ? C.green : status === "wrong" ? C.red : C.edge),
-            background: status === "correct" ? C.greenSoft : "#FFFFFF",
+              (status === "correct" ? C.ok : status === "wrong" ? C.alert : C.edge),
+            background: status === "correct" ? C.okSoft : "#FFFFFF",
             color: status === "correct" ? "#2B7A1E" : C.ink,
             fontFamily: MONO,
           }}
@@ -199,8 +199,8 @@ function TfEx({ ex, solved, onCorrect }) {
               key={i}
               className="rounded-xl p-3"
               style={{
-                background: right ? C.greenSoft : wrong ? C.redSoft : "#FFFFFF",
-                border: "1.5px solid " + (right ? C.green : wrong ? C.red : C.line),
+                background: right ? C.okSoft : wrong ? C.alertSoft : "#FFFFFF",
+                border: "1.5px solid " + (right ? C.ok : wrong ? C.alert : C.line),
               }}
             >
               <div className="flex items-start justify-between gap-3">
@@ -221,7 +221,7 @@ function TfEx({ ex, solved, onCorrect }) {
                       className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold disabled:cursor-default"
                       style={
                         marks[i] === v
-                          ? { background: C.purpleDeep, color: "#FFFFFF" }
+                          ? { background: C.accentDeep, color: "#FFFFFF" }
                           : { background: "#FFFFFF", border: "1.5px solid " + C.edge, color: C.body }
                       }
                     >
@@ -231,7 +231,7 @@ function TfEx({ ex, solved, onCorrect }) {
                 </div>
               </div>
               {judged && (
-                <p className="mt-2 text-xs leading-5" style={{ color: right ? "#2E5626" : C.redText }}>
+                <p className="mt-2 text-xs leading-5" style={{ color: right ? "#2E5626" : C.alertText }}>
                   {right ? "○ " : "✕ "}
                   <T>{it.why}</T>
                 </p>
@@ -247,8 +247,8 @@ function TfEx({ ex, solved, onCorrect }) {
       </div>
       <div role="status" aria-live="polite">
         {status === "correct" && (
-          <div className="pop mt-4 rounded-xl p-4" style={{ background: C.greenSoft, border: "1px solid #BFE3B4" }}>
-            <p className="text-sm font-bold" style={{ color: C.greenText }}>
+          <div className="pop mt-4 rounded-xl p-4" style={{ background: C.okSoft, border: "1px solid #BFE3B4" }}>
+            <p className="text-sm font-bold" style={{ color: C.okText }}>
               全問正解です!{!missed && " 初見でパーフェクトでした。"}
             </p>
           </div>
@@ -313,7 +313,7 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
         <div className="mb-3 flex items-center justify-between">
           <button
             className="inline-flex min-h-11 items-center text-sm font-bold"
-            style={{ color: C.purpleDeep }}
+            style={{ color: C.accentDeep }}
             onClick={onHome}
           >
             ← レッスン一覧
@@ -325,7 +325,7 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
         <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: C.track }}>
           <div
             className="h-full rounded-full"
-            style={{ width: pct + "%", background: C.purple, transition: "width 0.3s" }}
+            style={{ width: pct + "%", background: C.accent, transition: "width 0.3s" }}
           />
         </div>
       </div>
@@ -337,7 +337,7 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
       >
         {cur.kind === "page" && (
           <div>
-            <div className="mb-2 text-xs font-bold tracking-widest" style={{ color: C.purpleDeep, fontFamily: MONO }}>
+            <div className="mb-2 text-xs font-bold tracking-widest" style={{ color: C.accentDeep, fontFamily: MONO }}>
               {headLabel}
             </div>
             <h2 className="mb-4 text-xl font-bold" style={{ color: C.ink }}>
@@ -362,12 +362,12 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
             <div className="mb-4 flex items-center gap-2">
               <span
                 className="rounded-full px-3 py-1 text-xs font-bold"
-                style={{ background: C.purpleSoft, color: C.purpleDeep }}
+                style={{ background: C.accentSoft, color: C.accentDeep }}
               >
                 練習問題 {cur.i + 1} / {total}
               </span>
               {doneSet.has(cur.i) && (
-                <span className="text-xs font-bold" style={{ color: C.greenText }}>
+                <span className="text-xs font-bold" style={{ color: C.okText }}>
                   クリア済み ✓
                 </span>
               )}
@@ -487,7 +487,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
         <TriDots filled={dotsFilled} size={13} />
         <button
           className="inline-flex min-h-11 items-center text-xs font-bold underline"
-          style={{ color: C.purpleDeep }}
+          style={{ color: C.accentDeep }}
           onClick={onCheat}
         >
           チートシート
@@ -495,10 +495,10 @@ function Home({ progress, onOpen, onCheat, onReset }) {
       </div>
 
       <h1 className="mb-1.5 text-3xl font-bold tracking-tight" style={{ color: C.ink }}>
-        はじめてのJulia
+        はじめてのRとStan
       </h1>
       <p className="mb-6 text-sm leading-6" style={{ color: C.sub }}>
-        ゼロから学ぶ、研究のためのプログラミング。全{LESSONS.length}レッスンで、データ解析の入り口まで案内します。
+        ゼロから学ぶ、研究のためのデータ分析。全{LESSONS.length}レッスンで、Rの基礎からベイズ統計の入り口まで案内します。
       </p>
 
       <div className="mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
@@ -513,7 +513,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
         <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: C.track }}>
           <div
             className="h-full rounded-full"
-            style={{ width: pct + "%", background: C.purple, transition: "width 0.4s" }}
+            style={{ width: pct + "%", background: C.accent, transition: "width 0.4s" }}
           />
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
@@ -531,16 +531,16 @@ function Home({ progress, onOpen, onCheat, onReset }) {
       {allDone && (
         <div
           className="pop mb-6 rounded-2xl p-5 text-center"
-          style={{ background: C.purpleSoft, border: "1px solid #DCC9E8" }}
+          style={{ background: C.accentSoft, border: "1px solid #DCC9E8" }}
         >
           <div className="mb-2 flex justify-center">
             <TriDots filled={3} size={14} />
           </div>
-          <p className="text-base font-bold" style={{ color: C.purpleDeep }}>
+          <p className="text-base font-bold" style={{ color: C.accentDeep }}>
             全レッスン修了、おめでとうございます!
           </p>
           <p className="mt-1 text-xs leading-5" style={{ color: "#5A3B6E" }}>
-            次はチートシートを片手に、実際のJulia(julialang.org)で手を動かしてみましょう。
+            次はチートシートを片手に、自分のパソコンのRで手を動かしてみましょう。
           </p>
         </div>
       )}
@@ -567,7 +567,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
                 {sec.notebook && (
                   <a
                     className="inline-flex min-h-11 shrink-0 items-center text-xs font-bold underline"
-                    style={{ color: C.purpleDeep }}
+                    style={{ color: C.accentDeep }}
                     href={import.meta.env.BASE_URL + "notebooks/" + sec.notebook}
                     download
                   >
@@ -592,8 +592,8 @@ function Home({ progress, onOpen, onCheat, onReset }) {
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold"
                         style={
                           all
-                            ? { background: C.greenSoft, color: C.greenText }
-                            : { background: C.purpleSoft, color: C.purpleDeep, fontFamily: MONO }
+                            ? { background: C.okSoft, color: C.okText }
+                            : { background: C.accentSoft, color: C.accentDeep, fontFamily: MONO }
                         }
                       >
                         {all ? "✓" : badge}
@@ -608,7 +608,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
                       </span>
                       <span
                         className="shrink-0 text-xs font-bold"
-                        style={{ color: all ? C.greenText : got > 0 ? C.purpleDeep : C.faint, fontFamily: MONO }}
+                        style={{ color: all ? C.okText : got > 0 ? C.accentDeep : C.faint, fontFamily: MONO }}
                       >
                         {all ? "修了" : got + " / " + l.ex.length}
                       </span>
@@ -627,7 +627,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
         </p>
         <a
           className="inline-flex min-h-11 items-center text-xs font-bold underline"
-          style={{ color: C.purpleDeep }}
+          style={{ color: C.accentDeep }}
           href={import.meta.env.BASE_URL + "roadmap.html"}
         >
           この先の学習ロードマップを見る
@@ -659,11 +659,11 @@ function Sidebar({ progress, currentId, viewName, onOpen, onCheat, onHome }) {
       <button
         onClick={onHome}
         className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm font-bold"
-        style={{ color: viewName === "home" ? C.purpleDeep : C.ink }}
+        style={{ color: viewName === "home" ? C.accentDeep : C.ink }}
         aria-current={viewName === "home" ? "page" : undefined}
       >
         <TriDots filled={3} size={8} />
-        はじめてのJulia
+        はじめてのRとStan
       </button>
 
       <div className="flex flex-col gap-4 pb-4">
@@ -696,16 +696,16 @@ function Sidebar({ progress, currentId, viewName, onOpen, onCheat, onHome }) {
                       className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs"
                       style={
                         current
-                          ? { background: C.purpleSoft, color: C.purpleDeep, fontWeight: 700 }
+                          ? { background: C.accentSoft, color: C.accentDeep, fontWeight: 700 }
                           : { color: C.body }
                       }
                     >
-                      <span className="w-6 shrink-0 text-right" style={{ fontFamily: MONO, color: current ? C.purpleDeep : C.faint }}>
+                      <span className="w-6 shrink-0 text-right" style={{ fontFamily: MONO, color: current ? C.accentDeep : C.faint }}>
                         {badge}
                       </span>
                       <span className="min-w-0 flex-1 truncate">{l.title}</span>
                       {all && (
-                        <span aria-label="修了" style={{ color: C.greenText }}>
+                        <span aria-label="修了" style={{ color: C.okText }}>
                           ✓
                         </span>
                       )}
@@ -723,14 +723,14 @@ function Sidebar({ progress, currentId, viewName, onOpen, onCheat, onHome }) {
           onClick={onCheat}
           aria-current={viewName === "cheat" ? "page" : undefined}
           className="inline-flex min-h-11 items-center rounded-lg px-2 text-xs font-bold"
-          style={viewName === "cheat" ? { background: C.purpleSoft, color: C.purpleDeep } : { color: C.purpleDeep }}
+          style={viewName === "cheat" ? { background: C.accentSoft, color: C.accentDeep } : { color: C.accentDeep }}
         >
           チートシート
         </button>
         <a
           href={import.meta.env.BASE_URL + "roadmap.html"}
           className="inline-flex min-h-11 items-center rounded-lg px-2 text-xs font-bold"
-          style={{ color: C.purpleDeep }}
+          style={{ color: C.accentDeep }}
         >
           学習ロードマップ
         </a>
@@ -749,7 +749,7 @@ function CheatSheet({ onHome }) {
       <div className="mb-5 flex items-center justify-between">
         <button
           className="inline-flex min-h-11 items-center text-sm font-bold"
-          style={{ color: C.purpleDeep }}
+          style={{ color: C.accentDeep }}
           onClick={onHome}
         >
           ← もどる
@@ -757,7 +757,7 @@ function CheatSheet({ onHome }) {
         <TriDots filled={3} size={10} />
       </div>
       <h1 className="mb-1 text-2xl font-bold tracking-tight" style={{ color: C.ink }}>
-        Julia チートシート
+        R チートシート
       </h1>
       <p className="mb-5 text-sm" style={{ color: C.sub }}>
         レッスンで学んだ文法の早見表です。分析のおともに、いつでも見返せます。
@@ -765,7 +765,7 @@ function CheatSheet({ onHome }) {
       <div className="grid gap-4 sm:grid-cols-2">
         {CHEATS.map((sec, i) => (
           <div key={i} className="rounded-2xl bg-white p-4" style={{ border: "1px solid " + C.line }}>
-            <h2 className="mb-3 text-sm font-bold" style={{ color: C.purple }}>
+            <h2 className="mb-3 text-sm font-bold" style={{ color: C.accent }}>
               {sec.title}
             </h2>
             <div className="flex flex-col gap-2.5">
@@ -788,10 +788,10 @@ function CheatSheet({ onHome }) {
       </div>
       <div
         className="mt-5 rounded-2xl p-4 text-sm leading-6"
-        style={{ background: C.purpleSoft, border: "1px solid #DCC9E8", color: "#5A3B6E" }}
+        style={{ background: C.accentSoft, border: "1px solid #DCC9E8", color: "#5A3B6E" }}
       >
         <span className="font-bold">次のステップ:</span>
-        公式サイト julialang.org から juliaup でインストール → ノートブック環境 Pluto.jl で手を動かす → CSV.jl・DataFrames.jl で実データの分析へ。
+        CRAN から R を、Posit から RStudio をインストール → コンソールで手を動かす → tidyverse で実データの分析へ。
       </div>
       <div className="h-8" />
     </div>

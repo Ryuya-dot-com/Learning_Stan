@@ -16,8 +16,8 @@ function T({ children }) {
             key={i}
             className="rounded px-1.5 py-0.5"
             style={{
-              background: C.purpleSoft,
-              color: C.purpleDeep,
+              background: C.accentSoft,
+              color: C.accentDeep,
               fontFamily: MONO,
               fontSize: "0.88em",
               margin: "0 1px",
@@ -39,9 +39,9 @@ function CodeBlock({ code, output, error, lang }) {
   return (
     <div className="my-4 overflow-hidden rounded-xl" style={{ border: "1px solid " + C.line }}>
       <div className="flex items-center gap-1.5 px-4 pt-3" style={{ background: C.night }}>
-        <span className="h-2 w-2 rounded-full" style={{ background: C.red }} />
-        <span className="h-2 w-2 rounded-full" style={{ background: C.green }} />
-        <span className="h-2 w-2 rounded-full" style={{ background: C.purple }} />
+        <span className="h-2 w-2 rounded-full" style={{ background: C.accent }} />
+        <span className="h-2 w-2 rounded-full" style={{ background: C.ok }} />
+        <span className="h-2 w-2 rounded-full" style={{ background: C.stan }} />
         <span className="ml-2 text-xs font-semibold tracking-wide" style={{ color: "#8F86A3" }}>
           {lang || "Julia"}
         </span>
@@ -66,13 +66,13 @@ function CodeBlock({ code, output, error, lang }) {
         <div className="px-4 py-3" style={{ background: "#FFFFFF", borderTop: "1px solid " + C.line }}>
           <div
             className="mb-1 text-xs font-bold tracking-wide"
-            style={{ color: error ? C.red : C.greenText }}
+            style={{ color: error ? C.alert : C.okText }}
           >
             ▶ 実行結果
           </div>
           <pre
             className="overflow-x-auto whitespace-pre-wrap text-sm leading-6"
-            style={{ fontFamily: MONO, color: error ? C.red : C.ink }}
+            style={{ fontFamily: MONO, color: error ? C.alert : C.ink }}
           >
             {output}
           </pre>
@@ -82,9 +82,9 @@ function CodeBlock({ code, output, error, lang }) {
   );
 }
 
-// Juliaの3色ドット(進捗のシグネチャ)
+// R/Stanの3色ドット(進捗のシグネチャ)
 function TriDots({ filled = 3, size = 12 }) {
-  const cols = [C.red, C.green, C.purple];
+  const cols = [C.accent, C.ok, C.stan];
   return (
     <span className="inline-flex items-center" style={{ gap: size / 2 }}>
       {cols.map((col, i) => (
@@ -109,8 +109,8 @@ function Btn({ kind = "primary", className = "", style = {}, ...props }) {
   const base =
     "inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold transition-opacity hover:opacity-85 active:opacity-70 disabled:cursor-not-allowed disabled:opacity-40";
   const kinds = {
-    primary: { background: C.purple, color: "#FFFFFF" },
-    ghost: { background: "transparent", color: C.purple, border: "1.5px solid " + C.purple },
+    primary: { background: C.accent, color: "#FFFFFF" },
+    ghost: { background: "transparent", color: C.accent, border: "1.5px solid " + C.accent },
     quiet: { background: "#FFFFFF", color: C.sub, border: "1px solid " + C.line },
   };
   return <button className={base + " " + className} style={{ ...kinds[kind], ...style }} {...props} />;
@@ -123,7 +123,7 @@ function ResetButton({ onReset }) {
   return arm ? (
     <button
       className={hit + " text-xs font-bold underline"}
-      style={{ color: C.red }}
+      style={{ color: C.alert }}
       onClick={onReset}
       onBlur={() => setArm(false)}
     >
@@ -155,11 +155,11 @@ function Feedback({ status, why, hint, showHint, onHint }) {
   return (
     <div role="status" aria-live="polite" ref={boxRef} tabIndex={-1} className="focus:outline-none">
       {status === "correct" && (
-        <div className="pop mt-4 rounded-xl p-4" style={{ background: C.greenSoft, border: "1px solid #BFE3B4" }}>
-          <div className="mb-1.5 flex items-center gap-2 text-sm font-bold" style={{ color: C.greenText }}>
+        <div className="pop mt-4 rounded-xl p-4" style={{ background: C.okSoft, border: "1px solid #BFE3B4" }}>
+          <div className="mb-1.5 flex items-center gap-2 text-sm font-bold" style={{ color: C.okText }}>
             <span
               className="flex h-5 w-5 items-center justify-center rounded-full text-xs"
-              style={{ background: C.greenText, color: "#FFFFFF" }}
+              style={{ background: C.okText, color: "#FFFFFF" }}
             >
               ✓
             </span>
