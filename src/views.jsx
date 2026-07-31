@@ -531,7 +531,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
       {allDone && (
         <div
           className="pop mb-6 rounded-2xl p-5 text-center"
-          style={{ background: C.accentSoft, border: "1px solid #DCC9E8" }}
+          style={{ background: C.accentSoft, border: "1px solid #C9DBF0" }}
         >
           <div className="mb-2 flex justify-center">
             <TriDots filled={3} size={14} />
@@ -539,7 +539,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
           <p className="text-base font-bold" style={{ color: C.accentDeep }}>
             全レッスン修了、おめでとうございます!
           </p>
-          <p className="mt-1 text-xs leading-5" style={{ color: "#5A3B6E" }}>
+          <p className="mt-1 text-xs leading-5" style={{ color: C.accentDeep }}>
             次はチートシートを片手に、自分のパソコンのRで手を動かしてみましょう。
           </p>
         </div>
@@ -773,7 +773,7 @@ function CheatSheet({ onHome }) {
                 <div key={j} className="flex items-start justify-between gap-3">
                   <code
                     className="shrink-0 rounded px-1.5 py-0.5 text-xs leading-5"
-                    style={{ background: "#F5F2EC", color: "#5A4470", fontFamily: MONO }}
+                    style={{ background: "#F5F2EC", color: C.accentDeep, fontFamily: MONO }}
                   >
                     {r[0]}
                   </code>
@@ -788,7 +788,7 @@ function CheatSheet({ onHome }) {
       </div>
       <div
         className="mt-5 rounded-2xl p-4 text-sm leading-6"
-        style={{ background: C.accentSoft, border: "1px solid #DCC9E8", color: "#5A3B6E" }}
+        style={{ background: C.accentSoft, border: "1px solid #C9DBF0", color: C.accentDeep }}
       >
         <span className="font-bold">次のステップ:</span>
         CRAN から R を、Posit から RStudio をインストール → コンソールで手を動かす → tidyverse で実データの分析へ。
