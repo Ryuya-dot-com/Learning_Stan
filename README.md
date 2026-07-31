@@ -32,10 +32,12 @@ src/data/
 
 ```bash
 npm install
-npm run dev      # 開発サーバ
+npm run dev      # 開発サーバ(http://localhost:5173/Learning_Stan/ で開きます)
 npm test         # レッスンデータ・配色・ハイライトの検証
-npm run build && npm run preview  # 公開と同条件での確認(base パスが効くのは preview のみ)
+npm run build && npm run preview  # 公開と同条件での確認
 ```
+
+dev・preview とも `vite.config.js` の `base`(`/Learning_Stan/`)配下で配信されます。ルートを開くとそこへ転送されます。
 
 `main` に push すると GitHub Actions がテスト → ビルド → GitHub Pages への公開を自動で行います。
 
@@ -43,6 +45,8 @@ npm run build && npm run preview  # 公開と同条件での確認(base パス�
 
 教材に載せるRコードと出力は、すべて実際に実行して確認したものです（基礎編は R 4.6.0 で実測）。
 乱数やMCMCを使う例は、シードを固定しても環境やバージョンによって結果がわずかに変わることがあります。
+
+本文とロードマップの事実主張は公式ドキュメント・CRANで裏を取っています。典拠は [SOURCES.md](SOURCES.md) にまとめました。
 
 ## ライセンス
 

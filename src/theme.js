@@ -1,4 +1,6 @@
 // 配色・フォント・グローバルCSS（R青とStan赤のアイデンティティ）
+// アプリで使う色はすべてここに集約する。JSX に16進数を直書きしないこと
+// (#FFFFFF だけは例外。theme.test.js が直書きを検出して失敗する)。
 // 文字色はすべて WCAG AA (4.5:1) 以上を実測確認済み。値を変えるときは再計算すること。
 const C = {
   paper: "#FBFAF7",
@@ -16,17 +18,28 @@ const C = {
   ok: "#389826", // 装飾用
   okText: "#2B7A1E", // paper 上 5.15:1、okSoft 上 4.82:1
   okSoft: "#EAF6E6",
+  okDeep: "#2E5626", // 正解解説の本文。okSoft 上 7.60:1
+  okLine: "#BFE3B4", // 正解カードの枠(装飾)
 
   // 誤答・エラー（Stan の赤と同系。警告のシグナル）
   alert: "#B0182D", // 装飾用
   alertText: "#9A1526", // paper 上 8.02:1、alertSoft 上 7.13:1
   alertSoft: "#F9E9EB",
 
+  // 誤答フィードバック（琥珀。誤りは「間違い」ではなく「もう一度」のシグナルなので赤と分ける）
+  warnSoft: "#FFF7E8",
+  warnLine: "#F1DFB8", // 枠(装飾)
+  warnText: "#82590F", // 見出し・リンク。warnSoft 上 5.83:1
+  warnBody: "#7A5A1A", // ヒント本文。warnSoft 上 5.97:1
+
   // Stan編の識別色（3色ドットの3つ目）
   stan: "#7C1128",
 
   night: "#272134",
+  dim: "#8F86A3", // コードブロックの言語ラベル。night 上 4.51:1
   line: "#E8E4DC",
+  accentLine: "#C9DBF0", // accentSoft のカードの枠(装飾)
+  chip: "#F5F2EC", // チートシートのコード片の下地。accentDeep 上 7.42:1
   edge: "#8A8296", // 入力欄など操作要素の境界線(非テキスト3:1を満たす)
   track: "#EFEBE2",
 };

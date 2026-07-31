@@ -26,6 +26,25 @@ describe("配色定義", () => {
     const legacy = ["purple", "purpleDeep", "purpleSoft", "green", "greenText", "greenSoft", "red", "redText", "redSoft"];
     expect(legacy.filter((k) => k in C), "Julia版のキー名が残っている").toEqual([]);
   });
+
+  // 上の検査は「C.xxx が定義済みか」しか見ないため、JSX に16進数を直書きすると素通りしてしまう。
+  // 実際、誤答フィードバックの琥珀色一式(#FFF7E8/#82590F/#7A5A1A ほか)が theme.js の外にあり、
+  // 「文字色はすべてコントラスト確認済み」という theme.js の宣言の範囲外にこぼれていた(監査指摘)。
+  // 色を1か所に集約し続けるため、直書きそのものを禁止する。
+  it("JSX に色の直書きがない(#FFFFFF を除く)", () => {
+    const files = readdirSync(srcDir).filter((f) => /\.jsx$/.test(f));
+    const hits = [];
+    for (const f of files) {
+      readFileSync(join(srcDir, f), "utf8")
+        .split("\n")
+        .forEach((line, i) => {
+          for (const m of line.matchAll(/#[0-9A-Fa-f]{6}\b/g)) {
+            if (m[0].toUpperCase() !== "#FFFFFF") hits.push(`${f}:${i + 1} の ${m[0]} は theme.js に移すこと`);
+          }
+        });
+    }
+    expect(hits, "JSX に色が直書きされている").toEqual([]);
+  });
 });
 
 // public/roadmap.html は後からアプリと切り離して追加されたページで、上の検査(src/*.jsx のみ走査)では

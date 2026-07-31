@@ -132,7 +132,7 @@ function FillEx({ ex, solved, onCorrect }) {
               "1.5px solid " +
               (status === "correct" ? C.ok : status === "wrong" ? C.alert : C.edge),
             background: status === "correct" ? C.okSoft : "#FFFFFF",
-            color: status === "correct" ? "#2B7A1E" : C.ink,
+            color: status === "correct" ? C.okText : C.ink,
             fontFamily: MONO,
           }}
         />
@@ -231,7 +231,7 @@ function TfEx({ ex, solved, onCorrect }) {
                 </div>
               </div>
               {judged && (
-                <p className="mt-2 text-xs leading-5" style={{ color: right ? "#2E5626" : C.alertText }}>
+                <p className="mt-2 text-xs leading-5" style={{ color: right ? C.okDeep : C.alertText }}>
                   {right ? "○ " : "✕ "}
                   <T>{it.why}</T>
                 </p>
@@ -247,25 +247,25 @@ function TfEx({ ex, solved, onCorrect }) {
       </div>
       <div role="status" aria-live="polite">
         {status === "correct" && (
-          <div className="pop mt-4 rounded-xl p-4" style={{ background: C.okSoft, border: "1px solid #BFE3B4" }}>
+          <div className="pop mt-4 rounded-xl p-4" style={{ background: C.okSoft, border: "1px solid " + C.okLine }}>
             <p className="text-sm font-bold" style={{ color: C.okText }}>
               全問正解です!{!missed && " 初見でパーフェクトでした。"}
             </p>
           </div>
         )}
         {checked && status === "wrong" && (
-          <div className="rise mt-4 rounded-xl p-4" style={{ background: "#FFF7E8", border: "1px solid #F1DFB8" }}>
-            <p className="mb-1.5 text-sm font-bold" style={{ color: "#82590F" }}>
+          <div className="rise mt-4 rounded-xl p-4" style={{ background: C.warnSoft, border: "1px solid " + C.warnLine }}>
+            <p className="mb-1.5 text-sm font-bold" style={{ color: C.warnText }}>
               {rightCount} / {ex.items.length} 問が合っています。各記述の解説を読んで、もう一度。
             </p>
             {showHint ? (
-              <p className="text-sm leading-relaxed" style={{ color: "#7A5A1A" }}>
+              <p className="text-sm leading-relaxed" style={{ color: C.warnBody }}>
                 ヒント:<T>{ex.hint}</T>
               </p>
             ) : (
               <button
                 className="inline-flex min-h-11 items-center text-sm font-bold underline"
-                style={{ color: "#82590F" }}
+                style={{ color: C.warnText }}
                 onClick={() => setShowHint(true)}
               >
                 ヒントを見る
@@ -531,7 +531,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
       {allDone && (
         <div
           className="pop mb-6 rounded-2xl p-5 text-center"
-          style={{ background: C.accentSoft, border: "1px solid #C9DBF0" }}
+          style={{ background: C.accentSoft, border: "1px solid " + C.accentLine }}
         >
           <div className="mb-2 flex justify-center">
             <TriDots filled={3} size={14} />
@@ -586,7 +586,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
                       key={l.id}
                       onClick={() => onOpen(l.id)}
                       className="flex items-center gap-4 rounded-2xl bg-white p-4 text-left transition-shadow hover:shadow-md"
-                      style={{ border: "1px solid " + (all ? "#BFE3B4" : C.line) }}
+                      style={{ border: "1px solid " + (all ? C.okLine : C.line) }}
                     >
                       <span
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold"
@@ -773,7 +773,7 @@ function CheatSheet({ onHome }) {
                 <div key={j} className="flex items-start justify-between gap-3">
                   <code
                     className="shrink-0 rounded px-1.5 py-0.5 text-xs leading-5"
-                    style={{ background: "#F5F2EC", color: C.accentDeep, fontFamily: MONO }}
+                    style={{ background: C.chip, color: C.accentDeep, fontFamily: MONO }}
                   >
                     {r[0]}
                   </code>
@@ -788,7 +788,7 @@ function CheatSheet({ onHome }) {
       </div>
       <div
         className="mt-5 rounded-2xl p-4 text-sm leading-6"
-        style={{ background: C.accentSoft, border: "1px solid #C9DBF0", color: C.accentDeep }}
+        style={{ background: C.accentSoft, border: "1px solid " + C.accentLine, color: C.accentDeep }}
       >
         <span className="font-bold">次のステップ:</span>
         CRAN から R を、Posit から RStudio をインストール → コンソールで手を動かす → tidyverse で実データの分析へ。

@@ -43,7 +43,7 @@ function CodeBlock({ code, output, error, lang }) {
         <span className="h-2 w-2 rounded-full" style={{ background: C.accent }} />
         <span className="h-2 w-2 rounded-full" style={{ background: C.ok }} />
         <span className="h-2 w-2 rounded-full" style={{ background: C.stan }} />
-        <span className="ml-2 text-xs font-semibold tracking-wide" style={{ color: "#8F86A3" }}>
+        <span className="ml-2 text-xs font-semibold tracking-wide" style={{ color: C.dim }}>
           {lang || "R"}
         </span>
       </div>
@@ -156,7 +156,7 @@ function Feedback({ status, why, hint, showHint, onHint }) {
   return (
     <div role="status" aria-live="polite" ref={boxRef} tabIndex={-1} className="focus:outline-none">
       {status === "correct" && (
-        <div className="pop mt-4 rounded-xl p-4" style={{ background: C.okSoft, border: "1px solid #BFE3B4" }}>
+        <div className="pop mt-4 rounded-xl p-4" style={{ background: C.okSoft, border: "1px solid " + C.okLine }}>
           <div className="mb-1.5 flex items-center gap-2 text-sm font-bold" style={{ color: C.okText }}>
             <span
               className="flex h-5 w-5 items-center justify-center rounded-full text-xs"
@@ -166,24 +166,24 @@ function Feedback({ status, why, hint, showHint, onHint }) {
             </span>
             {PRAISE[why.length % PRAISE.length]}
           </div>
-          <p className="text-sm leading-relaxed" style={{ color: "#2E5626" }}>
+          <p className="text-sm leading-relaxed" style={{ color: C.okDeep }}>
             <T>{why}</T>
           </p>
         </div>
       )}
       {status === "wrong" && (
-        <div className="rise mt-4 rounded-xl p-4" style={{ background: "#FFF7E8", border: "1px solid #F1DFB8" }}>
-          <div className="mb-1.5 text-sm font-bold" style={{ color: "#82590F" }}>
+        <div className="rise mt-4 rounded-xl p-4" style={{ background: C.warnSoft, border: "1px solid " + C.warnLine }}>
+          <div className="mb-1.5 text-sm font-bold" style={{ color: C.warnText }}>
             おしい!もう一度考えてみましょう
           </div>
           {showHint ? (
-            <p className="text-sm leading-relaxed" style={{ color: "#7A5A1A" }}>
+            <p className="text-sm leading-relaxed" style={{ color: C.warnBody }}>
               ヒント:<T>{hint}</T>
             </p>
           ) : (
             <button
               className="inline-flex min-h-11 items-center text-sm font-bold underline"
-              style={{ color: "#82590F" }}
+              style={{ color: C.warnText }}
               onClick={onHint}
             >
               ヒントを見る
