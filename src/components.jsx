@@ -34,7 +34,8 @@ function T({ children }) {
 }
 
 function CodeBlock({ code, output, error, lang }) {
-  // lang: ヘッダのラベル。省略時は "Julia"。ターミナルコマンドには "ターミナル" 等を渡す
+  // lang: ヘッダのラベル兼ハイライトの言語指定。省略時は "R"。
+  // "Stan" で Stan 用の色分け、それ以外（"ターミナル" など）はキーワード着色なし
   const lines = code.split("\n");
   return (
     <div className="my-4 overflow-hidden rounded-xl" style={{ border: "1px solid " + C.line }}>
@@ -43,7 +44,7 @@ function CodeBlock({ code, output, error, lang }) {
         <span className="h-2 w-2 rounded-full" style={{ background: C.ok }} />
         <span className="h-2 w-2 rounded-full" style={{ background: C.stan }} />
         <span className="ml-2 text-xs font-semibold tracking-wide" style={{ color: "#8F86A3" }}>
-          {lang || "Julia"}
+          {lang || "R"}
         </span>
       </div>
       <pre
@@ -54,7 +55,7 @@ function CodeBlock({ code, output, error, lang }) {
           <div key={i}>
             {ln === ""
               ? "\u00A0"
-              : tokenizeLine(ln).map((t, j) => (
+              : tokenizeLine(ln, lang).map((t, j) => (
                   <span key={j} style={TOK_COLOR[t[0]]}>
                     {t[1]}
                   </span>
