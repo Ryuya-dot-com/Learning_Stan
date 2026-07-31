@@ -1,4 +1,4 @@
-// レッスンデータの検証テスト(仕様9節・改訂版)。
+// レッスンデータの検証テスト（仕様: docs/specs/2026-07-31-r-stan-learning-roadmap-design.md）。
 // レッスン追加時のミスをデプロイ前に検出する。CI ではビルド前に実行される。
 import { describe, it, expect } from "vitest";
 import { existsSync } from "node:fs";
@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { LESSONS } from "./lessons/index.js";
 import { SECTIONS } from "./sections.js";
 
-// 演習形式の許容値(仕様4.6)
+// 演習形式の許容値(仕様5節)
 const ALLOWED_K = ["choice", "fill", "tf"];
 
 const mods = import.meta.glob("./lessons/*/*.js", { eager: true });
@@ -70,6 +70,13 @@ describe("レッスンデータ", () => {
   it("番号付きレッスンの num は 1 からの連番", () => {
     const nums = LESSONS.filter((l) => l.num != null).map((l) => l.num);
     expect(nums).toEqual(nums.map((_, i) => i + 1));
+  });
+
+  it.each(LESSONS.map((l) => [l.id, l]))("%s: 先頭ページに到達目標がある", (_, l) => {
+    // 仕様4節: 各レッスンの冒頭ページに「このレッスンでは◯◯ができるようになります」を1文で置く
+    const first = l.pages[0];
+    const body = (first.b || []).join("");
+    expect(body, `${l.id} の先頭ページに到達目標がない`).toMatch(/できるようになります/);
   });
 });
 
