@@ -78,7 +78,7 @@ function tokenizeLine(line, lang) {
 }
 
 const TOK_COLOR = {
-  kw: { color: "#C792EA", fontWeight: 600 },
+  kw: { color: "#C792EA", fontWeight: 600 }, // 構文ハイライトの色。ブランドカラーではない
   str: { color: "#A8D8A0" },
   com: { color: "#8F86A3", fontStyle: "italic" }, // night 背景上 4.5:1 以上
   num: { color: "#8AB4F8" },

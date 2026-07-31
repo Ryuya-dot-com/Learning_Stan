@@ -6,9 +6,8 @@
 <title>はじめてのRとStan — 学習ロードマップ</title>
 <style>
 :root{
-  --paper:#FBFAF7; --ink:#2A2733; --body:#4A4454; --sub:#6E6879; --faint:#857D91;
+  --paper:#FBFAF7; --ink:#2A2733; --body:#4A4454; --sub:#6E6879; --faint:#726B7E;
   --rblue:#276DC3;
-  --purple:#9558B2;
   --green:#389826;
   --stanred:#B0182D; --stanred-deep:#7C1128; --stanred-soft:#F9E9EB;
   --night:#272134; --line:#E8E4DC;
@@ -25,7 +24,7 @@ body{
   height:4px; width:100%;
   background:linear-gradient(90deg,
     var(--rblue) 0%, var(--rblue) 33.4%,
-    var(--purple) 33.4%, var(--purple) 66.7%,
+    var(--green) 33.4%, var(--green) 66.7%,
     var(--stanred) 66.7%, var(--stanred) 100%);
 }
 .wrap{max-width:880px; margin:0 auto; padding:44px 22px 72px}
@@ -106,7 +105,7 @@ h1{
 .lesson p{margin:0 0 12px; font-size:13px; color:var(--sub); flex:1}
 .chips{display:flex; flex-wrap:wrap; gap:6px}
 .chips code{
-  font-family:var(--mono); font-size:11.5px; background:#F5F2EC; color:#5A4470;
+  font-family:var(--mono); font-size:11.5px; background:#F5F2EC; color:#1B4E8F;
   padding:3px 8px; border-radius:6px;
 }
 
@@ -118,7 +117,7 @@ h1{
 }
 .featured:hover{box-shadow:0 8px 24px rgba(39,33,52,.28)}
 .badge{
-  display:inline-block; align-self:flex-start; background:var(--purple); color:#fff;
+  display:inline-block; align-self:flex-start; background:#2B7A1E; color:#fff;
   font-size:11px; font-weight:700; letter-spacing:.06em;
   padding:4px 11px; border-radius:999px;
 }
@@ -129,7 +128,7 @@ h1{
 .code{margin:16px 0 12px; border:1px solid #3A3350; border-radius:12px; overflow:hidden}
 .codehead{display:flex; align-items:center; gap:6px; background:#1F1A2B; padding:10px 14px 0}
 .cd{width:8px; height:8px; border-radius:50%}
-.cd.b{background:var(--rblue)} .cd.p{background:var(--purple)} .cd.r{background:var(--stanred)}
+.cd.b{background:var(--rblue)} .cd.p{background:var(--green)} .cd.r{background:var(--stanred)}
 .codehead span{margin-left:6px; font-family:var(--mono); font-size:10.5px; font-weight:700; color:#8F86A3; letter-spacing:.06em}
 .code pre{
   margin:0; background:#1F1A2B; padding:8px 16px 16px; overflow-x:auto;
@@ -153,7 +152,7 @@ h1{
 .sq{border:1.5px dashed var(--line); border-radius:14px; padding:14px 16px; background:transparent}
 .sq h3{margin:0 0 4px; font-size:13.5px; color:var(--body)}
 .sq p{margin:0; font-size:12.5px; color:var(--sub)}
-.sq code{font-family:var(--mono); font-size:11px; background:#F5F2EC; color:#5A4470; padding:1px 6px; border-radius:5px}
+.sq code{font-family:var(--mono); font-size:11px; background:#F5F2EC; color:#1B4E8F; padding:1px 6px; border-radius:5px}
 
 /* ---------- ゴール ---------- */
 .goal-card{
@@ -162,7 +161,7 @@ h1{
 }
 .dots{display:inline-flex; align-items:center; gap:7px}
 .dots i{display:inline-block; width:13px; height:13px; border-radius:50%}
-.dots .b{background:var(--rblue)} .dots .p{background:var(--purple)} .dots .r{background:var(--stanred)}
+.dots .b{background:var(--rblue)} .dots .p{background:var(--green)} .dots .r{background:var(--stanred)}
 .goal-card h2{margin:12px 0 6px; font-size:21px; color:var(--stanred-deep)}
 .goal-card p{margin:0; font-size:13.5px; color:#6E3540}
 
@@ -203,7 +202,7 @@ html.js .reveal.in{opacity:1; transform:none}
   .result{background:#fff; border-top:1px solid var(--line)}
   .result .rl, .result .rv{color:var(--green)}
   .badge{background:none !important; color:var(--ink) !important; border:1px solid var(--line)}
-  .featured .chips code, .fnote code{background:#F5F2EC !important; color:#5A4470 !important}
+  .featured .chips code, .fnote code{background:#F5F2EC !important; color:#1B4E8F !important}
   .fnote, .codehead span{color:var(--sub) !important}
 }
 </style>
@@ -607,7 +606,7 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
 
   <footer class="foot reveal">
     <span class="dots" aria-hidden="true"><i class="b"></i><i class="p"></i><i class="r"></i></span>
-    <p>はじめてのRとStan — 研究室のためのベイズ統計モデリング入門</p>
+    <p>はじめてのRとStan — 研究室のためのベイズ統計入門</p>
     <p class="provenance">記載のパッケージ・関数・既定値は、2026-07-31に公式ドキュメント・CRANで実在確認済み(R 4.6 / Stan 2.39 / brms 2.23 / bayestestR 0.18 / sjPlot 2.9 時点)。コード例の実行結果は実測値です。</p>
     <p class="backlink" style="margin-top:8px"><a href="./">← アプリにもどる</a></p>
   </footer>
