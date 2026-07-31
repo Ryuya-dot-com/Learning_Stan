@@ -1,0 +1,12 @@
+# 依存とビルド成果物
+node_modules/
+dist/
+
+# 設計文書・実装計画(ローカル管理。Dropboxがバックアップを担う)
+/docs/
+
+# 移行前の原本(公開版に反映後もローカル保持)
+/stan-roadmap.html
+
+# OS
+.DS_Store
