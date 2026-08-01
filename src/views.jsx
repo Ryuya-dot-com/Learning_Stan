@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { C, MONO } from "./theme.js";
 import { isCodey } from "./highlight.js";
 import { seededOrder } from "./shuffle.js";
@@ -11,11 +11,10 @@ import { CHEATS } from "./data/cheats.js";
    練習問題コンポーネント
    ============================================================ */
 
-function ChoiceEx({ ex, seedKey, solved, onCorrect }) {
+function ChoiceEx({ ex, seedKey, solved, onMiss, onCorrect }) {
   const [sel, setSel] = useState(solved ? ex.ans : null);
   const [status, setStatus] = useState(solved ? "correct" : "idle");
   const [showHint, setShowHint] = useState(false);
-  const [missed, setMissed] = useState(false); // 一度でも誤答したか(初見クリアの判定用)
   // シードに問題文だけを使うと、同一文面の問題どうしで正解が同じ位置に固定される(監査A3)。
   // レッスンidと問indexを混ぜて、問題ごとに独立した並びにする
   const order = useMemo(() => seededOrder(ex.opts.length, seedKey + ":" + ex.q), [ex, seedKey]);
@@ -25,9 +24,9 @@ function ChoiceEx({ ex, seedKey, solved, onCorrect }) {
     setSel(i);
     if (i === ex.ans) {
       setStatus("correct");
-      onCorrect(!missed);
+      onCorrect();
     } else {
-      setMissed(true);
+      onMiss();
       setStatus("wrong");
     }
   };
@@ -83,11 +82,10 @@ function ChoiceEx({ ex, seedKey, solved, onCorrect }) {
   );
 }
 
-function FillEx({ ex, solved, onCorrect }) {
+function FillEx({ ex, solved, onMiss, onCorrect }) {
   const [val, setVal] = useState(solved ? ex.show : "");
   const [status, setStatus] = useState(solved ? "correct" : "idle");
   const [showHint, setShowHint] = useState(false);
-  const [missed, setMissed] = useState(false);
 
   const check = () => {
     if (status === "correct") return;
@@ -98,9 +96,9 @@ function FillEx({ ex, solved, onCorrect }) {
     if (ex.accept.includes(v)) {
       setStatus("correct");
       setVal(ex.show);
-      onCorrect(!missed);
+      onCorrect();
     } else {
-      setMissed(true);
+      onMiss();
       setStatus("wrong");
     }
   };
@@ -151,13 +149,102 @@ function FillEx({ ex, solved, onCorrect }) {
   );
 }
 
+function ReflectEx({ ex, solved, onCorrect }) {
+  const [answer, setAnswer] = useState("");
+  const [revealed, setRevealed] = useState(solved);
+  const [checks, setChecks] = useState(() => ex.rubric.map(() => solved));
+  const [complete, setComplete] = useState(solved);
+  const statusRef = useRef(null);
+  const longEnough = answer.trim().length >= ex.minLength;
+
+  const confirm = () => {
+    if (!longEnough || !checks.every(Boolean) || complete) return;
+    setComplete(true);
+    onCorrect();
+    requestAnimationFrame(() => statusRef.current?.focus());
+  };
+
+  return (
+    <div>
+      <p className="mb-3 text-base font-bold leading-relaxed" style={{ color: C.ink }}>
+        <T>{ex.q}</T>
+      </p>
+      {!solved && (
+        <>
+          <label htmlFor="reflection-answer" className="mb-1 block text-xs font-bold" style={{ color: C.sub }}>
+            自分の説明（本文は保存されません）
+          </label>
+          <textarea
+            id="reflection-answer"
+            value={answer}
+            onChange={(event) => setAnswer(event.target.value)}
+            rows={5}
+            className="w-full rounded-xl p-3 text-sm leading-6"
+            style={{ border: `1.5px solid ${C.edge}`, color: C.ink, background: "#FFFFFF" }}
+          />
+          {!revealed && (
+            <div className="mt-3">
+              <Btn onClick={() => setRevealed(true)} disabled={!longEnough}>
+                評価基準を見る
+              </Btn>
+              {!longEnough && (
+                <p className="mt-2 text-xs" style={{ color: C.faint }}>
+                  まず自分の言葉で{ex.minLength}文字以上書いてみましょう。
+                </p>
+              )}
+            </div>
+          )}
+        </>
+      )}
+
+      {revealed && (
+        <div className="mt-4 rounded-xl p-4" style={{ background: C.accentSoft, border: `1px solid ${C.accentLine}` }}>
+          <p className="mb-2 text-sm font-bold" style={{ color: C.accentDeep }}>評価基準</p>
+          <div className="flex flex-col gap-2">
+            {ex.rubric.map((criterion, index) => (
+              <label key={criterion} className="flex cursor-pointer items-start gap-2 text-sm leading-6" style={{ color: C.body }}>
+                <input
+                  type="checkbox"
+                  checked={checks[index]}
+                  disabled={complete}
+                  onChange={(event) => {
+                    const next = checks.slice();
+                    next[index] = event.target.checked;
+                    setChecks(next);
+                  }}
+                  className="mt-1 h-5 w-5 shrink-0"
+                />
+                <T>{criterion}</T>
+              </label>
+            ))}
+          </div>
+          <p className="mb-1 mt-4 text-xs font-bold" style={{ color: C.accentDeep }}>説明例</p>
+          <p className="text-sm leading-6" style={{ color: C.body }}><T>{ex.example}</T></p>
+          {!complete && (
+            <div className="mt-4">
+              <Btn onClick={confirm} disabled={!longEnough || !checks.every(Boolean)}>この基準を満たした</Btn>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div ref={statusRef} tabIndex={-1} role="status" aria-live="polite" className="focus:outline-none">
+        {complete && (
+          <p className="mt-4 rounded-xl p-4 text-sm font-bold" style={{ background: C.okSoft, color: C.okText, border: `1px solid ${C.okLine}` }}>
+            説明の自己確認が完了しました。回答本文は保存していません。
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // tf形式: 3つの記述それぞれに○×を付け、全問正解でクリア(ロードマップ仕様5節)。
 // 判定時は項目別の正誤と解説を必ず開示する。「初見で全問正解」は別フラグで記録する2層設計
-function TfEx({ ex, solved, onCorrect }) {
+function TfEx({ ex, solved, missed, onMiss, onCorrect }) {
   const [marks, setMarks] = useState(() => (solved ? ex.items.map((it) => it.a) : ex.items.map(() => null)));
   const [checked, setChecked] = useState(solved);
   const [status, setStatus] = useState(solved ? "correct" : "idle");
-  const [missed, setMissed] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
   const setMark = (i, v) => {
@@ -174,9 +261,9 @@ function TfEx({ ex, solved, onCorrect }) {
     setChecked(true);
     if (ex.items.every((it, i) => marks[i] === it.a)) {
       setStatus("correct");
-      onCorrect(!missed);
+      onCorrect();
     } else {
-      setMissed(true);
+      onMiss();
       setStatus("wrong");
     }
   };
@@ -282,7 +369,20 @@ function TfEx({ ex, solved, onCorrect }) {
    レッスン画面
    ============================================================ */
 
-function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, hasNext, onCheat }) {
+function LessonView({
+  lesson,
+  doneSet,
+  firstSet,
+  missedSet,
+  practiceSet,
+  onMiss,
+  onSolve,
+  onPractice,
+  onHome,
+  onNextLesson,
+  hasNext,
+  onCheat,
+}) {
   // 番号なしレッスン(bridge/extra)は「LESSON null」にならないようセクション名を表示する(仕様4.4b)
   const sec = SECTIONS.find((s) => s.dir === lesson.section);
   const headLabel = lesson.num != null ? `LESSON ${lesson.num}` : (sec ? sec.title : "");
@@ -290,16 +390,25 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
   const items = useMemo(() => {
     const arr = lesson.pages.map((p) => ({ kind: "page", p }));
     lesson.ex.forEach((e, i) => arr.push({ kind: "ex", e, i }));
+    if (lesson.practice) arr.push({ kind: "practice", practice: lesson.practice });
     arr.push({ kind: "done" });
     return arr;
   }, [lesson]);
 
-  const [idx, setIdx] = useState(0);
+  const practiceTotal = lesson.practice?.items.length || 0;
+  const practiceCount = practiceSet.size;
+  const practiceComplete = practiceTotal === 0 || practiceCount === practiceTotal;
+  const practiceIndex = lesson.pages.length + lesson.ex.length;
+  const [idx, setIdx] = useState(() =>
+    doneSet.size === lesson.ex.length && lesson.practice && !practiceComplete ? practiceIndex : 0
+  );
+  const contentRef = useRef(null);
 
   useEffect(() => {
     try {
       window.scrollTo({ top: 0 });
     } catch (e) {}
+    contentRef.current?.focus();
   }, [idx]);
 
   const cur = items[idx];
@@ -309,6 +418,7 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
 
   return (
     <div>
+      <h1 tabIndex={-1} className="sr-only focus:outline-none">{lesson.title}</h1>
       <div className="mb-5">
         <div className="mb-3 flex items-center justify-between">
           <button
@@ -322,7 +432,15 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
             {idx + 1} / {items.length}
           </span>
         </div>
-        <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: C.track }}>
+        <div
+          role="progressbar"
+          aria-label="レッスン内の進みぐあい"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+          className="h-1 w-full overflow-hidden rounded-full"
+          style={{ background: C.track }}
+        >
           <div
             className="h-full rounded-full"
             style={{ width: pct + "%", background: C.accent, transition: "width 0.3s" }}
@@ -331,8 +449,20 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
       </div>
 
       <div
+        ref={contentRef}
+        tabIndex={-1}
+        role="region"
+        aria-label={
+          cur.kind === "page"
+            ? cur.p.t
+            : cur.kind === "ex"
+              ? `練習問題 ${cur.i + 1}`
+              : cur.kind === "practice"
+                ? cur.practice.title
+                : doneLabel
+        }
         key={idx}
-        className="rise rounded-2xl bg-white p-5 sm:p-7"
+        className="rise rounded-2xl bg-white p-5 focus:outline-none sm:p-7"
         style={{ border: "1px solid " + C.line, boxShadow: "0 1px 2px rgba(42,39,51,0.04)" }}
       >
         {cur.kind === "page" && (
@@ -378,23 +508,90 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
                 ex={cur.e}
                 seedKey={lesson.id + ":" + cur.i}
                 solved={doneSet.has(cur.i)}
-                onCorrect={(first) => onSolve(cur.i, first)}
+                onMiss={() => onMiss(cur.i)}
+                onCorrect={() => onSolve(cur.i)}
               />
             ) : cur.e.k === "tf" ? (
               <TfEx
                 key={lesson.id + "-" + cur.i}
                 ex={cur.e}
                 solved={doneSet.has(cur.i)}
-                onCorrect={(first) => onSolve(cur.i, first)}
+                missed={missedSet.has(cur.i)}
+                onMiss={() => onMiss(cur.i)}
+                onCorrect={() => onSolve(cur.i)}
+              />
+            ) : cur.e.k === "reflect" ? (
+              <ReflectEx
+                key={lesson.id + "-" + cur.i}
+                ex={cur.e}
+                solved={doneSet.has(cur.i)}
+                onCorrect={() => onSolve(cur.i)}
               />
             ) : (
               <FillEx
                 key={lesson.id + "-" + cur.i}
                 ex={cur.e}
                 solved={doneSet.has(cur.i)}
-                onCorrect={(first) => onSolve(cur.i, first)}
+                onMiss={() => onMiss(cur.i)}
+                onCorrect={() => onSolve(cur.i)}
               />
             )}
+          </div>
+        )}
+
+        {cur.kind === "practice" && (
+          <div>
+            <div className="mb-2 text-xs font-bold tracking-widest" style={{ color: C.stan, fontFamily: MONO }}>
+               実機確認 {practiceCount} / {practiceTotal}
+            </div>
+            <h2 className="mb-3 text-xl font-bold" style={{ color: C.ink }}>
+              {cur.practice.title}
+            </h2>
+            <p className="mb-5 text-sm leading-7" style={{ color: C.body }}>
+              <T>{cur.practice.intro}</T>
+            </p>
+            <fieldset className="flex flex-col gap-3">
+              <legend className="sr-only">実機で確認できた項目</legend>
+              {cur.practice.items.map((item) => {
+                const inputId = `practice-${lesson.id}-${item.id}`;
+                const checked = practiceSet.has(item.id);
+                return (
+                  <div
+                    key={item.id}
+                    className="rounded-xl p-4"
+                    style={{
+                      background: checked ? C.okSoft : "#FFFFFF",
+                      border: `1.5px solid ${checked ? C.ok : C.line}`,
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        id={inputId}
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(event) => onPractice(item.id, event.target.checked)}
+                        className="mt-1 h-5 w-5 shrink-0 accent-current"
+                        style={{ color: C.okText }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <label htmlFor={inputId} className="cursor-pointer text-sm font-bold leading-6" style={{ color: C.ink }}>
+                          <T>{item.label}</T>
+                        </label>
+                        <p className="mt-1 text-xs leading-5" style={{ color: C.sub }}>
+                          <T>{item.criterion}</T>
+                        </p>
+                      </div>
+                    </div>
+                    {item.code && <CodeBlock code={item.code} output={item.out} />}
+                  </div>
+                );
+              })}
+            </fieldset>
+            <div role="status" aria-live="polite" className="mt-4 text-sm font-bold" style={{ color: practiceComplete ? C.okText : C.sub }}>
+              {practiceComplete
+                ? "すべての実機確認が完了しました。"
+                : `あと ${practiceTotal - practiceCount} 項目を実機で確認してください。`}
+            </div>
           </div>
         )}
 
@@ -403,17 +600,19 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
             {solvedCount === total ? (
               <div className="pop">
                 <div className="mb-4 flex justify-center">
-                  <TriDots filled={3} size={14} />
+                  <TriDots filled={practiceComplete ? 3 : 2} size={14} />
                 </div>
                 <h2 className="mb-2 text-2xl font-bold" style={{ color: C.ink }}>
-                  {doneLabel}
+                  {lesson.practice && practiceComplete ? `${lesson.title} 実践完了!` : doneLabel}
                 </h2>
                 <p className="mb-6 text-sm" style={{ color: C.sub }}>
                   練習問題 {total} 問、すべてクリアしました。
                   {firstSet && firstSet.size > 0 && ` うち ${firstSet.size} 問は一発クリアです!`}
                 </p>
                 <div className="flex flex-col items-center gap-3">
-                  {hasNext ? (
+                  {lesson.practice && !practiceComplete ? (
+                    <Btn kind="ghost" onClick={() => setIdx(practiceIndex)}>実践チェックへすすむ</Btn>
+                  ) : hasNext ? (
                     <Btn onClick={onNextLesson}>次のレッスンへすすむ</Btn>
                   ) : (
                     <Btn onClick={onCheat}>チートシートを見る</Btn>
@@ -472,14 +671,21 @@ function LessonView({ lesson, doneSet, firstSet, onSolve, onHome, onNextLesson, 
    ホーム画面
    ============================================================ */
 
-function Home({ progress, onOpen, onCheat, onReset }) {
+function Home({ progress, storageNotice, exportText, onImport, onImportError, onOpen, onCheat, onReset }) {
   const totalEx = LESSONS.reduce((s, l) => s + l.ex.length, 0);
   const doneEx = LESSONS.reduce((s, l) => s + (progress.done[l.id] || []).length, 0);
   const doneLessons = LESSONS.filter((l) => (progress.done[l.id] || []).length === l.ex.length).length;
-  const allDone = doneLessons === LESSONS.length;
-  const firstIncomplete = LESSONS.find((l) => (progress.done[l.id] || []).length < l.ex.length);
+  const practiceLessons = LESSONS.filter((l) => l.practice);
+  const practicedLessons = practiceLessons.filter((lesson) =>
+    lesson.practice.items.every((item) => (progress.practice?.[lesson.id] || []).includes(item.id))
+  ).length;
+  const lessonIsComplete = (lesson) =>
+    (progress.done[lesson.id] || []).length === lesson.ex.length &&
+    (!lesson.practice || lesson.practice.items.every((item) => (progress.practice?.[lesson.id] || []).includes(item.id)));
+  const allDone = LESSONS.every(lessonIsComplete);
+  const firstIncomplete = LESSONS.find((lesson) => !lessonIsComplete(lesson));
   const pct = Math.round((doneEx / totalEx) * 100);
-  const dotsFilled = allDone ? 3 : Math.floor((doneEx / totalEx) * 3);
+  const dotsFilled = allDone ? 3 : Math.min(2, Math.floor((doneEx / totalEx) * 3));
 
   return (
     <div className="rise">
@@ -494,32 +700,41 @@ function Home({ progress, onOpen, onCheat, onReset }) {
         </button>
       </div>
 
-      <h1 className="mb-1.5 text-3xl font-bold tracking-tight" style={{ color: C.ink }}>
+      <h1 tabIndex={-1} className="mb-1.5 text-3xl font-bold tracking-tight focus:outline-none" style={{ color: C.ink }}>
         はじめてのRとStan
       </h1>
       <p className="mb-6 text-sm leading-6" style={{ color: C.sub }}>
-        ゼロから学ぶ、研究のためのデータ分析。全{LESSONS.length}レッスンで、Rの基礎からベイズ統計の入り口まで案内します。
+        ゼロから学ぶ、研究のためのデータ分析。現在公開中の全{LESSONS.length}レッスンで、Rの基礎とRStudioの環境構築まで案内します。ベイズ統計以降は今後追加予定です。
       </p>
 
       <div className="mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
         <div className="mb-2 flex items-baseline justify-between">
           <span className="text-sm font-bold" style={{ color: C.ink }}>
-            学習の進みぐあい
+            理解問題の進みぐあい
           </span>
           <span className="text-xs font-bold" style={{ color: C.sub, fontFamily: MONO }}>
             {doneEx} / {totalEx} 問
           </span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: C.track }}>
+        <div
+          role="progressbar"
+          aria-label="理解問題の進みぐあい"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+          className="h-2 w-full overflow-hidden rounded-full"
+          style={{ background: C.track }}
+        >
           <div
             className="h-full rounded-full"
             style={{ width: pct + "%", background: C.accent, transition: "width 0.4s" }}
           />
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <span className="text-xs" style={{ color: C.faint }}>
-            3つの点がすべて灯ったら修了です
-          </span>
+          <div className="text-xs" style={{ color: C.faint }}>
+            <span>理解済み {doneLessons} / {LESSONS.length} レッスン</span>
+            {practiceLessons.length > 0 && <span> ・ 実践済み {practicedLessons} / {practiceLessons.length}</span>}
+          </div>
           {firstIncomplete && (
             <Btn onClick={() => onOpen(firstIncomplete.id)} className="px-4 py-2">
               {doneEx === 0 ? "レッスン1をはじめる" : "つづきから"}
@@ -540,7 +755,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
             全レッスン修了、おめでとうございます!
           </p>
           <p className="mt-1 text-xs leading-5" style={{ color: C.accentDeep }}>
-            次はチートシートを片手に、自分のパソコンのRで手を動かしてみましょう。
+            Foundation Checkまで完了しました。次はSTEP 1で、実データを読み、整えてみましょう。
           </p>
         </div>
       )}
@@ -578,7 +793,11 @@ function Home({ progress, onOpen, onCheat, onReset }) {
               <div className="flex flex-col gap-3">
                 {ls.map((l) => {
                   const got = (progress.done[l.id] || []).length;
-                  const all = got === l.ex.length;
+                  const understood = got === l.ex.length;
+                  const practiced = !l.practice || l.practice.items.every((item) =>
+                    (progress.practice?.[l.id] || []).includes(item.id)
+                  );
+                  const all = understood && practiced;
                   // 番号なしトラックは mark+セクション内連番(例: R1, 補1)を表示する(仕様4.4b)
                   const badge = l.num != null ? String(l.num).padStart(2, "0") : (sec.mark || "") + l.numInSection;
                   return (
@@ -596,7 +815,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
                             : { background: C.accentSoft, color: C.accentDeep, fontFamily: MONO }
                         }
                       >
-                        {all ? "✓" : badge}
+                        {all ? "✓" : understood && l.practice ? "実" : badge}
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-bold" style={{ color: C.ink }}>
@@ -610,7 +829,7 @@ function Home({ progress, onOpen, onCheat, onReset }) {
                         className="shrink-0 text-xs font-bold"
                         style={{ color: all ? C.okText : got > 0 ? C.accentDeep : C.faint, fontFamily: MONO }}
                       >
-                        {all ? "修了" : got + " / " + l.ex.length}
+                        {all ? (l.practice ? "実践済" : "修了") : understood && l.practice ? "理解済" : got + " / " + l.ex.length}
                       </span>
                     </button>
                   );
@@ -623,8 +842,50 @@ function Home({ progress, onOpen, onCheat, onReset }) {
 
       <div className="mt-8 flex flex-col items-center gap-2 pb-6 text-center">
         <p className="text-xs" style={{ color: C.faint }}>
-          進みぐあいは、このページを開いているあいだだけ記録されます
+          進みぐあいはこのブラウザに保存され、サーバーには送信されません
         </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <a
+            className="inline-flex min-h-11 items-center text-xs font-bold underline"
+            style={{ color: C.accentDeep }}
+            href={`data:application/json;charset=utf-8,${encodeURIComponent(exportText)}`}
+            download="learning-stan-progress.json"
+          >
+            保存データを書き出す
+          </a>
+          <label
+            className="inline-flex min-h-11 cursor-pointer items-center text-xs font-bold underline"
+            style={{ color: C.accentDeep }}
+          >
+            保存データを読み込む
+            <input
+              type="file"
+              accept="application/json,.json"
+              className="sr-only"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                if (file.size > 1024 * 1024) {
+                  onImportError("保存データは1 MB以下のJSONファイルを選んでください。");
+                  event.target.value = "";
+                  return;
+                }
+                try {
+                  onImport(await file.text());
+                } catch {
+                  onImport("{invalid-json");
+                } finally {
+                  event.target.value = "";
+                }
+              }}
+            />
+          </label>
+        </div>
+        {storageNotice && (
+          <p role="status" className="text-xs leading-5" style={{ color: C.warnText }}>
+            {storageNotice}
+          </p>
+        )}
         <a
           className="inline-flex min-h-11 items-center text-xs font-bold underline"
           style={{ color: C.accentDeep }}
@@ -685,7 +946,11 @@ function Sidebar({ progress, currentId, viewName, onOpen, onCheat, onHome }) {
               <div className="flex flex-col">
                 {ls.map((l) => {
                   const got = (progress.done[l.id] || []).length;
-                  const all = got === l.ex.length;
+                  const understood = got === l.ex.length;
+                  const practiced = !l.practice || l.practice.items.every((item) =>
+                    (progress.practice?.[l.id] || []).includes(item.id)
+                  );
+                  const all = understood && practiced;
                   const current = viewName === "lesson" && l.id === currentId;
                   const badge = l.num != null ? String(l.num).padStart(2, "0") : (sec.mark || "") + l.numInSection;
                   return (
@@ -756,7 +1021,7 @@ function CheatSheet({ onHome }) {
         </button>
         <TriDots filled={3} size={10} />
       </div>
-      <h1 className="mb-1 text-2xl font-bold tracking-tight" style={{ color: C.ink }}>
+      <h1 tabIndex={-1} className="mb-1 text-2xl font-bold tracking-tight focus:outline-none" style={{ color: C.ink }}>
         R チートシート
       </h1>
       <p className="mb-5 text-sm" style={{ color: C.sub }}>

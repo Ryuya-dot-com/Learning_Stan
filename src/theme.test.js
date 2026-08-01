@@ -4,9 +4,35 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { C } from "./theme.js";
+import { C, GLOBAL_CSS } from "./theme.js";
 
 const srcDir = dirname(fileURLToPath(import.meta.url));
+const WHITE = "#FFFFFF";
+
+function relativeLuminance(hex) {
+  const channels = hex.match(/[0-9A-Fa-f]{2}/g).map((value) => parseInt(value, 16) / 255);
+  const [r, g, b] = channels.map((value) =>
+    value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  );
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrastRatio(foreground, background) {
+  const lighter = Math.max(relativeLuminance(foreground), relativeLuminance(background));
+  const darker = Math.min(relativeLuminance(foreground), relativeLuminance(background));
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function expectContrast(pairs, minimum) {
+  const failures = pairs
+    .map(([name, foreground, background]) => ({
+      name,
+      ratio: contrastRatio(foreground, background),
+    }))
+    .filter(({ ratio }) => ratio + Number.EPSILON < minimum)
+    .map(({ name, ratio }) => `${name}: ${ratio.toFixed(2)}:1 < ${minimum}:1`);
+  expect(failures).toEqual([]);
+}
 
 describe("配色定義", () => {
   it("参照されている色キーがすべて theme.js に定義されている", () => {
@@ -44,6 +70,56 @@ describe("配色定義", () => {
         });
     }
     expect(hits, "JSX に色が直書きされている").toEqual([]);
+  });
+
+  it("実際に使う文字色と背景色がWCAG AAの4.5:1を満たす", () => {
+    expectContrast([
+      ["ink / paper", C.ink, C.paper],
+      ["ink / white", C.ink, WHITE],
+      ["body / paper", C.body, C.paper],
+      ["body / white", C.body, WHITE],
+      ["body / accentSoft", C.body, C.accentSoft],
+      ["sub / paper", C.sub, C.paper],
+      ["sub / white", C.sub, WHITE],
+      ["faint / paper", C.faint, C.paper],
+      ["faint / white", C.faint, WHITE],
+      ["accent / white", C.accent, WHITE],
+      ["accentDeep / paper", C.accentDeep, C.paper],
+      ["accentDeep / white", C.accentDeep, WHITE],
+      ["accentDeep / accentSoft", C.accentDeep, C.accentSoft],
+      ["accentDeep / chip", C.accentDeep, C.chip],
+      ["okText / paper", C.okText, C.paper],
+      ["okText / white", C.okText, WHITE],
+      ["okText / okSoft", C.okText, C.okSoft],
+      ["okDeep / okSoft", C.okDeep, C.okSoft],
+      ["alert / white", C.alert, WHITE],
+      ["alertText / paper", C.alertText, C.paper],
+      ["alertText / white", C.alertText, WHITE],
+      ["alertText / alertSoft", C.alertText, C.alertSoft],
+      ["warnText / warnSoft", C.warnText, C.warnSoft],
+      ["warnBody / warnSoft", C.warnBody, C.warnSoft],
+      ["stan / white", C.stan, WHITE],
+      ["dim / night", C.dim, C.night],
+      ["white / accent", WHITE, C.accent],
+      ["white / accentDeep", WHITE, C.accentDeep],
+      ["white / okText", WHITE, C.okText],
+      ["white / alert", WHITE, C.alert],
+    ], 4.5);
+  });
+
+  it("入力境界とフォーカス色が3:1を満たし、CSSはtheme値を参照する", () => {
+    expectContrast([
+      ["edge / white", C.edge, WHITE],
+      ["edge / paper", C.edge, C.paper],
+      ["focus / white", C.accentDeep, WHITE],
+      ["focus / paper", C.accentDeep, C.paper],
+      ["focus / accentSoft", C.accentDeep, C.accentSoft],
+      ["focus / okSoft", C.accentDeep, C.okSoft],
+      ["focus / alertSoft", C.accentDeep, C.alertSoft],
+      ["focus / warnSoft", C.accentDeep, C.warnSoft],
+    ], 3);
+    expect(GLOBAL_CSS).toContain(`color: ${C.sub}`);
+    expect(GLOBAL_CSS).toContain(`outline: 3px solid ${C.accentDeep}`);
   });
 });
 

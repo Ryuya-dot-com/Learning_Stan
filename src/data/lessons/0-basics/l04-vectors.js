@@ -61,6 +61,7 @@ export default {
       k: "fill",
       q: "`scores` の3番目の値を取り出すコードの空欄を埋めましょう。",
       code: "scores[___]",
+      verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },
       accept: ["3"],
       show: "3",
       why: "Rの添字は1から始まるので、3番目の値を取り出すには `scores[3]` と書きます。",

@@ -1,0 +1,58 @@
+import { describe, expect, it } from "vitest";
+import {
+  classifyBlock,
+  collectExamples,
+  compareOutput,
+  loadLessons,
+  normalizeOutput,
+} from "./r-example-verifier.mjs";
+
+describe("Rコード例の分類", () => {
+  it("期待出力付きの例は既定でexactになる", () => {
+    expect(classifyBlock({ code: "1 + 1", out: "[1] 2" }, "sample")).toEqual({ mode: "exact" });
+  });
+
+  it("manualには理由を必須とする", () => {
+    expect(() => classifyBlock({ code: "> 1 + 1", verify: { mode: "manual" } }, "sample")).toThrow(/reason/);
+  });
+
+  it("教材内の全コード例が分類されている", async () => {
+    const examples = collectExamples(await loadLessons(process.cwd()));
+
+    expect(examples.length).toBeGreaterThan(0);
+    expect(examples.every((example) => example.verify?.mode)).toBe(true);
+    expect(examples.filter((example) => example.verify.mode === "manual").every((example) => example.verify.reason)).toBe(true);
+  });
+});
+
+describe("R出力比較", () => {
+  it("exactでは改行コードと行末空白だけを正規化する", () => {
+    expect(normalizeOutput("[1] 2  \r\n")).toBe("[1] 2");
+    expect(normalizeOutput("  [1] 2\n")).toBe("  [1] 2");
+    expect(compareOutput({ id: "x", out: "[1] 2", verify: { mode: "exact" } }, "[1] 2  \r\n").ok).toBe(true);
+    expect(compareOutput({ id: "x", out: "[1] 2", verify: { mode: "exact" } }, "  [1] 2\n").ok).toBe(false);
+    expect(compareOutput({ id: "x", out: "[1] 2", verify: { mode: "exact" } }, "[1] 3").ok).toBe(false);
+  });
+
+  it("numericでは非数値構造を保ったまま許容誤差を使う", () => {
+    const example = {
+      id: "x",
+      out: "mean: 1.0000",
+      verify: { mode: "numeric", absoluteTolerance: 0.001, relativeTolerance: 0 },
+    };
+
+    expect(compareOutput(example, "mean: 1.0005").ok).toBe(true);
+    expect(compareOutput(example, "mean: 1.01").ok).toBe(false);
+    expect(compareOutput(example, "sd: 1.0005").ok).toBe(false);
+  });
+
+  it("stochasticでは指定した数値範囲を検査する", () => {
+    const example = {
+      id: "x",
+      verify: { mode: "stochastic", ranges: [{ index: 0, min: 0.4, max: 0.6, label: "平均" }] },
+    };
+
+    expect(compareOutput(example, "[1] 0.5").ok).toBe(true);
+    expect(compareOutput(example, "[1] 0.8").ok).toBe(false);
+  });
+});

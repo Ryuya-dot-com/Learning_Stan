@@ -1,46 +1,65 @@
-# main への push でテスト → ビルド → GitHub Pages へデプロイする。
-# データ検証テスト(src/data/lessons.test.js)が落ちたらデプロイしない。
+# main への push でNode/R検証 → ビルド → GitHub Pages へデプロイする。
+# pull requestでは検証とビルドだけを行い、デプロイしない。
 # 事前条件(初回のみ手動): リポジトリ Settings → Pages → Source を「GitHub Actions」にする
 name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# 進行中のデプロイは中断しない(公式Pagesスターターの推奨)。後続runは待機する
+# デプロイは直列化して中断せず、同じPRの古い検証runだけを中断する
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || 'deploy' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: 22 # LTS。ローカルとの差異による「CIだけ壊れる」を避けるため明示
+          node-version-file: .node-version
           cache: npm
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - uses: actions/configure-pages@v6
-      - uses: actions/upload-pages-artifact@v5
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: dist
 
+  r-verify:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .node-version
+      - uses: r-lib/actions/setup-r@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
+        with:
+          r-version: "4.6.1"
+      - run: node scripts/r-example-verifier.mjs
+
   deploy:
-    needs: build
+    if: github.event_name != 'pull_request'
+    needs: [build, r-verify]
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5

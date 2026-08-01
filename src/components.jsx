@@ -8,20 +8,32 @@ import { tokenizeLine, TOK_COLOR } from "./highlight.js";
 // 本文中の `code` をインラインコード表示にする
 function T({ children }) {
   const parts = String(children).split("`");
+  const inlineStyle = {
+    background: C.accentSoft,
+    color: C.accentDeep,
+    fontFamily: MONO,
+    fontSize: "0.88em",
+    margin: "0 1px",
+  };
   return (
     <>
       {parts.map((p, i) =>
-        i % 2 === 1 ? (
+        i % 2 === 1 && /^https:\/\/\S+$/.test(p) ? (
+          <a
+            key={i}
+            href={p}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded px-1.5 py-0.5 underline"
+            style={{ ...inlineStyle, textUnderlineOffset: "2px" }}
+          >
+            {p}
+          </a>
+        ) : i % 2 === 1 ? (
           <code
             key={i}
             className="rounded px-1.5 py-0.5"
-            style={{
-              background: C.accentSoft,
-              color: C.accentDeep,
-              fontFamily: MONO,
-              fontSize: "0.88em",
-              margin: "0 1px",
-            }}
+            style={inlineStyle}
           >
             {p}
           </code>
@@ -120,9 +132,14 @@ function Btn({ kind = "primary", className = "", style = {}, ...props }) {
 function ResetButton({ onReset }) {
   // 確認状態は時間で勝手に解除しない(時間制限はWCAG違反——監査A15)。フォーカスが外れたら解除する
   const [arm, setArm] = useState(false);
+  const confirmRef = useRef(null);
   const hit = "inline-flex min-h-11 items-center px-2"; // タッチターゲット44px確保(監査A16)
+  useEffect(() => {
+    if (arm) confirmRef.current?.focus();
+  }, [arm]);
   return arm ? (
     <button
+      ref={confirmRef}
       className={hit + " text-xs font-bold underline"}
       style={{ color: C.alert }}
       onClick={onReset}

@@ -55,8 +55,8 @@ const GLOBAL_CSS = `
 @keyframes popIn { from { transform: scale(0.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .pop { animation: popIn 0.22s ease-out both; }
 @media (prefers-reduced-motion: reduce) { .rise, .pop { animation: none; } }
-input::placeholder { color: #6E6879; opacity: 1; }
-:where(button, a, input, [tabindex]):focus-visible { outline: 3px solid #1B4E8F; outline-offset: 2px; }
+input::placeholder { color: ${C.sub}; opacity: 1; }
+:where(button, a, input, [tabindex]):focus-visible { outline: 3px solid ${C.accentDeep}; outline-offset: 2px; }
 `;
 
 export { C, JP, MONO, GLOBAL_CSS };

@@ -5,10 +5,11 @@ import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { LESSONS } from "./lessons/index.js";
+import { OUTCOMES } from "./outcomes.js";
 import { SECTIONS } from "./sections.js";
 
 // 演習形式の許容値(仕様5節)
-const ALLOWED_K = ["choice", "fill", "tf"];
+const ALLOWED_K = ["choice", "fill", "tf", "reflect"];
 
 const mods = import.meta.glob("./lessons/*/*.js", { eager: true });
 
@@ -72,6 +73,23 @@ describe("レッスンデータ", () => {
     expect(nums).toEqual(nums.map((_, i) => i + 1));
   });
 
+  it("l3: logical の説明で欠損値 NA を除外しない", () => {
+    const lesson = LESSONS.find((l) => l.id === "l3");
+    const pageText = lesson.pages.flatMap((p) => [...(p.b || []), ...(p.a || [])]).join("\n");
+    const item = lesson.ex.flatMap((ex) => ex.items || []).find((it) => it.s.includes("logical のベクトル"));
+
+    expect(pageText).toContain("NA");
+    expect(item?.s).toContain("NA");
+    expect(item?.a).toBe(true);
+  });
+
+  it("l5: factor の水準順を明示して実行環境による差を避ける", () => {
+    const lesson = LESSONS.find((l) => l.id === "l5");
+    const factorPage = lesson.pages.find((p) => p.code?.includes("factor("));
+
+    expect(factorPage?.code).toContain('levels = c("易", "難")');
+  });
+
   it.each(LESSONS.map((l) => [l.id, l]))("%s: 先頭ページに到達目標がある", (_, l) => {
     // 仕様4節: 各レッスンの冒頭ページに「このレッスンでは◯◯ができるようになります」を1文で置く
     const first = l.pages[0];
@@ -80,13 +98,85 @@ describe("レッスンデータ", () => {
   });
 });
 
+describe("到達目標―評価対応", () => {
+  it("全レッスンに重複のない対応表が1件ずつある", () => {
+    expect(OUTCOMES.map((outcome) => outcome.lessonId).sort()).toEqual(
+      LESSONS.map((lesson) => lesson.id).sort()
+    );
+    expect(new Set(OUTCOMES.map((outcome) => outcome.goalId)).size).toBe(OUTCOMES.length);
+  });
+
+  it.each(OUTCOMES.map((outcome) => [outcome.lessonId, outcome]))(
+    "%s: 目標文と直接評価証拠が整合する",
+    (_, outcome) => {
+      const lesson = LESSONS.find((item) => item.id === outcome.lessonId);
+      const intro = (lesson.pages[0].b || []).join("\n");
+
+      expect(intro).toContain(`このレッスンでは、${outcome.statement}ようになります。`);
+      expect(["explain", "apply", "analyze", "perform"]).toContain(outcome.level);
+      expect(outcome.evidence.some((evidence) => evidence.strength === "direct")).toBe(true);
+      expect(new Set(outcome.dimensions).size).toBe(outcome.dimensions.length);
+      const directDimensions = new Set(
+        outcome.evidence
+          .filter((evidence) => evidence.strength === "direct")
+          .flatMap((evidence) => evidence.dimensions)
+      );
+      expect([...directDimensions].sort()).toEqual([...outcome.dimensions].sort());
+
+      for (const evidence of outcome.evidence) {
+        expect(["direct", "supporting"]).toContain(evidence.strength);
+        expect(typeof evidence.criterion).toBe("string");
+        expect(evidence.criterion.length).toBeGreaterThan(0);
+        expect(evidence.dimensions.length).toBeGreaterThan(0);
+        expect(evidence.dimensions.every((dimension) => outcome.dimensions.includes(dimension))).toBe(true);
+
+        if (evidence.kind === "exercise") {
+          const exercise = lesson.ex[evidence.exerciseIndex];
+          expect(exercise, `${lesson.id} 演習${evidence.exerciseIndex + 1}が存在しない`).toBeTruthy();
+          expect(evidence.method).toBe(
+            ["fill", "reflect"].includes(exercise.k) ? "constructed-response" : "selected-response"
+          );
+        } else {
+          expect(evidence.kind).toBe("practice");
+          expect(evidence.method).toBe("self-attested-performance");
+          expect(lesson.practice?.items.some((item) => item.id === evidence.itemId)).toBe(true);
+        }
+      }
+    }
+  );
+});
+
+describe("実践チェック", () => {
+  const practiceLessons = LESSONS.filter((lesson) => lesson.practice);
+
+  it("現在公開中の実践チェックはL10にだけあり、Foundation Checkを5項目で測る", () => {
+    expect(practiceLessons.map((lesson) => lesson.id)).toEqual(["l10"]);
+    expect(practiceLessons[0].practice.items).toHaveLength(5);
+  });
+
+  it.each(practiceLessons.map((lesson) => [lesson.id, lesson]))("%s: ID・説明・コード検証方法が完全", (_, lesson) => {
+    const ids = lesson.practice.items.map((item) => item.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(lesson.practice.intro.length).toBeGreaterThan(0);
+
+    for (const item of lesson.practice.items) {
+      expect(item.id).toMatch(/^[a-z][a-z0-9-]*$/);
+      expect(item.label.length).toBeGreaterThan(0);
+      expect(item.criterion.length).toBeGreaterThan(0);
+      if (item.code) {
+        expect(item.out != null || item.verify?.mode === "manual").toBe(true);
+      }
+    }
+  });
+});
+
 describe("演習", () => {
   const allEx = LESSONS.flatMap((l) => l.ex.map((ex, i) => [`${l.id} 演習${i + 1}`, ex]));
 
   it.each(allEx)("%s: 形式と解答の整合", (_, ex) => {
     expect(ALLOWED_K, `k="${ex.k}" は未対応の形式`).toContain(ex.k);
-    expect(typeof ex.hint).toBe("string");
-    if (ex.k !== "tf") {
+    if (ex.k !== "reflect") expect(typeof ex.hint).toBe("string");
+    if (["choice", "fill"].includes(ex.k)) {
       // Feedback が why.length を使うため、choice/fill では why 必須(欠けると正解表示がクラッシュする)
       expect(typeof ex.why).toBe("string");
       expect(ex.why.length).toBeGreaterThan(0);
@@ -126,6 +216,14 @@ describe("演習", () => {
         ex.show.normalize("NFKC").toLowerCase()
       );
     }
+
+    if (ex.k === "reflect") {
+      expect(Number.isInteger(ex.minLength) && ex.minLength >= 10).toBe(true);
+      expect(Array.isArray(ex.rubric) && ex.rubric.length >= 2).toBe(true);
+      expect(ex.rubric.every((criterion) => typeof criterion === "string" && criterion.length > 0)).toBe(true);
+      expect(typeof ex.example).toBe("string");
+      expect(ex.example.length).toBeGreaterThanOrEqual(ex.minLength);
+    }
   });
 
   it("テキスト中のバッククォートが対で閉じている(T コンポーネントの描画が壊れないこと)", () => {
@@ -135,6 +233,11 @@ describe("演習", () => {
       for (const ex of l.ex) {
         texts.push(ex.q, ex.why, ex.hint, ...(ex.opts || []));
         for (const it of ex.items || []) texts.push(it.s, it.why);
+        texts.push(...(ex.rubric || []), ex.example);
+      }
+      if (l.practice) {
+        texts.push(l.practice.title, l.practice.intro);
+        for (const item of l.practice.items) texts.push(item.label, item.criterion);
       }
     }
     for (const t of texts.filter(Boolean)) {

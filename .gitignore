@@ -2,6 +2,9 @@
 node_modules/
 dist/
 
+# 固定版Nodeの一時検証ディレクトリ（検証後に削除する）
+/.codex-node-*/
+
 # 設計文書・実装計画(ローカル管理。Dropboxがバックアップを担う)
 /docs/
 

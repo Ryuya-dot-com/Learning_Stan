@@ -1,19 +1,28 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { C, JP, GLOBAL_CSS } from "./theme.js";
 import { LessonView, Home, CheatSheet, Sidebar } from "./views.jsx";
 import { LESSONS } from "./data/lessons/index.js";
+import {
+  PROGRESS_STORAGE_KEY,
+  clearProgress,
+  decodeProgress,
+  emptyProgress,
+  loadProgress,
+  saveProgress,
+  serializeProgress,
+} from "./progress.js";
+import { hashForView, routeFromHash } from "./routing.js";
 
 /* ============================================================
    アプリ本体
-   進捗はセッション内のみ保持する(意図的に永続化しない——仕様5節)。
-   リロードでリセットされる。
+   進捗は版付きlocalStorageへ保存し、URL hashで画面を表現する。
    ============================================================ */
 
 // 「次のレッスン」の遷移規則(仕様4.4b):
 // - 番号付きレッスンは num 連番で次へ。最後の番号付きが終端で、
 //   番号なしトラック(bridge/extra)へは流れ込まない
 // - 番号なしレッスンは同一セクション内のみ次へ
-function nextLessonOf(lesson) {
+export function nextLessonOf(lesson) {
   if (lesson.num != null) {
     return LESSONS.find((l) => l.num === lesson.num + 1) || null;
   }
@@ -23,23 +32,137 @@ function nextLessonOf(lesson) {
 }
 
 export default function RStanLearningApp() {
-  const [view, setView] = useState({ name: "home" });
-  // done: クリア済み問題 / first: 初見(誤答なし)でクリアした問題。修了と測定を分ける2層設計(仕様5節)
-  const [progress, setProgress] = useState({ done: {}, first: {} });
+  const [view, setView] = useState(() => routeFromHash(window.location.hash).view);
+  const [initialProgress] = useState(() => loadProgress());
+  // done: 理解問題クリア / first: 誤答なし / missed: 一度でも誤答 / practice: 実機で自己確認済み
+  const [progress, setProgress] = useState(initialProgress.progress);
+  const [canPersist, setCanPersist] = useState(initialProgress.canPersist);
+  const [storageNotice, setStorageNotice] = useState(initialProgress.message);
+  const mainRef = useRef(null);
 
-  const solve = useCallback((lid, i, firstTry) => {
+  const navigate = useCallback((nextView, { replace = false } = {}) => {
+    const route = routeFromHash(hashForView(nextView));
+    const nextUrl = `${window.location.pathname}${window.location.search}${route.canonicalHash}`;
+    if (replace || window.location.hash !== route.canonicalHash) {
+      window.history[replace ? "replaceState" : "pushState"](null, "", nextUrl);
+    }
+    setView(route.view);
+  }, []);
+
+  useEffect(() => {
+    const initialRoute = routeFromHash(window.location.hash);
+    if (!initialRoute.valid || window.location.hash !== initialRoute.canonicalHash) {
+      navigate(initialRoute.view, { replace: true });
+    }
+
+    const followHistory = () => {
+      const route = routeFromHash(window.location.hash);
+      if (!route.valid) {
+        navigate({ name: "home" }, { replace: true });
+      } else {
+        setView(route.view);
+      }
+    };
+    window.addEventListener("popstate", followHistory);
+    window.addEventListener("hashchange", followHistory);
+    return () => {
+      window.removeEventListener("popstate", followHistory);
+      window.removeEventListener("hashchange", followHistory);
+    };
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!canPersist) return;
+    if (!saveProgress(progress)) {
+      setCanPersist(false);
+      setStorageNotice("進みぐあいを保存できませんでした。閲覧中のみ保持します。");
+    }
+  }, [progress, canPersist]);
+
+  useEffect(() => {
+    const syncProgress = (event) => {
+      if (event.key !== PROGRESS_STORAGE_KEY) return;
+      const loaded = decodeProgress(event.newValue);
+      if (!loaded.canPersist) {
+        setCanPersist(false);
+        setStorageNotice(loaded.message);
+        return;
+      }
+      setProgress(loaded.progress);
+      setCanPersist(true);
+      setStorageNotice(loaded.message || "別のタブで更新された進みぐあいを反映しました。");
+    };
+    window.addEventListener("storage", syncProgress);
+    return () => window.removeEventListener("storage", syncProgress);
+  }, []);
+
+  useEffect(() => {
+    const heading = mainRef.current?.querySelector("h1");
+    (heading || mainRef.current)?.focus();
+  }, [view.name, view.id]);
+
+  useEffect(() => {
+    const lesson = view.name === "lesson" ? LESSONS.find((item) => item.id === view.id) : null;
+    document.title = lesson
+      ? `${lesson.title} — はじめてのRとStan`
+      : view.name === "cheat"
+        ? "R チートシート — はじめてのRとStan"
+        : "はじめてのRとStan — 研究室のためのベイズ統計入門";
+  }, [view.name, view.id]);
+
+  const miss = useCallback((lid, i) => {
+    setProgress((prev) => {
+      const cur = prev.missed[lid] || [];
+      if (cur.includes(i) || (prev.done[lid] || []).includes(i)) return prev;
+      return { ...prev, missed: { ...prev.missed, [lid]: [...cur, i] } };
+    });
+  }, []);
+
+  const solve = useCallback((lid, i) => {
     setProgress((prev) => {
       const cur = prev.done[lid] || [];
       if (cur.includes(i)) return prev;
-      const next = { done: { ...prev.done, [lid]: [...cur, i] }, first: prev.first };
-      if (firstTry) next.first = { ...prev.first, [lid]: [...(prev.first[lid] || []), i] };
+      const next = { ...prev, done: { ...prev.done, [lid]: [...cur, i] } };
+      if (!(prev.missed[lid] || []).includes(i)) {
+        next.first = { ...prev.first, [lid]: [...(prev.first[lid] || []), i] };
+      }
       return next;
     });
   }, []);
 
+  const togglePractice = useCallback((lid, itemId, checked) => {
+    setProgress((prev) => {
+      const current = prev.practice[lid] || [];
+      const nextItems = checked
+        ? [...new Set([...current, itemId])]
+        : current.filter((id) => id !== itemId);
+      const nextPractice = { ...prev.practice };
+      if (nextItems.length > 0) nextPractice[lid] = nextItems;
+      else delete nextPractice[lid];
+      return {
+        ...prev,
+        practice: nextPractice,
+      };
+    });
+  }, []);
+
   const reset = () => {
-    setProgress({ done: {}, first: {} });
-    setView({ name: "home" });
+    const cleared = clearProgress();
+    setProgress(emptyProgress());
+    setCanPersist(cleared);
+    setStorageNotice(cleared ? "保存した進みぐあいを消去しました。" : "保存データを消去できませんでした。");
+    navigate({ name: "home" });
+  };
+
+  const importProgress = (raw) => {
+    const imported = decodeProgress(raw);
+    if (!imported.canPersist) {
+      setStorageNotice(imported.message);
+      return;
+    }
+    setProgress(imported.progress);
+    setCanPersist(true);
+    setStorageNotice("進みぐあいを読み込みました。");
   };
 
   let body = null;
@@ -52,21 +175,29 @@ export default function RStanLearningApp() {
         lesson={lesson}
         doneSet={new Set(progress.done[lesson.id] || [])}
         firstSet={new Set(progress.first[lesson.id] || [])}
-        onSolve={(i, first) => solve(lesson.id, i, first)}
-        onHome={() => setView({ name: "home" })}
+        missedSet={new Set(progress.missed[lesson.id] || [])}
+        practiceSet={new Set(progress.practice[lesson.id] || [])}
+        onMiss={(i) => miss(lesson.id, i)}
+        onSolve={(i) => solve(lesson.id, i)}
+        onPractice={(itemId, checked) => togglePractice(lesson.id, itemId, checked)}
+        onHome={() => navigate({ name: "home" })}
         hasNext={next != null}
-        onNextLesson={() => next && setView({ name: "lesson", id: next.id })}
-        onCheat={() => setView({ name: "cheat" })}
+        onNextLesson={() => next && navigate({ name: "lesson", id: next.id })}
+        onCheat={() => navigate({ name: "cheat" })}
       />
     );
   } else if (view.name === "cheat") {
-    body = <CheatSheet onHome={() => setView({ name: "home" })} />;
+    body = <CheatSheet onHome={() => navigate({ name: "home" })} />;
   } else {
     body = (
       <Home
         progress={progress}
-        onOpen={(id) => setView({ name: "lesson", id })}
-        onCheat={() => setView({ name: "cheat" })}
+        storageNotice={storageNotice}
+        exportText={serializeProgress(progress)}
+        onImport={importProgress}
+        onImportError={setStorageNotice}
+        onOpen={(id) => navigate({ name: "lesson", id })}
+        onCheat={() => navigate({ name: "cheat" })}
         onReset={reset}
       />
     );
@@ -90,11 +221,17 @@ export default function RStanLearningApp() {
           progress={progress}
           viewName={view.name}
           currentId={view.name === "lesson" ? view.id : null}
-          onOpen={(id) => setView({ name: "lesson", id })}
-          onCheat={() => setView({ name: "cheat" })}
-          onHome={() => setView({ name: "home" })}
+          onOpen={(id) => navigate({ name: "lesson", id })}
+          onCheat={() => navigate({ name: "cheat" })}
+          onHome={() => navigate({ name: "home" })}
         />
-        <div className="w-full min-w-0 max-w-2xl">{body}</div>
+        <main
+          ref={mainRef}
+          tabIndex={-1}
+          className="w-full min-w-0 max-w-2xl focus:outline-none"
+        >
+          {body}
+        </main>
       </div>
     </div>
   );

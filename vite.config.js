@@ -8,5 +8,6 @@ import tailwindcss from "@tailwindcss/vite";
 // パスの誤りは dev でも preview でも同じように現れる。
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  oxc: { jsx: { runtime: "automatic" } },
   base: "/Learning_Stan/",
 });
