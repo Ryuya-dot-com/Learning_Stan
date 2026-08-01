@@ -3,6 +3,55 @@
   "status": "draft-unpublished",
   "entryPrerequisite": "l33",
   "releasePolicy": "Foundation Gate通過後に、前段階の評価結果を反映して1レッスンずつ公開する",
+  "grammarPractice": {
+    "artifact": "grammar-drills.json",
+    "manuscript": "distribution-grammar-lab.md",
+    "unitIds": ["g01", "g02", "g03", "g04", "g05", "g06", "g07", "g08"],
+    "stageOrder": ["imitate", "modify", "recall", "transfer"],
+    "lessonMap": {
+      "l35": ["g01", "g02"],
+      "l36": ["g03", "g05", "g07"],
+      "l39": ["g04", "g08"],
+      "l40": ["g06"]
+    },
+    "masteryPolicy": "各単元で白紙再現と転移を1回以上成功し、構文エラーと統計的仮定の誤りを別々に説明する"
+  },
+  "caseStudies": [
+    {
+      "id": "stan-case-truncation-01",
+      "status": "draft-unpublished",
+      "title": "採用範囲のある測定器――診断が良い誤答を見抜く",
+      "manuscript": "truncation-case-study.md",
+      "runner": "examples/run-distribution-models.R",
+      "prerequisiteUnits": ["g04", "g05", "g06"],
+      "lessonMap": ["l36", "l38", "l39"],
+      "models": [
+        "examples/prior-predictive.stan",
+        "examples/truncated-normal.stan",
+        "examples/wrong-naive-bounded-normal.stan"
+      ],
+      "evidence": "scenario-validation.json",
+      "artifactCount": 8,
+      "outcome": "同じデータに対して計算診断が良好な正答・誤答モデルを比較し、切断正規化項の有無による推定差を観測過程から説明できる"
+    },
+    {
+      "id": "stan-case-link-loo-01",
+      "status": "draft-unpublished",
+      "title": "リンク関数と予測モデル比較――比較できるものだけを比べる",
+      "manuscript": "link-functions-model-comparison.md",
+      "runner": "examples/run-link-model-comparison.R",
+      "prerequisiteUnits": ["g03", "g04", "g07", "g08"],
+      "lessonMap": ["l36", "l38", "l39", "l41"],
+      "models": [
+        "examples/binary-logit-linear.stan",
+        "examples/binary-logit-quadratic.stan",
+        "examples/poisson-log-exposure.stan"
+      ],
+      "evidence": "link-comparison-validation.json",
+      "artifactCount": 13,
+      "outcome": "線形予測子を応答尺度へ戻し、比較対象・観測単位をそろえてからPSIS-LOO、Pareto k、ELPD差、不確実性、stackingを解釈できる"
+    }
+  ],
   "lessons": [
     {
       "id": "l34",
@@ -22,8 +71,8 @@
       "id": "l35",
       "title": "ブロック、型、制約を読む",
       "prerequisites": ["l34"],
-      "outcome": "6つの主要ブロックの実行時期と、int・real・vector・制約の意味をコードから説明できる",
-      "concepts": ["program blocks", "execution order", "types", "constraints"],
+      "outcome": "6つの主要ブロックの実行時期、int・real・vector・制約、分布関数の接尾辞をコードから説明できる",
+      "concepts": ["program blocks", "execution order", "types", "constraints", "lpdf・lpmf・lcdf・lccdf・rng"],
       "directEvidence": [
         {
           "artifact": "ブロック分類と型エラー修正",
@@ -36,8 +85,8 @@
       "id": "l36",
       "title": "生成過程を対数密度へ翻訳する",
       "prerequisites": ["l35"],
-      "outcome": "単回帰の生成過程を事前分布と尤度へ分解し、sampling statementがtargetへ何を加えるか説明できる",
-      "concepts": ["generative model", "prior", "likelihood", "target", "vectorization"],
+      "outcome": "単回帰の生成過程を事前分布と尤度へ分解し、distribution statementがtargetへ何を加えるか説明できる",
+      "concepts": ["generative model", "prior", "hyperparameter", "likelihood", "target", "vectorization", "link function", "inverse link", "prior sensitivity"],
       "directEvidence": [
         {
           "artifact": "単回帰Stanプログラム",
@@ -76,15 +125,15 @@
     },
     {
       "id": "l39",
-      "title": "generated quantitiesでモデルを検査する",
+      "title": "generated quantitiesでモデルを検査・比較する",
       "prerequisites": ["l38"],
-      "outcome": "log_likとy_repを生成し、観測データとのずれを事後予測チェックで説明できる",
-      "concepts": ["generated quantities", "log likelihood", "posterior predictive check", "prediction"],
+      "outcome": "log_likとy_repを生成し、事後予測チェックを行ったうえで、比較可能なモデルのPSIS-LOOとPareto kを解釈できる",
+      "concepts": ["generated quantities", "rng", "prior predictive check", "log likelihood", "posterior predictive check", "prediction", "PSIS-LOO", "ELPD", "Pareto k", "stacking"],
       "directEvidence": [
         {
-          "artifact": "事後予測図と解釈",
+          "artifact": "事後予測図と予測モデル比較メモ",
           "method": "performance-task",
-          "criterion": "少なくとも1つの観測統計量をy_repと比較し、適合と妥当性を混同せず説明する"
+          "criterion": "少なくとも1つの観測統計量をy_repと比較し、比較対象・Pareto k・ELPD差と不確実性を確認して、適合・順位・妥当性を混同せず説明する"
         }
       ]
     },
@@ -93,7 +142,7 @@
       "title": "悪い幾何をモデル側から直す",
       "prerequisites": ["l39"],
       "outcome": "階層モデルのfunnelとdivergenceの関係を説明し、centered表現をnon-centered表現へ書き換えられる",
-      "concepts": ["hierarchical model", "funnel", "centered", "non-centered", "standardization"],
+      "concepts": ["hierarchical model", "funnel", "centered", "non-centered", "standardization", "constraint・truncation・censoring"],
       "directEvidence": [
         {
           "artifact": "再パラメータ化前後のコードと診断比較",
@@ -107,7 +156,7 @@
       "title": "自分のモデルを設計・診断・報告する",
       "prerequisites": ["l40"],
       "outcome": "自分の研究課題を生成過程として定義し、Stan実装、診断、予測検査、限界を一つの再現可能な成果物として報告できる",
-      "concepts": ["model specification", "prior predictive", "sampling diagnostics", "posterior predictive", "reporting"],
+      "concepts": ["model specification", "prior predictive", "sampling diagnostics", "posterior predictive", "predictive comparison", "sensitivity analysis", "reporting"],
       "directEvidence": [
         {
           "artifact": "Stan卒業制作",
@@ -120,7 +169,18 @@
   "officialSources": [
     "https://mc-stan.org/docs/reference-manual/blocks.html",
     "https://mc-stan.org/docs/reference-manual/execution.html",
+    "https://mc-stan.org/docs/reference-manual/syntax.html",
+    "https://mc-stan.org/docs/reference-manual/user-functions.html",
+    "https://mc-stan.org/docs/2_39/functions-reference/conventions_for_probability_functions.html",
+    "https://mc-stan.org/docs/reference-manual/statements.html",
+    "https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html#prior-predictive-checks",
     "https://mc-stan.org/docs/stan-users-guide/regression.html",
+    "https://mc-stan.org/docs/functions-reference/link-functions.html",
+    "https://mc-stan.org/docs/functions-reference/binary_distributions.html",
+    "https://mc-stan.org/loo/articles/loo2-with-rstan.html",
+    "https://mc-stan.org/loo/reference/pareto-k-diagnostic.html",
+    "https://mc-stan.org/loo/reference/loo_compare.html",
+    "https://mc-stan.org/loo/reference/loo_model_weights.html",
     "https://mc-stan.org/cmdstanr/articles/cmdstanr.html",
     "https://mc-stan.org/docs/2_39/cmdstan-guide/diagnose_utility.html"
   ]

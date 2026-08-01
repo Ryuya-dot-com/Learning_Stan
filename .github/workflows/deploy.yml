@@ -66,6 +66,7 @@ jobs:
       - run: Rscript scripts/verify-step2-participant-differences.R
       - run: Rscript scripts/verify-step2-report-and-transfer.R
       - run: Rscript scripts/verify-step2-observation-rehearsal.R
+      - run: Rscript scripts/verify-stan-link-lab.R
       - run: node scripts/r-example-verifier.mjs
 
   deploy:
