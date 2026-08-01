@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "verifiedAt": "2026-08-02T01:12:08+09:00",
+  "sourceHashes": {
+    "prior-predictive.stan": "282168eb81cf82b2854136922cfc992f8265c635bdb5b5fba68a60877e9927bb",
+    "truncated-normal.stan": "85178554a760decaaec6081d55d74ac280c7b63b11342f918c448c116b1b870a",
+    "wrong-naive-bounded-normal.stan": "d177d3afb69ed76525ab683e6200f90cbdaa7dbe221b0ebd8ec0d3da0d9f5e07",
+    "run-distribution-models.R": "0247c16773b5607e509b5a73dfa4ef9e8657fec088a5749a9455da1c2af85652"
+  },
+  "environment": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "architecture": "AMD64",
+    "r": "4.6.1",
+    "cmdstanr": "0.9.0",
+    "cmdstan": "2.39.0"
+  },
+  "checks": {
+    "syntax": "PASS",
+    "compile": "PASS",
+    "fixedParameterPriorPredictive": "PASS",
+    "correctModelSampling": "PASS",
+    "wrongModelSampling": "PASS",
+    "diagnosticSummary": "PASS",
+    "posteriorPrediction": "PASS",
+    "visualInspection": "PASS"
+  },
+  "scenario": {
+    "seed": 20260802,
+    "observations": 2000,
+    "trueMu": 0.15,
+    "trueSigma": 0.45,
+    "lowerBound": 0,
+    "upperBound": 1.5,
+    "retentionProbability": 0.6292087618
+  },
+  "priorPredictive": [
+    {
+      "scenario": "narrow",
+      "priorScale": 0.5,
+      "sigmaRate": 2,
+      "ySd": 0.8323686,
+      "yQ05": -1.140251,
+      "yQ95": 1.265275,
+      "sigmaMean": 0.4713729
+    },
+    {
+      "scenario": "baseline",
+      "priorScale": 2,
+      "sigmaRate": 1,
+      "ySd": 2.4724306,
+      "yQ05": -3.916368,
+      "yQ95": 3.597234,
+      "sigmaMean": 0.9974077
+    },
+    {
+      "scenario": "wide",
+      "priorScale": 4,
+      "sigmaRate": 0.5,
+      "ySd": 4.923104,
+      "yQ05": -8.23343,
+      "yQ95": 7.245327,
+      "sigmaMean": 1.9902764
+    }
+  ],
+  "sample": {
+    "chains": 4,
+    "iterWarmup": 1000,
+    "iterSampling": 1000,
+    "priorIterationsPerScenario": 1000,
+    "initialization": 0
+  },
+  "diagnostics": {
+    "correctTruncated": {
+      "divergentByChain": [0, 0, 0, 0],
+      "maxTreedepthByChain": [0, 0, 0, 0],
+      "ebfmiByChain": [1.0661612, 1.0890139, 1.0803666, 1.1208971],
+      "reportedRhatMax": 1.0047502,
+      "reportedEssBulkMin": 709.0173,
+      "reportedEssTailMin": 822.3469
+    },
+    "wrongNaive": {
+      "divergentByChain": [0, 0, 0, 0],
+      "maxTreedepthByChain": [0, 0, 0, 0],
+      "ebfmiByChain": [1.1238683, 1.0788017, 1.1505635, 1.1079371],
+      "reportedRhatMax": 1.0025922,
+      "reportedEssBulkMin": 2725.8408,
+      "reportedEssTailMin": 2597.7659
+    }
+  },
+  "posteriorComparison": {
+    "correctTruncated": {
+      "muMean": 0.1499438,
+      "muQ05": 0.0868508,
+      "muQ95": 0.2087625,
+      "sigmaMean": 0.4503102,
+      "sigmaQ05": 0.4195619,
+      "sigmaQ95": 0.4816651
+    },
+    "wrongNaive": {
+      "muMean": 0.4174342,
+      "muQ05": 0.4067342,
+      "muQ95": 0.4280525,
+      "sigmaMean": 0.2941287,
+      "sigmaQ05": 0.2866077,
+      "sigmaQ95": 0.3020266
+    }
+  },
+  "artifacts": [
+    "scenario-data.csv",
+    "scenario-metadata.csv",
+    "prior-predictive-summary.csv",
+    "model-comparison.csv",
+    "diagnostics.csv",
+    "01-stan-prior-predictive.png",
+    "02-truncation-estimates.png",
+    "03-truncated-posterior-predictive.png"
+  ],
+  "limitations": [
+    "固定seedの合成校正データによるローカル実行証拠であり、実データに対するモデル妥当性を保証しない",
+    "意図的な誤答モデルは正規化項欠落の影響だけを比較する教材用であり、使用を推奨するものではない",
+    "両モデルの計算診断が良好でも、誤答モデルの統計的仮定が正しくなるわけではない",
+    "サンプリング中にsigmaが数値的に0へ近づく提案の散発的棄却が表示されたが、保存drawのdivergence・最大treedepth到達は全chainで0だった",
+    "公開前にクリーンCIでの再実行とStan経験者による独立レビューが必要"
+  ]
+}

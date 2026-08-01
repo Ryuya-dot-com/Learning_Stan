@@ -1,12 +1,12 @@
 import { LESSONS } from "./data/lessons/index.js";
 
 export const PROGRESS_STORAGE_KEY = "learning-stan.progress";
-export const PROGRESS_SCHEMA_VERSION = 2;
+export const PROGRESS_SCHEMA_VERSION = 3;
 // レッスンID、問題の順序・意味、進捗解釈を変えるときに更新し、decodeProgressで移行する。
-export const CONTENT_VERSION = "2026-08-01-l1-l16-v3";
+export const CONTENT_VERSION = "2026-08-02-l1-l16-v4";
 
 export function emptyProgress() {
-  return { done: {}, first: {}, missed: {}, practice: {} };
+  return { done: {}, first: {}, missed: {}, drill: {}, practice: {} };
 }
 
 function isRecord(value) {
@@ -20,10 +20,21 @@ function cleanIndices(value, exerciseCount) {
     .sort((a, b) => a - b);
 }
 
-function cleanPracticeIds(value, practice) {
-  if (!Array.isArray(value) || !practice?.items) return [];
-  const valid = new Set(practice.items.map((item) => item.id));
-  return [...new Set(value)].filter((id) => typeof id === "string" && valid.has(id)).sort();
+function cleanItemIds(value, items) {
+  if (!Array.isArray(value) || !items) return [];
+  const selected = new Set(value.filter((id) => typeof id === "string"));
+  return items.map((item) => item.id).filter((id) => selected.has(id));
+}
+
+function cleanPrefixIds(value, items) {
+  if (!Array.isArray(value) || !items) return [];
+  const selected = new Set(value.filter((id) => typeof id === "string"));
+  const prefix = [];
+  for (const item of items) {
+    if (!selected.has(item.id)) break;
+    prefix.push(item.id);
+  }
+  return prefix;
 }
 
 export function sanitizeProgress(candidate, lessons = LESSONS) {
@@ -38,11 +49,13 @@ export function sanitizeProgress(candidate, lessons = LESSONS) {
     const first = cleanIndices(source.first?.[lesson.id], lesson.ex.length).filter(
       (index) => doneSet.has(index) && !missedSet.has(index)
     );
-    const practice = cleanPracticeIds(source.practice?.[lesson.id], lesson.practice);
+    const drill = cleanPrefixIds(source.drill?.[lesson.id], lesson.practiceLadder?.steps);
+    const practice = cleanItemIds(source.practice?.[lesson.id], lesson.practice?.items);
 
     if (done.length > 0) progress.done[lesson.id] = done;
     if (first.length > 0) progress.first[lesson.id] = first;
     if (missed.length > 0) progress.missed[lesson.id] = missed;
+    if (drill.length > 0) progress.drill[lesson.id] = drill;
     if (practice.length > 0) progress.practice[lesson.id] = practice;
   }
 
@@ -96,7 +109,7 @@ export function decodeProgress(raw, lessons = LESSONS) {
     };
   }
 
-  if (parsed.schemaVersion != null && ![1, PROGRESS_SCHEMA_VERSION].includes(parsed.schemaVersion)) {
+  if (parsed.schemaVersion != null && ![1, 2, PROGRESS_SCHEMA_VERSION].includes(parsed.schemaVersion)) {
     return {
       progress: emptyProgress(),
       canPersist: false,
@@ -130,7 +143,7 @@ export function loadProgress(storage = window.localStorage) {
 export function saveProgress(progress, storage = window.localStorage) {
   try {
     const clean = sanitizeProgress(progress);
-    const isEmpty = [clean.done, clean.first, clean.missed, clean.practice].every(
+    const isEmpty = [clean.done, clean.first, clean.missed, clean.drill, clean.practice].every(
       (record) => Object.keys(record).length === 0
     );
     if (isEmpty) storage.removeItem(PROGRESS_STORAGE_KEY);

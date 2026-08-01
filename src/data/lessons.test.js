@@ -200,6 +200,37 @@ describe("実践チェック", () => {
   });
 });
 
+describe("4段階の反復練習", () => {
+  it.each(LESSONS.map((lesson) => [lesson.id, lesson]))(
+    "%s: まねる・変える・想起・転移を順に1回ずつ行う",
+    (_, lesson) => {
+      const ladder = lesson.practiceLadder;
+      expect(ladder).toBeTruthy();
+      expect(ladder.title).toBe("4段階の反復練習");
+      expect(ladder.intro).toContain("今回くり返す技能");
+      expect(ladder.steps.map((step) => step.id)).toEqual([
+        "imitate",
+        "change",
+        "recall",
+        "transfer",
+      ]);
+
+      for (const step of ladder.steps) {
+        expect(step.label.length).toBeGreaterThan(0);
+        expect(step.support.length).toBeGreaterThan(0);
+        expect(step.task.length).toBeGreaterThan(0);
+        expect(step.criterion.length).toBeGreaterThan(0);
+      }
+      expect(ladder.steps[2].support).toContain("例を閉じ");
+      expect(ladder.steps[3].support).toContain("別の場面");
+    }
+  );
+
+  it("自己記録を理解済みの直接証拠へ混ぜない", () => {
+    expect(OUTCOMES.flatMap((outcome) => outcome.evidence).some((evidence) => evidence.kind === "drill")).toBe(false);
+  });
+});
+
 describe("STEP 1成果物", () => {
   const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -448,6 +479,12 @@ describe("演習", () => {
       if (l.practice) {
         texts.push(l.practice.title, l.practice.intro);
         for (const item of l.practice.items) texts.push(item.label, item.criterion);
+      }
+      if (l.practiceLadder) {
+        texts.push(l.practiceLadder.title, l.practiceLadder.intro);
+        for (const step of l.practiceLadder.steps) {
+          texts.push(step.label, step.support, step.task, step.criterion);
+        }
       }
     }
     for (const t of texts.filter(Boolean)) {

@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-unpublished",
+  "practiceOrder": ["imitate", "modify", "recall", "transfer"],
+  "rules": [
+    "各段階でコードを実行または構文確認してから次へ進む",
+    "白紙再現では見本を閉じ、誤りの原因を1文で記録する",
+    "転移課題では変えた仮定と変えていない仮定を区別する"
+  ],
+  "units": [
+    {
+      "id": "g01",
+      "title": "ブロック・宣言・添字",
+      "math": "観測データを D = (N, y_1, ..., y_N) とし、y は長さ N のベクトルとして宣言する。",
+      "stanFocus": ["data", "parameters", "model", "int", "real", "vector", "array", "for"],
+      "misconception": "変数はどのブロックに置いても同じだと思う",
+      "steps": [
+        {
+          "id": "imitate",
+          "prompt": "data・parameters・modelの3ブロックと、int<lower=1> N、vector[N] y、real muを見本どおり入力する。",
+          "successCriterion": "ブロック順、波括弧、セミコロン、型とサイズがすべて構文確認を通る。"
+        },
+        {
+          "id": "modify",
+          "prompt": "yをarray[N] realへ変更し、y[n]を参照するforループを追加する。vector版との違いを1文で説明する。",
+          "successCriterion": "宣言と参照方法が一致し、ベクトル化できる処理と添字が必要な処理を区別できる。"
+        },
+        {
+          "id": "recall",
+          "prompt": "見本を閉じ、N個の実数観測と1個の実数パラメータを受け取る最小プログラムを白紙から再現する。",
+          "successCriterion": "ヒントなしで宣言場所と型を決め、構文確認を通す。"
+        },
+        {
+          "id": "transfer",
+          "prompt": "成功回数s[n]と試行回数trials[n]を扱うデータ契約へ書き換え、必要な整数制約を設計する。",
+          "successCriterion": "離散データをint配列で表し、0以上という下限制約とs[n] <= trials[n]の検査方針を説明する。"
+        }
+      ]
+    },
+    {
+      "id": "g02",
+      "title": "分布関数とdistribution statement（旧称sampling statement）",
+      "math": "Y ~ Normal(mu, sigma) は p(y | mu, sigma) = exp(-(y-mu)^2/(2 sigma^2)) / (sigma sqrt(2 pi)) を表す。",
+      "stanFocus": ["~", "normal_lpdf", "bernoulli_lpmf", "normal_lcdf", "normal_lccdf", "normal_rng"],
+      "misconception": "y ~ normal(mu, sigma)がyへの乱数代入だと思う",
+      "steps": [
+        {
+          "id": "imitate",
+          "prompt": "y ~ normal(mu, sigma); と target += normal_lpdf(y | mu, sigma); を入力し、両者が同じ対数密度核を加えることを確認する。",
+          "successCriterion": "~を代入や乱数生成と呼ばず、targetへの加算として説明できる。"
+        },
+        {
+          "id": "modify",
+          "prompt": "連続観測を二値観測へ変え、normal_lpdfをbernoulli_lpmfへ、real/vectorをint配列へ変更する。",
+          "successCriterion": "連続分布には_lpdf、離散分布には_lpmfを選び、変量の型も一致させる。"
+        },
+        {
+          "id": "recall",
+          "prompt": "_lpdf・_lpmf・_lcdf・_lccdf・_rngの意味と、縦線の左に置く変量を白紙で書く。",
+          "successCriterion": "5つの接尾辞を混同せず、normal_lpdf(y | mu, sigma)を再現する。"
+        },
+        {
+          "id": "transfer",
+          "prompt": "正の待ち時間へexponential分布、0から1の比率へbeta分布を割り当て、支持範囲と型を説明する。",
+          "successCriterion": "観測の支持範囲から候補分布を選び、分布名だけでなくパラメータの役割を説明する。"
+        }
+      ]
+    },
+    {
+      "id": "g03",
+      "title": "target・尤度・ベクトル化",
+      "math": "独立なら log p(y | theta) = sum_{n=1}^N log p(y_n | theta) であり、積を対数和として計算する。",
+      "stanFocus": ["target +=", "vectorization", "for", "normal_lpdf", "sum"],
+      "misconception": "ベクトル化すると統計モデルそのものが変わると思う",
+      "steps": [
+        {
+          "id": "imitate",
+          "prompt": "for (n in 1:N) y[n] ~ normal(mu, sigma); と y ~ normal(mu, sigma); の両方を構文確認する。",
+          "successCriterion": "独立で同じmu・sigmaを使う例では、両者が同じ対数密度を表すと説明できる。"
+        },
+        {
+          "id": "modify",
+          "prompt": "muをvector[N]へ変更し、mu[n]を使うループとベクトル化した尤度を比較する。",
+          "successCriterion": "分布関数のベクトル化規則に沿って、yとmuの要素対応を維持する。"
+        },
+        {
+          "id": "recall",
+          "prompt": "独立なN観測の対数尤度を数式とStanの2通り（~とtarget +=）で白紙から書く。",
+          "successCriterion": "sum、縦線、添字、セミコロンを含め、数式とコードを対応付ける。"
+        },
+        {
+          "id": "transfer",
+          "prompt": "観測ごとに既知の標準誤差se[n]が異なるモデル y[n] ~ normal(theta, se[n]) を設計する。",
+          "successCriterion": "seをdataで正値制約付きvectorとして受け、要素別尺度の尤度を正しく書く。"
+        }
+      ]
+    },
+    {
+      "id": "g04",
+      "title": "乱数生成と事前予測",
+      "math": "theta_sim ~ p(theta), y_sim ~ p(y | theta_sim) と順に生成すれば、y_sim ~ p(y) = integral p(y | theta) p(theta) dtheta となる。",
+      "stanFocus": ["generated quantities", "transformed data", "_rng", "fixed_param", "prior predictive"],
+      "misconception": "_rngをmodelブロックで呼び出して尤度を定義できると思う",
+      "steps": [
+        {
+          "id": "imitate",
+          "prompt": "generated quantitiesでmu_sim = normal_rng(0, 1)、y_sim = normal_rng(mu_sim, 1)を生成する。",
+          "successCriterion": "_rngを許可されたブロックに置き、生成順を数式と対応付ける。"
+        },
+        {
+          "id": "modify",
+          "prompt": "muの事前尺度を0.5、2、5へ変え、y_simの分布を同じ軸で可視化する。",
+          "successCriterion": "乱数の偶然変動と事前尺度による系統的変化を区別して説明する。"
+        },
+        {
+          "id": "recall",
+          "prompt": "見本なしで、データを使わない正規モデルの事前予測Stanプログラムを白紙から書く。",
+          "successCriterion": "parameters・modelを不要に追加せず、generated quantitiesと_rngだけで独立標本を生成する。"
+        },
+        {
+          "id": "transfer",
+          "prompt": "二項モデルp ~ beta(alpha, beta)、y_sim ~ binomial_rng(trials, p)へ移し替える。",
+          "successCriterion": "連続な確率pと離散な件数y_simの型、支持範囲、生成順が正しい。"
+        }
+      ]
+    },
+    {
+      "id": "g05",
+      "title": "分布パラメータとハイパーパラメータ",
+      "math": "mu ~ Normal(m0, tau), sigma ~ Exponential(lambda) では、m0・tau・lambdaを固定すれば事前分布のハイパーパラメータで、E[sigma] = 1/lambda である。",
+      "stanFocus": ["prior", "hyperparameter", "normal", "beta", "exponential", "sensitivity analysis"],
+      "misconception": "alphaやbetaという名前の量は常にハイパーパラメータだと思う",
+      "steps": [
+        {
+          "id": "imitate",
+          "prompt": "m0・tau・lambdaをdataで受け、mu ~ normal(m0, tau)、sigma ~ exponential(lambda)と書く。",
+          "successCriterion": "固定値がどの事前分布を調整するか矢印で対応付ける。"
+        },
+        {
+          "id": "modify",
+          "prompt": "tauとlambdaを3通り変え、mu_sim・sigma_sim・y_simの可視化と分位点を比較する。",
+          "successCriterion": "tauはmuの広がり、lambdaはsigmaの平均と裾を変えることを数値で説明する。"
+        },
+        {
+          "id": "recall",
+          "prompt": "Beta(alpha, beta)の平均alpha/(alpha+beta)と分散alpha beta / ((alpha+beta)^2 (alpha+beta+1))を白紙で再現する。",
+          "successCriterion": "alpha・betaを形状パラメータと呼び、別の未知量pの事前分布を規定するときにハイパーパラメータになると説明する。"
+        },
+        {
+          "id": "transfer",
+          "prompt": "複数群のtheta_j ~ normal(mu_theta, tau_theta)を設計し、どれがパラメータ、どれがハイパーパラメータまたは上位パラメータか整理する。",
+          "successCriterion": "固定された設定値とデータから推定する上位パラメータを同じ言葉で曖昧に扱わない。"
+        }
+      ]
+    },
+    {
+      "id": "g06",
+      "title": "支持範囲・制約・切断・打ち切り",
+      "math": "L <= y <= U の切断密度は p_T(y | theta) = p(y | theta) / (F(U | theta) - F(L | theta)) である。",
+      "stanFocus": ["<lower>", "<upper>", "T[L, U]", "lcdf", "lccdf", "log_diff_exp"],
+      "misconception": "負値を0へ丸めれば、0で切断した分布からの標本になると思う",
+      "steps": [
+        {
+          "id": "imitate",
+          "prompt": "y ~ normal(mu, sigma) T[L, U]; を入力し、正規化項F(U)-F(L)を数式へ書き足す。",
+          "successCriterion": "範囲外の密度が0になり、範囲内の密度が再正規化されることを説明する。"
+        },
+        {
+          "id": "modify",
+          "prompt": "両側切断を下側だけのT[0, ]へ変え、normal_lccdfを使う等価なtarget式を書く。",
+          "successCriterion": "target += normal_lpdf(y | mu, sigma) - normal_lccdf(0 | mu, sigma)を再現する。"
+        },
+        {
+          "id": "recall",
+          "prompt": "制約、切断、打ち切りの違いを、観測過程・Stan構文・必要な尤度の3列で白紙から整理する。",
+          "successCriterion": "<lower=0>だけではT[0, ]の正規化項が自動追加されないことを説明する。"
+        },
+        {
+          "id": "transfer",
+          "prompt": "測定器が上限Uを超えると『U以上』だけ記録する打ち切りデータの尤度を設計する。",
+          "successCriterion": "未観測の値をUへ置換せず、上限超過にはlccdfで確率を加える方針を示す。"
+        }
+      ]
+    },
+    {
+      "id": "g07",
+      "title": "線形予測子・リンク関数・係数解釈",
+      "math": "g(mu_i) = eta_i = alpha + x_i^T beta、mu_i = g^{-1}(eta_i) と分ける。logitでは exp(beta) がodds ratio、logリンクでは exp(beta) が期待件数率比になる。",
+      "stanFocus": ["eta", "inv_logit", "Phi", "inv_cloglog", "bernoulli_logit", "poisson_log", "offset"],
+      "misconception": "logit係数betaが、どの基準確率でも一定の確率差を表すと思う",
+      "steps": [
+        {
+          "id": "imitate",
+          "prompt": "eta=-2, 0, 2をlogit・probit・cloglogの3つのinverse linkへ通し、同じ軸へ可視化する。",
+          "successCriterion": "linkとinverse linkの向きを区別し、各出力が0と1の間にあることを確認する。"
+        },
+        {
+          "id": "modify",
+          "prompt": "beta=1を固定し、alpha=-2, 0, 2でxを0から1へ動かした確率差を比較する。",
+          "successCriterion": "一定なのはlog odds差で、確率差は基準値alphaに依存すると数値で説明する。"
+        },
+        {
+          "id": "recall",
+          "prompt": "Bernoulli-logitモデルと、log(exposure) offsetを持つPoisson-logモデルを白紙からStanで書く。",
+          "successCriterion": "応答のint型、etaまたはlog_rate、数値的に安定な分布関数、事前分布を正しく対応付ける。"
+        },
+        {
+          "id": "transfer",
+          "prompt": "非負件数、0/1、正の連続時間という3つの応答について、候補分布・link・係数の報告尺度を設計する。",
+          "successCriterion": "支持範囲だけで機械的に決めず、観測過程、過分散、曝露量、予測目的も明示する。"
+        }
+      ]
+    },
+    {
+      "id": "g08",
+      "title": "観測別対数尤度・PSIS-LOO・モデル比較",
+      "math": "elpd_loo = sum_i log p(y_i | y_{-i})。elpd_diffは最良モデルを0とした差で、Pareto kはPSIS近似の信頼性を観測ごとに診断する。",
+      "stanFocus": ["generated quantities", "log_lik", "bernoulli_logit_lpmf", "loo", "loo_compare", "Pareto k", "stacking"],
+      "misconception": "LOOで1位なら、そのモデルが真で因果解釈も正しいと証明されたと思う",
+      "steps": [
+        {
+          "id": "imitate",
+          "prompt": "同じN観測へ当てた2モデルでlog_lik[N]を生成し、loo()とloo_compare()を実行する。",
+          "successCriterion": "両モデルの列が同じ観測を同じ順で表し、合計尤度ではなく観測別尤度を渡す。"
+        },
+        {
+          "id": "modify",
+          "prompt": "線形logitへ二次項を加え、事後予測図、pointwise ELPD差、elpd_diffとse_diffを比較する。",
+          "successCriterion": "総合順位だけでなく、どの観測が差を作るかと差の不確実性を説明する。"
+        },
+        {
+          "id": "recall",
+          "prompt": "比較可能性、sampling診断、事後予測、Pareto k、ELPD差、判断の順序を白紙から再現する。",
+          "successCriterion": "高いPareto kを無視して順位へ進まず、LOOを絶対適合や因果同定と混同しない。"
+        },
+        {
+          "id": "transfer",
+          "prompt": "参加者内反復測定について、新しい測定を予測する分割と新しい参加者を予測する分割を別々に設計する。",
+          "successCriterion": "予測対象に合わせて観測単位LOOとgrouped K-foldを使い分け、情報漏洩の有無を説明する。"
+        }
+      ]
+    }
+  ]
+}

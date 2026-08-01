@@ -7,7 +7,8 @@ required <- c(
   purrr = "1.2.2",
   ggplot2 = "4.0.3",
   knitr = "1.51",
-  rmarkdown = "2.31"
+  rmarkdown = "2.31",
+  loo = "2.10.1"
 )
 
 rspm_repo <- Sys.getenv("RSPM", unset = "")

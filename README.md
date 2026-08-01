@@ -6,6 +6,7 @@
 **教材はこちら → https://ryuya-dot-com.github.io/Learning_Stan/**
 
 - 体験 → STEP 0（環境構築）→ R基礎8レッスン → Foundation Check → STEP 1（データ操作6レッスン）の一本道を公開中
+- 各レッスンは、説明の後に「まねる → ひとつ変える → 見ずに作る → 別の場面で使う」を順番に反復してから理解問題へ進みます
 - STEP 1は「認知課題のパイロットデータで、正答試行のincong−cong差を参加者ごとに記述し、再生成可能なCSVと限界付き結果メモを納品する」という1つの分析依頼で全6レッスンを接続しています
 - STEP 1には、CSV 3件（問題入りの品質検査用を含む）・TSV 1件・区切りTXT 1件・Excel 3件、読み込みから成果物の再生成までを一周する[Quarto演習ノート](https://ryuya-dot-com.github.io/Learning_Stan/notebooks/nb1-data.qmd)、実務形式の[完成版Rスクリプト](https://ryuya-dot-com.github.io/Learning_Stan/scripts/step1_analysis.R)があります
 - STEP 1の各レッスン冒頭から、展開するだけでProject構成が揃う[一括スターターZIP](https://ryuya-dot-com.github.io/Learning_Stan/downloads/learning-stan-step1.zip)、その回で使う個別データ、演習ノートをダウンロードできます。CSV・TSV・任意区切りテキスト・Excel・複数Excelの一括読込に加え、rawを上書きしない品質検査とprocessedへの保存を扱います
@@ -15,9 +16,9 @@
 - 実機アクセシビリティ監査・初学者観察・公開判定の手順は [Foundation Gate実施キット](quality/foundation-gate/README.md) を参照
 - L12→L13で「読込成功」と「分析可能な品質」を区別できるかの観察手順は [STEP 1 Data Quality Gate](quality/step1-data-gate/README.md) を参照
 - L16修了後に、中心課題を見ず別データへ品質検査・集計・解釈を移せるかの観察手順は [STEP 1独立転移観察キット](quality/step1-transfer-gate/README.md) を参照
-- Stan編は [非公開教材パック](content/stan/README.md) でL34–L41の設計と単回帰の縦切り原稿を検証中です。公開アプリにはまだ含まれません
+- Stan編は [非公開教材パック](content/stan/README.md) でL34–L41の設計、単回帰の縦切り、8単元32課題の文法反復、分布・リンク関数の可視化、切断モデル、PSIS-LOOによる予測モデル比較を検証中です。公開アプリにはまだ含まれません
 - STEP 2は [非公開教材パック](content/step2/README.md) でL17–L20の意味ID・依存関係・成果物契約、L17記述統計、L18分布図、L19参加者内対応図、L20一括再生成・限界報告、20件の診断的理解問題を検証中です。[初心者観察ゲート](quality/step2-observation-gate/README.md)の通過前は公開アプリへ含めません
-- 理解問題と実機チェックの進みぐあいは、版付きデータとしてブラウザ内に保存されます（サーバには何も送信しません）。記述回答の本文は保存せず、JSONの書き出し・読み込み・明示的なリセットができます
+- 4段階練習・理解問題・実機チェックの進みぐあいは、版付きデータとしてブラウザ内に保存されます（サーバには何も送信しません）。4段階練習は自己記録であり、それだけでは理解済みになりません。記述回答の本文は保存せず、JSONの書き出し・読み込み・明示的なリセットができます
 
 ## レッスンの追加方法
 
@@ -50,7 +51,7 @@ Node.js 22.23.1 と同梱の npm 10.9.8 を使用します（`.node-version` と
 npm install
 npm run dev      # 開発サーバ(http://localhost:5173/Learning_Stan/ で開きます)
 npm test         # レッスンデータ・配色・ハイライトの検証
-npm run install:r-deps  # STEP 1・非公開STEP 2の検証に必要なRパッケージを導入
+npm run install:r-deps  # STEP 1・非公開STEP 2・Stanリンク比較の検証に必要なRパッケージを導入
 npm run generate:excel-samples  # 固定したExcelJSでExcel教材3件を再生成
 npm run test:excel-samples      # Excelのシート・型・行分割・書式契約を検査
 npm run generate:step1-bundle   # STEP 1のProject用スターターZIPを再生成
@@ -75,6 +76,10 @@ npm run test:step2-observation-rehearsal  # 観察用ZIP展開から初回提出
 npm run gate:step2-observation:status  # 実観察状態を表示（現在はNOT RUN）
 npm run test:r   # Rコード例と期待出力の照合（R 4.6.1が必要）
 npm run test:stan-content  # 非公開Stan原稿・.stan・R実行コード・評価設計の同期検査
+npm run test:stan-distributions  # 正規・Beta・事前予測・切断のPNG生成と理論値照合
+npm run test:stan-links  # logit・probit・cloglog・Poisson offsetのPNGと数値基準を検査
+npm run test:stan-scenario-runtime  # 切断ケース3モデルを実行し、真値回収・誤答のずれ・診断・8成果物を検査
+npm run test:stan-model-comparison-runtime  # 2つのlogitモデルを実行し、LOO・Pareto k・stacking・13成果物を検査
 npm run gate:status        # Foundation Gateの現在状態を表示
 npm run gate:require-pass  # 公開許可時のみ使用。現在はBLOCKEDのため失敗します
 npm run gate:step1-transfer:status            # 独立転移観察の現在状態（NOT RUN）を検証

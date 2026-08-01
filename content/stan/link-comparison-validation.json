@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "verifiedAt": "2026-08-02T01:58:28+09:00",
+  "sourceHashes": {
+    "binary-logit-linear.stan": "71254a369cb972f3a043d96e32f19cfd7b5f82ec8fd663cd0db92e6ce2a67d08",
+    "binary-logit-quadratic.stan": "25f8c64b4ae23a97e1bd794c73ca6fe35c1dc7b15138135d111b45d6b35fad89",
+    "poisson-log-exposure.stan": "5c4add7cfdc62a5626ba4843ab2fad9ab40e818688e314069e68aaebd8b313bc",
+    "simulate-link-functions.R": "dd39f95cca748f640f433e6354dde392fb52a671a5430a702a02983abc753743",
+    "run-link-model-comparison.R": "7ed4f28da6140f8edc093bfd77e12b1fa217cc2b3d2b24cd21274b6ebef2913f"
+  },
+  "environment": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "architecture": "AMD64",
+    "r": "4.6.1",
+    "cmdstanr": "0.9.0",
+    "cmdstan": "2.39.0",
+    "loo": "2.10.1"
+  },
+  "checks": {
+    "linkSimulation": "PASS",
+    "syntax": "PASS",
+    "compile": "PASS",
+    "linearModelSampling": "PASS",
+    "quadraticModelSampling": "PASS",
+    "diagnosticSummary": "PASS",
+    "pointwiseLogLikelihood": "PASS",
+    "psisLoo": "PASS",
+    "paretoK": "PASS",
+    "stacking": "PASS",
+    "visualInspection": "PASS"
+  },
+  "scenario": {
+    "seed": 20260802,
+    "observations": 400,
+    "successes": 113,
+    "trueAlpha": -0.4,
+    "trueBetaLinear": 1.1,
+    "trueBetaSquare": -0.9
+  },
+  "sample": {
+    "chains": 4,
+    "iterWarmup": 750,
+    "iterSampling": 750,
+    "posteriorDraws": 3000
+  },
+  "diagnostics": {
+    "linear": {
+      "divergentByChain": [0, 0, 0, 0],
+      "maxTreedepthByChain": [0, 0, 0, 0],
+      "ebfmiByChain": [1.1223116, 1.1614999, 1.0903042, 0.9916191],
+      "reportedRhatMax": 1.0008351,
+      "reportedEssBulkMin": 2128.835,
+      "reportedEssTailMin": 1656.944
+    },
+    "quadratic": {
+      "divergentByChain": [0, 0, 0, 0],
+      "maxTreedepthByChain": [0, 0, 0, 0],
+      "ebfmiByChain": [1.0843562, 1.034571, 1.0968423, 1.162176],
+      "reportedRhatMax": 1.003455,
+      "reportedEssBulkMin": 1423.979,
+      "reportedEssTailMin": 1674.647
+    }
+  },
+  "modelComparison": {
+    "linear": {
+      "elpdLoo": -231.4119383,
+      "seElpdLoo": 8.6720203,
+      "pLoo": 1.7697906,
+      "looic": 462.8238767,
+      "elpdDiff": -19.1339875,
+      "seDiff": 5.6012233,
+      "paretoKMax": 0.0223062,
+      "paretoKFlagged": 0,
+      "stackingWeight": 0.0000003165
+    },
+    "quadratic": {
+      "elpdLoo": -212.2779508,
+      "seElpdLoo": 9.1124662,
+      "pLoo": 2.7070096,
+      "looic": 424.5559016,
+      "elpdDiff": 0,
+      "seDiff": 0,
+      "paretoKMax": 0.1580238,
+      "paretoKFlagged": 0,
+      "stackingWeight": 0.9999996835
+    },
+    "paretoThreshold": 0.7,
+    "pointwiseElpdDifferenceSum": 19.1339875
+  },
+  "artifacts": [
+    "link-function-summary.csv",
+    "logit-baseline-effects.csv",
+    "01-binary-inverse-links.png",
+    "02-logit-coefficient-baseline.png",
+    "03-poisson-log-exposure.png",
+    "simulated-binary-data.csv",
+    "model-comparison.csv",
+    "pareto-k.csv",
+    "stacking-weights.csv",
+    "diagnostics.csv",
+    "04-loo-model-predictions.png",
+    "pointwise-elpd.csv",
+    "05-pointwise-elpd.png"
+  ],
+  "limitations": [
+    "固定seedの合成二値データによる教材校正であり、実データの予測性能やリンク選択を保証しない",
+    "同じ400観測を1件ずつ除く予測課題でのみ比較可能性を満たし、参加者群・時系列・空間単位の外挿は検証していない",
+    "Pareto kの閾値超過0はこの固定実行に対するPSIS近似診断であり、別データや別モデルへ一般化できない",
+    "stacking weightは候補予測分布の組み合わせ重みであり、モデルが真であるposterior probabilityではない",
+    "公開前にクリーンCIでの再実行、Stan・予測評価経験者による独立レビュー、初心者による理解観察が必要"
+  ]
+}

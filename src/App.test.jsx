@@ -16,9 +16,18 @@ afterEach(() => {
 
 async function openLesson1(user) {
   await user.click(screen.getByRole("button", { name: /インストール不要で体験を始める|体験のつづきから/ }));
+  await advanceToLesson1Exercises(user);
+}
+
+async function advanceToLesson1Exercises(user) {
   for (let i = 0; i < 3; i += 1) {
     await user.click(screen.getByRole("button", { name: "次へ →" }));
   }
+  for (const name of ["1. まねる", "2. ひとつ変える", "3. 見ずに作る", "4. 別の場面で使う"]) {
+    const checkbox = screen.getByRole("checkbox", { name });
+    if (!checkbox.checked) await user.click(checkbox);
+  }
+  await user.click(screen.getByRole("button", { name: "次へ →" }));
 }
 
 async function finishLesson1(user) {
@@ -131,9 +140,7 @@ describe("学習進捗", () => {
     firstRender.unmount();
 
     render(<App />);
-    for (let i = 0; i < 3; i += 1) {
-      await user.click(screen.getByRole("button", { name: "次へ →" }));
-    }
+    await advanceToLesson1Exercises(user);
     expect(screen.getByText("クリア済み ✓")).toBeTruthy();
     expect(screen.getByRole("button", { name: /print/ }).disabled).toBe(true);
   });
@@ -186,6 +193,38 @@ describe("学習進捗", () => {
     expect(confirm.disabled).toBe(false);
     await user.click(confirm);
     expect(screen.getByText(/説明の自己確認が完了/)).toBeTruthy();
+  });
+
+  it("4段階練習を上から解除し、自己記録を理解済みと混同しない", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "インストール不要で体験を始める" }));
+    for (let i = 0; i < 3; i += 1) {
+      await user.click(screen.getByRole("button", { name: "次へ →" }));
+    }
+
+    const next = screen.getByRole("button", { name: "4段階を上から実行" });
+    const imitate = screen.getByRole("checkbox", { name: "1. まねる" });
+    const change = screen.getByRole("checkbox", { name: "2. ひとつ変える" });
+    const recall = screen.getByRole("checkbox", { name: "3. 見ずに作る" });
+    const transfer = screen.getByRole("checkbox", { name: "4. 別の場面で使う" });
+
+    expect(imitate.disabled).toBe(false);
+    expect(change.disabled).toBe(true);
+    expect(next.disabled).toBe(true);
+    await user.click(imitate);
+    expect(change.disabled).toBe(false);
+    await user.click(change);
+    await user.click(recall);
+    await user.click(transfer);
+    expect(screen.getByRole("button", { name: "次へ →" }).disabled).toBe(false);
+    expect(screen.queryByText("理解済み")).toBeNull();
+
+    await user.click(change);
+    expect(recall.checked).toBe(false);
+    expect(transfer.checked).toBe(false);
+    expect(recall.disabled).toBe(true);
   });
 });
 
@@ -278,6 +317,11 @@ describe("レッスン遷移", () => {
     for (let i = 0; i < 3; i += 1) {
       await tabToAndActivate(user, "button", { name: "次へ →" });
     }
+    for (const name of ["1. まねる", "2. ひとつ変える", "3. 見ずに作る", "4. 別の場面で使う"]) {
+      await tabTo(user, "checkbox", { name });
+      await user.keyboard(" ");
+    }
+    await tabToAndActivate(user, "button", { name: "次へ →" });
     await tabToAndActivate(user, "button", { name: /print/ });
     await tabToAndActivate(user, "button", { name: "次へ →" });
     await tabToAndActivate(user, "button", { name: /\[1\] "R"/ });

@@ -38,7 +38,8 @@ export function nextLessonOf(lesson) {
 export default function RStanLearningApp() {
   const [view, setView] = useState(() => routeFromHash(window.location.hash).view);
   const [initialProgress] = useState(() => loadProgress());
-  // done: 理解問題クリア / first: 誤答なし / missed: 一度でも誤答 / practice: 実機で自己確認済み
+  // done: 理解問題クリア / first: 誤答なし / missed: 一度でも誤答
+  // drill: 4段階練習の自己記録 / practice: 実機で自己確認済み
   const [progress, setProgress] = useState(initialProgress.progress);
   const [canPersist, setCanPersist] = useState(initialProgress.canPersist);
   const [storageNotice, setStorageNotice] = useState(initialProgress.message);
@@ -152,6 +153,27 @@ export default function RStanLearningApp() {
     });
   }, []);
 
+  const toggleDrill = useCallback((lid, itemId, checked) => {
+    setProgress((prev) => {
+      const lesson = LESSONS.find((item) => item.id === lid);
+      const orderedIds = lesson?.practiceLadder?.steps.map((step) => step.id) || [];
+      const itemIndex = orderedIds.indexOf(itemId);
+      if (itemIndex < 0) return prev;
+
+      const current = new Set(prev.drill[lid] || []);
+      if (checked) {
+        current.add(itemId);
+      } else {
+        orderedIds.slice(itemIndex).forEach((id) => current.delete(id));
+      }
+      const nextItems = orderedIds.filter((id) => current.has(id));
+      const nextDrill = { ...prev.drill };
+      if (nextItems.length > 0) nextDrill[lid] = nextItems;
+      else delete nextDrill[lid];
+      return { ...prev, drill: nextDrill };
+    });
+  }, []);
+
   const reset = () => {
     const cleared = clearProgress();
     setProgress(emptyProgress());
@@ -190,9 +212,11 @@ export default function RStanLearningApp() {
         doneSet={new Set(progress.done[lesson.id] || [])}
         firstSet={new Set(progress.first[lesson.id] || [])}
         missedSet={new Set(progress.missed[lesson.id] || [])}
+        drillSet={new Set(progress.drill[lesson.id] || [])}
         practiceSet={new Set(progress.practice[lesson.id] || [])}
         onMiss={(i) => miss(lesson.id, i)}
         onSolve={(i) => solve(lesson.id, i)}
+        onDrill={(itemId, checked) => toggleDrill(lesson.id, itemId, checked)}
         onPractice={(itemId, checked) => togglePractice(lesson.id, itemId, checked)}
         onHome={() => navigate({ name: "home" })}
         hasNext={nextView != null}

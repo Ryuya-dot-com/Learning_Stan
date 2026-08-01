@@ -10,7 +10,7 @@
 2. Rの`stan_data`とStanの`data`ブロックを名前・型・長さで対応付ける。
 3. 6つのブロックが、いつ、何のために実行されるか説明する。
 4. 単回帰の事前分布と尤度をコードから読み取る。
-5. sampling statementの`~`が、乱数生成ではなく`target`への対数密度加算であると説明する。
+5. distribution statement（旧称sampling statement）の`~`が、乱数生成ではなく`target`への対数密度加算であると説明する。
 6. CmdStanRで構文確認、コンパイル、4 chainのサンプリングを行う。
 7. 推定値を解釈する前に計算診断を確認する。
 8. `y_rep`を観測値と比べ、モデルが再現できない特徴を説明する。
@@ -119,7 +119,7 @@ y ~ normal(mu, sigma);
 target += normal_lpdf(alpha | 0, 2);
 ```
 
-sampling statementの`~`は、パラメータ探索中に何度も評価される対数密度の定義です。乱数生成には`normal_rng`のような`_rng`関数を使い、原則として`generated quantities`など許可された場所に書きます。
+distribution statementの`~`は、パラメータ探索中に何度も評価される対数密度の定義です。旧版資料ではsampling statementと呼ばれます。乱数生成には`normal_rng`のような`_rng`関数を使い、原則として`generated quantities`など許可された場所に書きます。
 
 `y ~ normal(mu, sigma)`はベクトル化されています。意味は次のloopと同じです。
 

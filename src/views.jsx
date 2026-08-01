@@ -382,9 +382,11 @@ function LessonView({
   doneSet,
   firstSet,
   missedSet,
+  drillSet,
   practiceSet,
   onMiss,
   onSolve,
+  onDrill,
   onPractice,
   onHome,
   onNextLesson,
@@ -403,16 +405,21 @@ function LessonView({
   const doneLabel = completionLabel || (lesson.num != null ? `レッスン${lesson.num} 修了!` : `${lesson.title} 修了!`);
   const items = useMemo(() => {
     const arr = lesson.pages.map((p) => ({ kind: "page", p }));
+    if (lesson.practiceLadder) arr.push({ kind: "drill", drill: lesson.practiceLadder });
     lesson.ex.forEach((e, i) => arr.push({ kind: "ex", e, i }));
     if (lesson.practice && includePractice) arr.push({ kind: "practice", practice: lesson.practice });
     arr.push({ kind: "done" });
     return arr;
   }, [lesson, includePractice]);
 
+  const drillTotal = lesson.practiceLadder?.steps.length || 0;
+  const drillCount = drillSet.size;
+  const drillComplete = drillTotal === 0 || drillCount === drillTotal;
+  const exerciseStartIndex = lesson.pages.length + (lesson.practiceLadder ? 1 : 0);
   const practiceTotal = includePractice ? lesson.practice?.items.length || 0 : 0;
   const practiceCount = practiceSet.size;
   const practiceComplete = practiceTotal === 0 || practiceCount === practiceTotal;
-  const practiceIndex = lesson.pages.length + lesson.ex.length;
+  const practiceIndex = exerciseStartIndex + lesson.ex.length;
   const [idx, setIdx] = useState(() =>
     doneSet.size === lesson.ex.length && lesson.practice && includePractice && !practiceComplete ? practiceIndex : 0
   );
@@ -469,6 +476,8 @@ function LessonView({
         aria-label={
           cur.kind === "page"
             ? cur.p.t
+            : cur.kind === "drill"
+              ? cur.drill.title
             : cur.kind === "ex"
               ? `練習問題 ${cur.i + 1}`
               : cur.kind === "practice"
@@ -605,6 +614,73 @@ function LessonView({
           </div>
         )}
 
+        {cur.kind === "drill" && (
+          <div>
+            <div className="mb-2 text-xs font-bold tracking-widest" style={{ color: C.accentDeep, fontFamily: MONO }}>
+              段階練習 {drillCount} / {drillTotal}
+            </div>
+            <h2 className="mb-3 text-xl font-bold" style={{ color: C.ink }}>
+              {cur.drill.title}
+            </h2>
+            <p className="mb-3 text-sm leading-7" style={{ color: C.body }}>
+              <T>{cur.drill.intro}</T>
+            </p>
+            <p className="mb-5 rounded-lg px-3 py-2 text-xs leading-5" style={{ color: C.sub, background: C.track }}>
+              ここは練習の自己記録です。チェックだけでは「理解済み」になりません。次の問題で、例を見ずに確かめます。
+            </p>
+            <fieldset className="flex flex-col gap-3">
+              <legend className="sr-only">4段階の反復練習</legend>
+              {cur.drill.steps.map((step, index) => {
+                const inputId = `drill-${lesson.id}-${step.id}`;
+                const checked = drillSet.has(step.id);
+                const unlocked = index === 0 || drillSet.has(cur.drill.steps[index - 1].id);
+                return (
+                  <div
+                    key={step.id}
+                    className="rounded-xl p-4"
+                    style={{
+                      background: checked ? C.okSoft : unlocked ? "#FFFFFF" : C.track,
+                      border: `1.5px solid ${checked ? C.ok : C.line}`,
+                      opacity: unlocked ? 1 : 0.68,
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        id={inputId}
+                        type="checkbox"
+                        checked={checked}
+                        disabled={!unlocked}
+                        onChange={(event) => onDrill(step.id, event.target.checked)}
+                        className="mt-1 h-5 w-5 shrink-0 accent-current disabled:cursor-not-allowed"
+                        style={{ color: C.okText }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <label htmlFor={inputId} className="cursor-pointer text-sm font-bold leading-6" style={{ color: C.ink }}>
+                          {step.label}
+                        </label>
+                        <p className="mt-1 text-xs leading-5" style={{ color: C.sub }}>
+                          {step.support}
+                        </p>
+                        <p className="mt-3 text-sm leading-6" style={{ color: C.body }}>
+                          <T>{step.task}</T>
+                        </p>
+                        <p className="mt-2 text-xs leading-5" style={{ color: C.sub }}>
+                          完了の目安: <T>{step.criterion}</T>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </fieldset>
+            <div role="status" aria-live="polite" className="mt-4 text-sm font-bold" style={{ color: drillComplete ? C.okText : C.sub }}>
+              {drillComplete
+                ? "4段階の練習が完了しました。次は、例を見ずに理解問題へ進みます。"
+                : `あと ${drillTotal - drillCount} 段階です。上から順に実行してください。`}
+            </div>
+          </div>
+        )}
+
         {cur.kind === "practice" && (
           <div>
             <div className="mb-2 text-xs font-bold tracking-widest" style={{ color: C.stan, fontFamily: MONO }}>
@@ -704,7 +780,7 @@ function LessonView({
                   {lesson.ex.map(
                     (e, i) =>
                       !doneSet.has(i) && (
-                        <Btn key={i} kind="ghost" onClick={() => setIdx(lesson.pages.length + i)}>
+                        <Btn key={i} kind="ghost" onClick={() => setIdx(exerciseStartIndex + i)}>
                           練習問題 {i + 1} にもどる
                         </Btn>
                       )
@@ -724,8 +800,12 @@ function LessonView({
           ← 前へ
         </Btn>
         {cur.kind !== "done" && (
-          <Btn onClick={() => setIdx(idx + 1)}>
-            {items[idx + 1] && items[idx + 1].kind === "done" ? "まとめへ" : "次へ →"}
+          <Btn onClick={() => setIdx(idx + 1)} disabled={cur.kind === "drill" && !drillComplete}>
+            {cur.kind === "drill" && !drillComplete
+              ? "4段階を上から実行"
+              : items[idx + 1] && items[idx + 1].kind === "done"
+                ? "まとめへ"
+                : "次へ →"}
           </Btn>
         )}
       </div>
@@ -914,10 +994,11 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
 
       <section aria-labelledby="orientation-title" className="mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
         <h2 id="orientation-title" className="text-base font-bold" style={{ color: C.ink }}>最初に知っておくこと</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
             ["対象", "Rを初めて学ぶ人"],
             ["最初の体験", "5〜10分・準備不要"],
+            ["練習の順番", "まねる→変える→見ずに作る→使う"],
             ["公開範囲", "R基礎〜データ操作"],
           ].map(([label, value]) => (
             <div key={label} className="rounded-xl p-3" style={{ background: C.accentSoft }}>
