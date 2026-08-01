@@ -9,6 +9,25 @@ required <- c(
   rmarkdown = "2.31"
 )
 
+rspm_repo <- Sys.getenv("RSPM", unset = "")
+configured_repos <- getOption("repos")
+configured_cran <- unname(configured_repos["CRAN"])
+
+if (nzchar(rspm_repo)) {
+  repositories <- c(CRAN = rspm_repo)
+} else if (
+  length(configured_cran) == 1L &&
+    !is.na(configured_cran) &&
+    nzchar(configured_cran) &&
+    configured_cran != "@CRAN@"
+) {
+  repositories <- configured_repos
+} else {
+  repositories <- c(CRAN = "https://cloud.r-project.org")
+}
+
+message("Using R package repository: ", repositories[["CRAN"]])
+
 needs_install <- vapply(
   names(required),
   function(package) {
@@ -21,7 +40,7 @@ needs_install <- vapply(
 if (any(needs_install)) {
   install.packages(
     names(required)[needs_install],
-    repos = "https://cloud.r-project.org"
+    repos = repositories
   )
 }
 
