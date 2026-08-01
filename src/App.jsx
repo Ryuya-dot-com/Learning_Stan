@@ -4,9 +4,10 @@ import { LessonView, FoundationCheck, Home, CheatSheet, Sidebar } from "./views.
 import { LESSONS } from "./data/lessons/index.js";
 import {
   FOUNDATION_LESSON_ID,
-  LEARNING_LESSON_IDS,
+  FOUNDATION_PREREQUISITE_IDS,
   getLessonPathMeta,
   isLastLearningLesson,
+  lessonLeadsToFoundation,
   lessonIsUnderstood,
   nextLessonInPath,
 } from "./learningPath.js";
@@ -176,8 +177,10 @@ export default function RStanLearningApp() {
     const next = nextLessonOf(lesson);
     const nextView = next
       ? { name: "lesson", id: next.id }
-      : isLastLearningLesson(lesson)
+      : lessonLeadsToFoundation(lesson)
         ? { name: "foundation" }
+        : isLastLearningLesson(lesson)
+          ? { name: "home" }
         : null;
     const pathMeta = getLessonPathMeta(lesson);
     body = (
@@ -197,7 +200,15 @@ export default function RStanLearningApp() {
         onCheat={() => navigate({ name: "cheat" })}
         pathLabel={pathMeta?.eyebrow}
         completionLabel={pathMeta ? `${pathMeta.eyebrow} 修了!` : undefined}
-        nextLabel={nextView?.name === "foundation" ? "Foundation Checkへすすむ" : "次の段階へすすむ"}
+        caseStudy={pathMeta?.caseStudy}
+        nextLabel={
+          nextView?.name === "foundation"
+            ? "Foundation Checkへすすむ"
+            : nextView?.name === "home"
+              ? "STEP 1の成果を確認する"
+              : "次の段階へすすむ"
+        }
+        resources={pathMeta?.resources || []}
         includePractice={lesson.id !== FOUNDATION_LESSON_ID}
       />
     );
@@ -211,7 +222,8 @@ export default function RStanLearningApp() {
         onHome={() => navigate({ name: "home" })}
         onReviewSetup={() => navigate({ name: "lesson", id: FOUNDATION_LESSON_ID })}
         onCheat={() => navigate({ name: "cheat" })}
-        ready={LEARNING_LESSON_IDS.every((id) => lessonIsUnderstood(progress, id))}
+        onContinue={() => navigate({ name: "lesson", id: "l11" })}
+        ready={FOUNDATION_PREREQUISITE_IDS.every((id) => lessonIsUnderstood(progress, id))}
       />
     );
   } else if (view.name === "cheat") {

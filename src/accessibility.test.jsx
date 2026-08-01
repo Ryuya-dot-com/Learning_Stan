@@ -33,6 +33,8 @@ describe("主要画面のアクセシビリティ", () => {
   it.each([
     ["ホーム", "#/"],
     ["レッスン", "#/lesson/l1"],
+    ["STEP 1の最初", "#/lesson/l11"],
+    ["STEP 1の成果物確認", "#/lesson/l16"],
     ["チートシート", "#/cheat"],
   ])("%sに重大な自動検出違反がない", async (_name, hash) => {
     window.history.replaceState(null, "", hash);

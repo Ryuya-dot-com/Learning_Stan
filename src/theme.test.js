@@ -98,6 +98,9 @@ describe("配色定義", () => {
       ["alertText / alertSoft", C.alertText, C.alertSoft],
       ["warnText / warnSoft", C.warnText, C.warnSoft],
       ["warnBody / warnSoft", C.warnBody, C.warnSoft],
+      ["caseText / caseSoft", C.caseText, C.caseSoft],
+      ["caseText / white", C.caseText, WHITE],
+      ["sub / caseSoft", C.sub, C.caseSoft],
       ["stan / white", C.stan, WHITE],
       ["dim / night", C.dim, C.night],
       ["white / accent", WHITE, C.accent],
@@ -117,6 +120,7 @@ describe("配色定義", () => {
       ["focus / okSoft", C.accentDeep, C.okSoft],
       ["focus / alertSoft", C.accentDeep, C.alertSoft],
       ["focus / warnSoft", C.accentDeep, C.warnSoft],
+      ["focus / caseSoft", C.accentDeep, C.caseSoft],
     ], 3);
     expect(GLOBAL_CSS).toContain(`color: ${C.sub}`);
     expect(GLOBAL_CSS).toContain(`outline: 3px solid ${C.accentDeep}`);

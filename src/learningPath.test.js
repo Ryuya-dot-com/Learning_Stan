@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import { LESSONS } from "./data/lessons/index.js";
 import {
   FOUNDATION_LESSON_ID,
+  FOUNDATION_PREREQUISITE_IDS,
   JOURNEY_STAGES,
   LEARNING_LESSON_IDS,
   foundationIsComplete,
   getJourneyState,
   getLessonPathMeta,
+  lessonPracticeIsComplete,
   nextLessonInPath,
 } from "./learningPath.js";
 
@@ -20,8 +22,8 @@ function understood(ids) {
 }
 
 describe("初心者向け学習パス", () => {
-  it("公開中の番号付きレッスンを、体験→準備→R基礎の順で一度ずつ扱う", () => {
-    expect(LEARNING_LESSON_IDS).toEqual(["l1", "l10", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9"]);
+  it("公開中の番号付きレッスンを、体験→準備→R基礎→データ操作の順で一度ずつ扱う", () => {
+    expect(LEARNING_LESSON_IDS).toEqual(["l1", "l10", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l11", "l12", "l13", "l14", "l15", "l16"]);
     expect([...LEARNING_LESSON_IDS].sort()).toEqual(
       LESSONS.filter((lesson) => lesson.num != null).map((lesson) => lesson.id).sort()
     );
@@ -47,7 +49,7 @@ describe("初心者向け学習パス", () => {
   });
 
   it("全理解問題の後だけFoundation Checkを次の行動として示す", () => {
-    const allUnderstood = { ...empty, done: understood(LEARNING_LESSON_IDS) };
+    const allUnderstood = { ...empty, done: understood(FOUNDATION_PREREQUISITE_IDS) };
     expect(getJourneyState(allUnderstood)).toMatchObject({
       stage: { id: "foundation" },
       targetView: { name: "foundation" },
@@ -55,21 +57,105 @@ describe("初心者向け学習パス", () => {
     expect(nextLessonInPath(LESSONS.find((lesson) => lesson.id === "l9"))).toBeNull();
   });
 
-  it("実機確認5項目を満たすと公開中トラックを修了する", () => {
-    const practiceIds = LESSONS.find((lesson) => lesson.id === FOUNDATION_LESSON_ID).practice.items.map((item) => item.id);
+  it("Foundation後はSTEP 1へ進み、STEP 1成果物まで満たすと公開中トラックを修了する", () => {
+    const foundationPractice = LESSONS.find((lesson) => lesson.id === FOUNDATION_LESSON_ID).practice.items.map((item) => item.id);
+    const dataPractice = LESSONS.find((lesson) => lesson.id === "l16").practice.items.map((item) => item.id);
+    const afterFoundation = {
+      ...empty,
+      done: understood(FOUNDATION_PREREQUISITE_IDS),
+      practice: { [FOUNDATION_LESSON_ID]: foundationPractice },
+    };
+    expect(getJourneyState(afterFoundation).targetView).toEqual({ name: "lesson", id: "l11" });
+
     const progress = {
       ...empty,
       done: understood(LEARNING_LESSON_IDS),
-      practice: { [FOUNDATION_LESSON_ID]: practiceIds },
+      practice: { [FOUNDATION_LESSON_ID]: foundationPractice, l16: dataPractice },
     };
     expect(foundationIsComplete(progress)).toBe(true);
+    expect(lessonPracticeIsComplete(progress, "l16")).toBe(true);
     expect(getJourneyState(progress).complete).toBe(true);
-    expect(JOURNEY_STAGES).toHaveLength(4);
+    expect(JOURNEY_STAGES).toHaveLength(5);
+  });
+
+  it("L16の理解問題だけ終えても成果物チェックが残っていればL16を案内する", () => {
+    const foundationPractice = LESSONS.find((lesson) => lesson.id === FOUNDATION_LESSON_ID).practice.items.map((item) => item.id);
+    const progress = {
+      ...empty,
+      done: understood(LEARNING_LESSON_IDS),
+      practice: { [FOUNDATION_LESSON_ID]: foundationPractice },
+    };
+
+    expect(getJourneyState(progress)).toMatchObject({
+      stage: { id: "data" },
+      targetView: { name: "lesson", id: "l16" },
+    });
   });
 
   it("画面上のラベルは内部の旧レッスン番号ではなく学習段階を示す", () => {
     expect(getLessonPathMeta("l1").eyebrow).toBe("体験");
     expect(getLessonPathMeta("l10").eyebrow).toBe("STEP 0");
     expect(getLessonPathMeta("l2").eyebrow).toBe("R基礎 1 / 8");
+    expect(getLessonPathMeta("l11").eyebrow).toBe("STEP 1 1 / 6");
+  });
+
+  it("STEP 1の6レッスンを、同じ分析依頼と固有の作業で接続する", () => {
+    const metas = ["l11", "l12", "l13", "l14", "l15", "l16"].map(getLessonPathMeta);
+
+    expect(new Set(metas.map((meta) => meta.caseStudy.title))).toEqual(
+      new Set(["認知課題パイロットの分析依頼"])
+    );
+    expect(new Set(metas.map((meta) => meta.caseStudy.question)).size).toBe(1);
+    expect(new Set(metas.map((meta) => meta.caseStudy.task)).size).toBe(6);
+    expect(metas[0].caseStudy.question).toContain("incong条件の平均反応時間はcong条件より長いか");
+    expect(metas.at(-1).caseStudy.deliverable).toContain("analysis_note.txt");
+    expect(metas.at(-1).caseStudy.caution).toContain("母集団への一般化");
+    expect(getLessonPathMeta("l2").caseStudy).toBeNull();
+  });
+
+  it("STEP 1の冒頭には、そのレッスンで使うダウンロード教材だけを示す", () => {
+    const dataStage = JOURNEY_STAGES.find((stage) => stage.id === "data");
+
+    expect(dataStage.resources).toEqual([
+      { label: "STEP 1一括スターターZIP", path: "downloads/learning-stan-step1.zip", destination: "ZIPを展開してProjectに指定", primary: true },
+      { label: "反応時間CSV", path: "data/rt_data.csv", destination: "data/rt_data.csv" },
+      { label: "参加者CSV", path: "data/participants.csv", destination: "data/participants.csv", lessonIds: ["l12", "l13", "l15", "l16"] },
+      { label: "問題入りCSV", path: "data/rt_data_dirty.csv", destination: "data/rt_data_dirty.csv", lessonIds: ["l13"] },
+      { label: "反応時間TSV", path: "data/rt_data.tsv", destination: "data/rt_data.tsv", lessonIds: ["l12"] },
+      { label: "参加者パイプ区切りTXT", path: "data/participants_pipe.txt", destination: "data/participants_pipe.txt", lessonIds: ["l12"] },
+      { label: "Excel読込サンプル", path: "data/trials.xlsx", destination: "data/trials.xlsx", lessonIds: ["l12"] },
+      { label: "一括Excel 1", path: "data/batches/batch_01.xlsx", destination: "data/batches/batch_01.xlsx", lessonIds: ["l12"] },
+      { label: "一括Excel 2", path: "data/batches/batch_02.xlsx", destination: "data/batches/batch_02.xlsx", lessonIds: ["l12"] },
+      { label: "Quarto演習ノート", path: "notebooks/nb1-data.qmd", destination: "Project直下" },
+      { label: "完成版Rスクリプト", path: "scripts/step1_analysis.R", destination: "Project直下", lessonIds: ["l16"] },
+      { label: "発展: 独立転移課題", path: "challenges/step1-transfer.qmd", destination: "Project直下", lessonIds: ["l16"] },
+    ]);
+
+    expect(getLessonPathMeta("l11").resources.map((resource) => resource.path)).toEqual([
+      "downloads/learning-stan-step1.zip", "data/rt_data.csv", "notebooks/nb1-data.qmd",
+    ]);
+    expect(getLessonPathMeta("l12").resources.map((resource) => resource.path)).toEqual([
+      "downloads/learning-stan-step1.zip",
+      "data/rt_data.csv",
+      "data/participants.csv",
+      "data/rt_data.tsv",
+      "data/participants_pipe.txt",
+      "data/trials.xlsx",
+      "data/batches/batch_01.xlsx",
+      "data/batches/batch_02.xlsx",
+      "notebooks/nb1-data.qmd",
+    ]);
+    expect(getLessonPathMeta("l13").resources.map((resource) => resource.path)).toEqual([
+      "downloads/learning-stan-step1.zip", "data/rt_data.csv", "data/participants.csv", "data/rt_data_dirty.csv", "notebooks/nb1-data.qmd",
+    ]);
+    expect(getLessonPathMeta("l14").resources.map((resource) => resource.path)).toEqual([
+      "downloads/learning-stan-step1.zip", "data/rt_data.csv", "notebooks/nb1-data.qmd",
+    ]);
+    expect(getLessonPathMeta("l15").resources.map((resource) => resource.path)).toEqual([
+      "downloads/learning-stan-step1.zip", "data/rt_data.csv", "data/participants.csv", "notebooks/nb1-data.qmd",
+    ]);
+    expect(getLessonPathMeta("l16").resources.map((resource) => resource.path)).toEqual([
+      "downloads/learning-stan-step1.zip", "data/rt_data.csv", "data/participants.csv", "notebooks/nb1-data.qmd", "scripts/step1_analysis.R", "challenges/step1-transfer.qmd",
+    ]);
   });
 });

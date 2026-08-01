@@ -25,6 +25,10 @@ function memoryStorage(initial = {}) {
 }
 
 describe("進捗保存形式", () => {
+  it("公開中のL1〜L16を識別できる内容版を使う", () => {
+    expect(CONTENT_VERSION).toBe("2026-08-01-l1-l16-v3");
+  });
+
   it("版情報を付けて保存し、同じ内容を読み戻す", () => {
     const storage = memoryStorage();
     const progress = { done: { l1: [0] }, first: { l1: [0] }, missed: {}, practice: { l10: ["console"] } };
@@ -64,6 +68,23 @@ describe("進捗保存形式", () => {
       practice: {},
     });
   });
+
+  it("L1〜L10版の進捗を失わずL1〜L16版へ移行する", () => {
+    const decoded = decodeProgress({
+      schemaVersion: PROGRESS_SCHEMA_VERSION,
+      contentVersion: "2026-08-01-l1-l10-v2",
+      done: { l1: [0] },
+      first: { l1: [0] },
+      missed: {},
+      practice: {},
+    }, lessons);
+
+    expect(decoded.status).toBe("migrated");
+    expect(decoded.canPersist).toBe(true);
+    expect(decoded.progress.done.l1).toEqual([0]);
+    expect(decoded.progress.first.l1).toEqual([0]);
+  });
+
 
   it("未知のレッスン・範囲外・重複を除き、初見正解の不変条件を直す", () => {
     const decoded = decodeProgress(

@@ -392,6 +392,8 @@ function LessonView({
   onCheat,
   pathLabel,
   completionLabel,
+  caseStudy,
+  resources = [],
   nextLabel = "次のレッスンへすすむ",
   includePractice = true,
 }) {
@@ -477,6 +479,58 @@ function LessonView({
         className="rise rounded-2xl bg-white p-5 focus:outline-none sm:p-7"
         style={{ border: "1px solid " + C.line, boxShadow: "0 1px 2px rgba(42,39,51,0.04)" }}
       >
+        {idx === 0 && resources.length > 0 && (
+          <section aria-labelledby={`downloads-${lesson.id}`} className="mb-5 rounded-xl p-4" style={{ background: C.accentSoft, border: `1px solid ${C.accentLine}` }}>
+            <h2 id={`downloads-${lesson.id}`} className="text-sm font-bold" style={{ color: C.ink }}>
+              このレッスンで使うファイル
+            </h2>
+            <p className="mt-1 text-xs leading-5" style={{ color: C.sub }}>
+              初回は一括ZIPを展開すると、必要なフォルダとファイルが揃います。個別に取得する場合は、表示したProject内の保存先へ置いてください。
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {resources.map((resource) => (
+                <a
+                  key={resource.path}
+                  className={`inline-flex min-h-11 min-w-0 flex-col items-start justify-center rounded-lg px-3 py-2 text-left text-xs font-bold ${resource.primary ? "sm:col-span-2 lg:col-span-3" : ""}`}
+                  style={{ background: resource.primary ? C.accentDeep : "#FFFFFF", color: resource.primary ? "#FFFFFF" : C.accentDeep, border: `1px solid ${resource.primary ? C.accentDeep : C.accentLine}` }}
+                  href={import.meta.env.BASE_URL + resource.path}
+                  download
+                >
+                  <span className="break-words">{resource.primary ? "まずはこちら: " : "↓ "}{resource.label}をダウンロード</span>
+                  {resource.destination && (
+                    <span aria-hidden="true" className="mt-1 break-all font-mono text-[10px] font-medium opacity-70">
+                      保存先: {resource.destination}
+                    </span>
+                  )}
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+        {idx === 0 && caseStudy && (
+          <section aria-labelledby={`case-study-${lesson.id}`} className="mb-5 rounded-xl p-4" style={{ background: C.caseSoft, border: `1px solid ${C.caseLine}` }}>
+            <div className="text-[10px] font-bold tracking-widest" style={{ color: C.caseText, fontFamily: MONO }}>
+              STEP 1 ケーススタディ
+            </div>
+            <h2 id={`case-study-${lesson.id}`} className="mt-1 text-base font-bold" style={{ color: C.ink }}>
+              {caseStudy.title}
+            </h2>
+            <p className="mt-2 text-xs leading-5" style={{ color: C.sub }}>{caseStudy.context}</p>
+            <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+              {[
+                ["研究上の問い", caseStudy.question],
+                ["今回の仕事", caseStudy.task],
+                ["最終成果物", caseStudy.deliverable],
+                ["解釈の範囲", caseStudy.caution],
+              ].map(([term, description]) => (
+                <div key={term} className="rounded-lg bg-white p-3" style={{ border: `1px solid ${C.caseLine}` }}>
+                  <dt className="font-bold" style={{ color: C.caseText }}>{term}</dt>
+                  <dd className="mt-1 leading-5" style={{ color: C.ink }}>{description}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
         {cur.kind === "page" && (
           <div>
             <div className="mb-2 text-xs font-bold tracking-widest" style={{ color: C.accentDeep, fontFamily: MONO }}>
@@ -683,7 +737,7 @@ function LessonView({
    Foundation Check
    ============================================================ */
 
-function FoundationCheck({ lesson, practiceSet, onPractice, onHome, onReviewSetup, onCheat, ready }) {
+function FoundationCheck({ lesson, practiceSet, onPractice, onHome, onReviewSetup, onCheat, onContinue, ready }) {
   const practice = lesson.practice;
   const checklistComplete = practice.items.every((item) => practiceSet.has(item.id));
   const complete = ready && checklistComplete;
@@ -706,7 +760,7 @@ function FoundationCheck({ lesson, practiceSet, onPractice, onHome, onReviewSetu
       </div>
 
       <div className="mb-2 text-xs font-bold tracking-widest" style={{ color: C.stan, fontFamily: MONO }}>
-        最終確認
+        R基礎の実機確認
       </div>
       <h1 tabIndex={-1} className="mb-2 text-3xl font-bold tracking-tight focus:outline-none" style={{ color: C.ink }}>
         Foundation Check
@@ -780,14 +834,10 @@ function FoundationCheck({ lesson, practiceSet, onPractice, onHome, onReviewSetu
               RStudioでコードを実行し、保存して、同じ結果を再現する土台ができました。
             </p>
             <div className="mt-5 flex flex-col items-center gap-2">
-              <Btn onClick={onCheat}>学んだR文法を復習する</Btn>
-              <a
-                className="inline-flex min-h-11 items-center text-xs font-bold underline"
-                style={{ color: C.accentDeep }}
-                href={import.meta.env.BASE_URL + "roadmap.html"}
-              >
-                この先の公開予定を見る
-              </a>
+              <Btn onClick={onContinue}>STEP 1へ進む</Btn>
+              <button className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} onClick={onCheat}>
+                学んだR文法を復習する
+              </button>
             </div>
           </div>
         ) : checklistComplete ? (
@@ -826,9 +876,13 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
   const totalEx = LESSONS.reduce((s, l) => s + l.ex.length, 0);
   const doneEx = LESSONS.reduce((s, l) => s + (progress.done[l.id] || []).length, 0);
   const doneLessons = LESSONS.filter((lesson) => lessonIsUnderstood(progress, lesson)).length;
-  const foundationLesson = LESSONS.find((lesson) => lesson.id === FOUNDATION_LESSON_ID);
-  const practiceTotal = foundationLesson.practice.items.length;
-  const practiceCount = (progress.practice?.[FOUNDATION_LESSON_ID] || []).length;
+  const practiceItems = LESSONS.flatMap((lesson) =>
+    (lesson.practice?.items || []).map((item) => ({ lessonId: lesson.id, itemId: item.id }))
+  );
+  const practiceTotal = practiceItems.length;
+  const practiceCount = practiceItems.filter(({ lessonId, itemId }) =>
+    (progress.practice?.[lessonId] || []).includes(itemId)
+  ).length;
   const journey = getJourneyState(progress);
   const pct = Math.round(((doneEx + practiceCount) / (totalEx + practiceTotal)) * 100);
   const dotsFilled = journey.complete ? 3 : Math.min(2, Math.floor((journey.completedStages / JOURNEY_STAGES.length) * 3));
@@ -855,7 +909,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         はじめてのRとStan
       </h1>
       <p className="mb-6 text-sm leading-6" style={{ color: C.sub }}>
-        プログラミング未経験から、研究でRを使うための土台を作ります。現在公開中なのはRの基礎とRStudioの環境構築までで、Stanとベイズ統計は今後の公開予定です。
+        プログラミング未経験から、研究データをRで読み、整え、再現可能な成果物として保存するところまで進みます。ベイズ統計とStanは今後の公開予定です。
       </p>
 
       <section aria-labelledby="orientation-title" className="mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
@@ -864,7 +918,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
           {[
             ["対象", "Rを初めて学ぶ人"],
             ["最初の体験", "5〜10分・準備不要"],
-            ["公開範囲", "R基礎とRStudio"],
+            ["公開範囲", "R基礎〜データ操作"],
           ].map(([label, value]) => (
             <div key={label} className="rounded-xl p-3" style={{ background: C.accentSoft }}>
               <div className="text-xs font-bold" style={{ color: C.accentDeep }}>{label}</div>
@@ -878,12 +932,15 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         {journey.complete ? (
           <>
             <div className="mb-2 flex justify-center sm:justify-start"><TriDots filled={3} size={14} /></div>
-            <h2 id="next-action-title" className="text-xl font-bold" style={{ color: C.okText }}>公開中のR基礎トラックを修了しました</h2>
+            <h2 id="next-action-title" className="text-xl font-bold" style={{ color: C.okText }}>公開中のSTEP 1まで修了しました</h2>
             <p className="mt-2 text-sm leading-6" style={{ color: C.okText }}>
-              ここからは、学んだ文法を見直すか、この先の公開予定を確認できます。
+              L11〜L16の理解問題と、再実行・成果物の自己確認を完了しました。演習ノートで一連の手順を復習できます。
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <Btn onClick={onCheat}>学んだR文法を復習する</Btn>
+              <Btn onClick={() => onOpen("l11")}>STEP 1を復習する</Btn>
+              <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + "notebooks/nb1-data.qmd"} download>
+                演習ノートをダウンロード
+              </a>
               <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + "roadmap.html"}>
                 この先の公開予定を見る
               </a>
@@ -899,7 +956,14 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
             <p className="mt-2 text-xs font-bold" style={{ color: C.sub }}>
               目安 {journey.stage.time} ・ {journey.stage.install}
             </p>
-            <div className="mt-4"><Btn onClick={openJourneyTarget}>{journey.cta}</Btn></div>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Btn onClick={openJourneyTarget}>{journey.cta}</Btn>
+              {journey.stage.notebook && (
+                <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + `notebooks/${journey.stage.notebook}`} download>
+                  演習ノートをダウンロード
+                </a>
+              )}
+            </div>
           </>
         )}
       </section>
@@ -959,37 +1023,53 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
           全{LESSONS.length}レッスンを見る
         </summary>
         <div className="flex flex-col gap-6 border-t p-4" style={{ borderColor: C.line }}>
-          {JOURNEY_STAGES.filter((stage) => stage.lessonIds.length > 0).map((stage) => (
-            <div key={stage.id}>
-              <h3 className="mb-2 text-xs font-bold" style={{ color: C.sub }}>{stage.label} / {stage.title}</h3>
-              <div className="flex flex-col gap-2">
-                {stage.lessonIds.map((id) => {
-                  const lesson = LESSONS.find((item) => item.id === id);
-                  const got = (progress.done[lesson.id] || []).length;
-                  const understood = lessonIsUnderstood(progress, lesson);
-                  const badge = getLessonPathMeta(lesson)?.badge;
-                  return (
-                    <button key={lesson.id} onClick={() => onOpen(lesson.id)} className="flex items-center gap-3 rounded-xl p-3 text-left" style={{ background: understood ? C.okSoft : C.paper }}>
-                      <span className="w-9 shrink-0 text-center text-xs font-bold" style={{ color: understood ? C.okText : C.accentDeep, fontFamily: MONO }}>{understood ? "✓" : badge}</span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-bold" style={{ color: C.ink }}>{lesson.title}</span>
-                        <span className="block text-xs" style={{ color: C.sub }}>{lesson.tag}</span>
-                      </span>
-                      <span className="shrink-0 text-xs font-bold" style={{ color: understood ? C.okText : C.faint }}>{understood ? "理解済" : `${got} / ${lesson.ex.length}`}</span>
-                    </button>
-                  );
-                })}
+          {JOURNEY_STAGES.map((stage) => {
+            if (stage.kind === "foundation") {
+              const foundationLesson = LESSONS.find((lesson) => lesson.id === FOUNDATION_LESSON_ID);
+              return (
+                <button key={stage.id} onClick={onFoundation} className="flex items-center gap-3 rounded-xl p-3 text-left" style={{ background: getStageStatus(stage, progress) === "done" ? C.okSoft : C.paper }}>
+                  <span className="w-9 shrink-0 text-center text-xs font-bold" style={{ color: C.stan, fontFamily: MONO }}>確認</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold" style={{ color: C.ink }}>Foundation Check</span>
+                    <span className="block text-xs" style={{ color: C.sub }}>実機で実行・保存・再実行を確認</span>
+                  </span>
+                  <span className="shrink-0 text-xs font-bold" style={{ color: C.faint }}>
+                    {(progress.practice?.[FOUNDATION_LESSON_ID] || []).length} / {foundationLesson.practice.items.length}
+                  </span>
+                </button>
+              );
+            }
+            return (
+              <div key={stage.id}>
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-xs font-bold" style={{ color: C.sub }}>{stage.label} / {stage.title}</h3>
+                  {stage.notebook && (
+                    <a className="text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + `notebooks/${stage.notebook}`} download>
+                      演習ノート
+                    </a>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  {stage.lessonIds.map((id) => {
+                    const lesson = LESSONS.find((item) => item.id === id);
+                    const got = (progress.done[lesson.id] || []).length;
+                    const understood = lessonIsUnderstood(progress, lesson);
+                    const badge = getLessonPathMeta(lesson)?.badge;
+                    return (
+                      <button key={lesson.id} onClick={() => onOpen(lesson.id)} className="flex items-center gap-3 rounded-xl p-3 text-left" style={{ background: understood ? C.okSoft : C.paper }}>
+                        <span className="w-9 shrink-0 text-center text-xs font-bold" style={{ color: understood ? C.okText : C.accentDeep, fontFamily: MONO }}>{understood ? "✓" : badge}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-bold" style={{ color: C.ink }}>{lesson.title}</span>
+                          <span className="block text-xs" style={{ color: C.sub }}>{lesson.tag}</span>
+                        </span>
+                        <span className="shrink-0 text-xs font-bold" style={{ color: understood ? C.okText : C.faint }}>{understood ? "理解済" : `${got} / ${lesson.ex.length}`}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-          <button onClick={onFoundation} className="flex items-center gap-3 rounded-xl p-3 text-left" style={{ background: getStageStatus(JOURNEY_STAGES.at(-1), progress) === "done" ? C.okSoft : C.paper }}>
-            <span className="w-9 shrink-0 text-center text-xs font-bold" style={{ color: C.stan, fontFamily: MONO }}>確認</span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-bold" style={{ color: C.ink }}>Foundation Check</span>
-              <span className="block text-xs" style={{ color: C.sub }}>実機で実行・保存・再実行を確認</span>
-            </span>
-            <span className="shrink-0 text-xs font-bold" style={{ color: C.faint }}>{practiceCount} / {practiceTotal}</span>
-          </button>
+            );
+          })}
         </div>
       </details>
 

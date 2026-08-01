@@ -32,6 +32,11 @@ const C = {
   warnText: "#82590F", // 見出し・リンク。warnSoft 上 5.83:1
   warnBody: "#7A5A1A", // ヒント本文。warnSoft 上 5.97:1
 
+  // STEP 1 ケーススタディ（依頼・研究上の問い・解釈範囲をまとめる）
+  caseSoft: "#FFF8E8",
+  caseLine: "#E7CC8A", // 枠(装飾)
+  caseText: "#7A5410", // 見出し。caseSoft 上 6.30:1
+
   // Stan編の識別色（3色ドットの3つ目）
   stan: "#7C1128",
 

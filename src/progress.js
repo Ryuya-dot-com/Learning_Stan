@@ -3,7 +3,7 @@ import { LESSONS } from "./data/lessons/index.js";
 export const PROGRESS_STORAGE_KEY = "learning-stan.progress";
 export const PROGRESS_SCHEMA_VERSION = 2;
 // レッスンID、問題の順序・意味、進捗解釈を変えるときに更新し、decodeProgressで移行する。
-export const CONTENT_VERSION = "2026-08-01-l1-l10-v2";
+export const CONTENT_VERSION = "2026-08-01-l1-l16-v3";
 
 export function emptyProgress() {
   return { done: {}, first: {}, missed: {}, practice: {} };

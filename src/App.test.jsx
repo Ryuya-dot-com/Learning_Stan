@@ -222,6 +222,46 @@ describe("レッスン遷移", () => {
     expect(document.title).toContain("変数");
   });
 
+  it("STEP 1レッスンの冒頭から共通教材を直接ダウンロードできる", () => {
+    window.history.replaceState(null, "", "#/lesson/l12");
+    render(<App />);
+
+    expect(screen.getByText("初回は一括ZIPを展開すると、必要なフォルダとファイルが揃います。個別に取得する場合は、表示したProject内の保存先へ置いてください。")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "まずはこちら: STEP 1一括スターターZIPをダウンロード" }).getAttribute("href")).toContain("/downloads/learning-stan-step1.zip");
+    expect(screen.getByRole("link", { name: "↓ 反応時間CSVをダウンロード" }).getAttribute("href")).toContain("/data/rt_data.csv");
+    expect(screen.getByRole("link", { name: "↓ 参加者CSVをダウンロード" }).getAttribute("href")).toContain("/data/participants.csv");
+    expect(screen.getByRole("link", { name: "↓ 反応時間TSVをダウンロード" }).getAttribute("href")).toContain("/data/rt_data.tsv");
+    expect(screen.getByRole("link", { name: "↓ 参加者パイプ区切りTXTをダウンロード" }).getAttribute("href")).toContain("/data/participants_pipe.txt");
+    expect(screen.getByRole("link", { name: "↓ Excel読込サンプルをダウンロード" }).getAttribute("href")).toContain("/data/trials.xlsx");
+    expect(screen.getByRole("link", { name: "↓ 一括Excel 1をダウンロード" }).getAttribute("href")).toContain("/data/batches/batch_01.xlsx");
+    expect(screen.getByRole("link", { name: "↓ 一括Excel 2をダウンロード" }).getAttribute("href")).toContain("/data/batches/batch_02.xlsx");
+    expect(screen.getByRole("link", { name: "↓ Quarto演習ノートをダウンロード" }).getAttribute("href")).toContain("/notebooks/nb1-data.qmd");
+    expect(screen.getByRole("heading", { name: "認知課題パイロットの分析依頼" })).toBeTruthy();
+    expect(screen.getByText("研究上の問い")).toBeTruthy();
+    expect(screen.getByText("届いたCSV・区切りテキスト・Excelが、想定した行数・列名・列型で読めたか確かめます。")).toBeTruthy();
+    expect(screen.getByText("output/condition_means.csv と output/analysis_note.txt")).toBeTruthy();
+  });
+
+  it("L13では品質チェックに必要な教材だけを先に示す", () => {
+    window.history.replaceState(null, "", "#/lesson/l13");
+    render(<App />);
+
+    expect(screen.getByRole("link", { name: "↓ 問題入りCSVをダウンロード" }).getAttribute("href")).toContain("/data/rt_data_dirty.csv");
+    expect(screen.getByRole("link", { name: "↓ 参加者CSVをダウンロード" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "↓ 反応時間CSVをダウンロード" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "↓ Excel読込サンプルをダウンロード" })).toBeNull();
+  });
+
+  it("L16では完成版RスクリプトをProject直下へダウンロードできる", () => {
+    window.history.replaceState(null, "", "#/lesson/l16");
+    render(<App />);
+
+    const script = screen.getByRole("link", { name: "↓ 完成版Rスクリプトをダウンロード" });
+    expect(script.getAttribute("href")).toContain("/scripts/step1_analysis.R");
+    expect(script.textContent).toContain("保存先: Project直下");
+    expect(screen.getByRole("link", { name: "↓ 発展: 独立転移課題をダウンロード" }).getAttribute("href")).toContain("/challenges/step1-transfer.qmd");
+  });
+
   it("未知のURLを正規のホームURLへ戻す", async () => {
     window.history.replaceState(null, "", "#/lesson/not-found");
     render(<App />);
@@ -298,23 +338,25 @@ describe("初心者向けホーム導線", () => {
     expect(screen.queryByText("先にR基礎まで終えるのがおすすめです")).toBeNull();
   });
 
-  it("全修了後は未公開STEP 1ではなく復習と公開予定だけを示す", () => {
-    const practice = LESSONS.find((lesson) => lesson.id === "l10").practice.items.map((item) => item.id);
+  it("STEP 1の成果物確認まで終えると復習と演習ノートを示す", () => {
+    const foundationPractice = LESSONS.find((lesson) => lesson.id === "l10").practice.items.map((item) => item.id);
+    const dataPractice = LESSONS.find((lesson) => lesson.id === "l16").practice.items.map((item) => item.id);
     window.localStorage.setItem(
       "learning-stan.progress",
       serializeProgress({
         done: completedExercises(LESSONS.map((lesson) => lesson.id)),
         first: {},
         missed: {},
-        practice: { l10: practice },
+        practice: { l10: foundationPractice, l16: dataPractice },
       })
     );
 
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: "公開中のR基礎トラックを修了しました" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "学んだR文法を復習する" })).toBeTruthy();
-    expect(screen.queryByText(/次はSTEP 1/)).toBeNull();
+    expect(screen.getByRole("heading", { name: "公開中のSTEP 1まで修了しました" })).toBeTruthy();
+    expect(screen.getByText("L11〜L16の理解問題と、再実行・成果物の自己確認を完了しました。演習ノートで一連の手順を復習できます。")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "STEP 1を復習する" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "演習ノートをダウンロード" })).toBeTruthy();
   });
 });
 
