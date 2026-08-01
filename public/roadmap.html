@@ -218,7 +218,7 @@ html.js .reveal.in{opacity:1; transform:none}
     <p class="eyebrow">学習アプリ「はじめてのRとStan」構想</p>
     <h1>学習ロードマップ</h1>
     <p class="lede">Rの文法の土台から、tidyverseによるデータ操作・ggplot2による可視化・モンテカルロ・シミュレーション、そしてベイズ推定の考え方へ。前半はbrmsで「ベイズで分析できる」状態をつくり、後半は生のStanコードでその中身を開きます。事前分布の選び方から事後分布の要約(HDI・ROPE・pd)、モデル比較(LOO)、論文での報告まで——「ベイズで考え、ベイズで語る」を一本道で積み上げるロードマップです。</p>
-    <p class="meta"><span>体験→STEP 0→R基礎→最終確認を公開中</span><span class="sep">/</span><span>続編 27レッスン+ブリッジ3本・補講5本(構想)</span><span class="sep">/</span><span>対象:プログラミング未経験〜</span></p>
+    <p class="meta"><span>体験→STEP 0→R基礎→基礎確認→STEP 1を公開中</span><span class="sep">/</span><span>続編 21レッスン+ブリッジ3本・補講5本(構想)</span><span class="sep">/</span><span>対象:プログラミング未経験〜</span></p>
   </header>
 
   <div class="route">
@@ -283,8 +283,8 @@ html.js .reveal.in{opacity:1; transform:none}
     <section class="phase reveal" style="--pc:#276DC3; --ps:#E9F0FA;">
       <span class="node" aria-hidden="true"></span>
       <div>
-        <span class="pstep">STEP 1 / データ操作編</span>
-        <h2>レッスン 11–16 <span class="psub">実データを読み、整える</span></h2>
+        <span class="pstep">STEP 1 / データ操作編・公開中</span>
+        <h2>レッスン 11–16 <span class="psub">表形式データを読み、整える</span></h2>
         <p class="ptag">研究データ分析でいちばん時間を使う「前処理」の道具を、tidyverseでそろえるシリーズです。</p>
       </div>
       <div class="lessons">
@@ -296,15 +296,15 @@ html.js .reveal.in{opacity:1; transform:none}
         </article>
         <article class="lesson">
           <span class="lnum">L12</span>
-          <h3>CSVを読む</h3>
-          <p>read_csv によるファイル読み込みと列型の確認。Excelファイル(readxl)や、日本語データにつきものの文字コード指定も最初にケアします。</p>
-          <div class="chips"><code>read_csv</code><code>read_excel</code><code>locale</code></div>
+          <h3>CSV・テキスト・Excelを読む</h3>
+          <p>CSV・TSV・任意区切りテキストとExcelを、型・欠損・シート・範囲を確認して読み込みます。複数Excelは列契約を検査し、元ファイル名を残して一括結合します。</p>
+          <div class="chips"><code>read_csv</code><code>read_tsv</code><code>read_excel</code><code>list_rbind</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L13</span>
-          <h3>行と列をあやつる</h3>
-          <p>行の絞り込み・列の選択・新しい列の追加・並べ替え。前処理の4大動詞をそろえます。</p>
-          <div class="chips"><code>filter</code><code>select</code><code>mutate</code><code>arrange</code></div>
+          <h3>行・列操作と品質チェック</h3>
+          <p>前処理の4大動詞に加え、重複・値域・カテゴリ・ID対応・欠損を検査。rawを保ち、問題記録とprocessedを分けます。</p>
+          <div class="chips"><code>case_when</code><code>between</code><code>anti_join</code><code>stopifnot</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L14</span>
@@ -321,9 +321,12 @@ html.js .reveal.in{opacity:1; transform:none}
         <article class="lesson">
           <span class="lnum">L16</span>
           <h3>縦横変換</h3>
-          <p>SPSS的な横持ちと解析用の縦持ちを自在に行き来。複数ファイルの一括読み込みもここで自動化します。</p>
-          <div class="chips"><code>pivot_longer</code><code>pivot_wider</code></div>
+          <p>横持ちと解析用の縦持ちを相互変換し、要約表をCSV・TSVへ保存・再読込。Excel向けCSVと本当のxlsxの違いも確認します。</p>
+          <div class="chips"><code>pivot_longer</code><code>pivot_wider</code><code>write_csv</code><code>write_tsv</code></div>
         </article>
+      </div>
+      <div class="base-card">
+        <p><strong>ケーススタディ:</strong> 認知課題のパイロットデータについて、正答試行のincong−cong差を参加者ごとに記述し、一般化しない限界を添えて納品します。<a href="downloads/learning-stan-step1.zip" download>一括スターターZIP</a>を展開すると、CSV 5件（中心課題3件・転移課題2件）・TSV 1件・区切りTXT 1件・Excel 3件、<a href="notebooks/nb1-data.qmd" download>Quarto演習ノート NB1</a>、<a href="scripts/step1_analysis.R" download>完成版Rスクリプト</a>が教材と同じProject構成で揃います。品質検査、単一Excelと複数Excelの読み込み、要約CSVと結果メモの再生成までを一周した後、完成コードを載せない<a href="challenges/step1-transfer.qmd" download>独立転移課題</a>で、列名と条件名が異なる注意切替データへ同じ判断を移せるか確認します。</p>
       </div>
     </section>
 
@@ -628,7 +631,7 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
       <div class="goal-card">
         <span class="dots" aria-hidden="true"><i class="b"></i><i class="p"></i><i class="r"></i></span>
         <h2>ゴール:自分のデータを、ベイズで語れるように。</h2>
-        <p>どの回も「生成 → 推定 → 復元」の一本線。brmsで意味をつかみ、Stanで中身を開く二段構えです。アプリ(1画面1トピック・即時フィードバック)で読んで理解し、STEP 1〜6に1本ずつ用意するQuartoノートブック(計6本)の実データ演習で手を動かして仕上げます。</p>
+        <p>どの回も「生成 → 推定 → 復元」の一本線。brmsで意味をつかみ、Stanで中身を開く二段構えです。アプリ(1画面1トピック・即時フィードバック)で読んで理解し、STEP 1〜6に1本ずつ用意するQuartoノートブック(計6本)の研究データ形式の演習で手を動かして仕上げます。</p>
       </div>
     </section>
 
@@ -637,7 +640,7 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
   <footer class="foot reveal">
     <span class="dots" aria-hidden="true"><i class="b"></i><i class="p"></i><i class="r"></i></span>
     <p>はじめてのRとStan — 研究室のためのベイズ統計入門</p>
-    <p class="provenance">記載のパッケージ・関数・既定値は、2026-07-31に公式ドキュメント・CRANで実在確認済み(R 4.6.1 / Stan 2.39.0 / brms 2.23.0 / bayestestR 0.18.1 / sjPlot 2.9.0 時点)。コード例の実行結果は実測値です。典拠の一覧は <a href="https://github.com/Ryuya-dot-com/Learning_Stan/blob/main/SOURCES.md">SOURCES.md</a> にまとめています。</p>
+    <p class="provenance">記載のパッケージ・関数・既定値は、2026-08-01に公式ドキュメント・CRANで実在確認済み(R 4.6.1 / Stan 2.39.0 / brms 2.23.0 / bayestestR 0.18.1 / sjPlot 2.9.0 時点)。コード例の実行結果は実測値です。典拠の一覧は <a href="https://github.com/Ryuya-dot-com/Learning_Stan/blob/main/SOURCES.md">SOURCES.md</a> にまとめています。</p>
     <p class="backlink" style="margin-top:8px"><a href="./">← アプリにもどる</a></p>
   </footer>
 
