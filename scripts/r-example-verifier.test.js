@@ -14,6 +14,8 @@ describe("Rコード例の分類", () => {
 
   it("manualには理由を必須とする", () => {
     expect(() => classifyBlock({ code: "> 1 + 1", verify: { mode: "manual" } }, "sample")).toThrow(/reason/);
+    expect(() => classifyBlock({ code: "1 + 1", verify: { mode: "manual", reason: "画面確認", parse: "yes" } }, "sample")).toThrow(/parse/);
+    expect(classifyBlock({ code: "1 + 1", verify: { mode: "manual", reason: "画面確認", parse: true } }, "sample")).toEqual({ mode: "manual", reason: "画面確認", parse: true });
   });
 
   it("教材内の全コード例が分類されている", async () => {

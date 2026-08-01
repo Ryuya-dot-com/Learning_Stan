@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import {
+  cpSync,
   existsSync,
   mkdtempSync,
   readdirSync,
@@ -104,6 +105,9 @@ function classifyBlock(block, id) {
   if (verify.mode === "manual") {
     if (typeof verify.reason !== "string" || !verify.reason.trim()) {
       throw new Error(`${id}: manual例にはreasonが必要です`);
+    }
+    if (verify.parse != null && typeof verify.parse !== "boolean") {
+      throw new Error(`${id}: manual例のparseはbooleanで指定してください`);
     }
   } else if (verify.mode === "stochastic") {
     if (!Array.isArray(verify.ranges) || verify.ranges.length === 0) {
@@ -237,6 +241,7 @@ function runExample(rscript, example, tempDir) {
   const rPath = path.replace(/\\/g, "/").replace(/'/g, "\\'");
   const expression = `source('${rPath}', echo = FALSE, print.eval = TRUE, encoding = 'UTF-8')`;
   const result = spawnSync(rscript, ["--vanilla", "-e", expression], {
+    cwd: tempDir,
     encoding: "utf8",
     windowsHide: true,
     env: { ...process.env, LANGUAGE: "en" },
@@ -246,6 +251,27 @@ function runExample(rscript, example, tempDir) {
     return { ok: false, message: normalizeOutput(result.stderr || result.stdout) };
   }
   return compareOutput(example, result.stdout);
+}
+
+function parseExample(rscript, example) {
+  const result = spawnSync(
+    rscript,
+    ["--vanilla", "-e", "parse(text = Sys.getenv('LEARNING_STAN_R_CODE'), keep.source = FALSE)"],
+    {
+      encoding: "utf8",
+      windowsHide: true,
+      env: {
+        ...process.env,
+        LANGUAGE: "en",
+        LEARNING_STAN_R_CODE: [example.setup, example.code].filter(Boolean).join("\n\n"),
+      },
+    }
+  );
+  if (result.error) return { ok: false, message: result.error.message };
+  if (result.status !== 0) {
+    return { ok: false, message: normalizeOutput(result.stderr || result.stdout) };
+  }
+  return { ok: true };
 }
 
 async function verifyExamples({
@@ -266,10 +292,24 @@ async function verifyExamples({
   let manual = 0;
 
   try {
+    const publicDataDir = join(rootDir, "public", "data");
+    if (existsSync(publicDataDir)) {
+      cpSync(publicDataDir, join(tempDir, "data"), { recursive: true });
+    }
     for (const example of examples) {
       if (example.verify.mode === "manual") {
         manual += 1;
-        log(`MANUAL ${example.id}: ${example.verify.reason}`);
+        if (example.verify.parse) {
+          const result = parseExample(rscript, example);
+          if (!result.ok) {
+            failures.push({ example, message: result.message });
+            log(`FAIL   ${example.id}: R構文エラー: ${result.message}`);
+            continue;
+          }
+          log(`MANUAL ${example.id} (syntax checked): ${example.verify.reason}`);
+        } else {
+          log(`MANUAL ${example.id}: ${example.verify.reason}`);
+        }
         continue;
       }
       const result = runExample(rscript, example, tempDir);
