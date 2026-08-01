@@ -5,6 +5,7 @@ required <- c(
   tidyr = "1.3.2",
   tibble = "3.3.1",
   purrr = "1.2.2",
+  ggplot2 = "4.0.3",
   knitr = "1.51",
   rmarkdown = "2.31"
 )

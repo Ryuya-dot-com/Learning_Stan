@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "status": "contract-defined",
+  "generator": {
+    "path": "scripts/generate-step2-samples.mjs",
+    "seed": 20260802
+  },
+  "data": {
+    "path": "content/step2/data/expanded_pilot_trials.csv",
+    "sha256": "48d9da10bfad70a5777d537f6f1559a7c5017a017a4769fde4490eab4a4786db",
+    "rows": 960,
+    "participants": 24,
+    "conditions": ["cong", "incong"],
+    "trialsPerParticipantCondition": 20,
+    "correctTrials": {
+      "cong": 453,
+      "incong": 431,
+      "total": 884
+    }
+  },
+  "expected": {
+    "participantConditionRows": 48,
+    "conditionStatistics": [
+      {
+        "condition": "cong",
+        "meanOfParticipantMeans": 499.08804036234375,
+        "medianOfParticipantMeans": 510.7266081871345,
+        "q1": 487.42083333333335,
+        "q3": 536.2171052631579,
+        "iqr": 48.79627192982457
+      },
+      {
+        "condition": "incong",
+        "meanOfParticipantMeans": 568.7107558264534,
+        "medianOfParticipantMeans": 580.421052631579,
+        "q1": 552,
+        "q3": 595.7690058479532,
+        "iqr": 43.76900584795317
+      }
+    ],
+    "participantDifferences": {
+      "rows": 24,
+      "positive": 24,
+      "median": 64.70701754385965,
+      "min": 33.788235294117726,
+      "max": 108.77499999999998
+    },
+    "figures": {
+      "conditionDistributions": {
+        "path": "output/condition_distributions.png",
+        "input": "output/participant_condition_summary.csv",
+        "boxGroups": 2,
+        "pointRows": 48,
+        "jitterSeed": 20260802,
+        "widthIn": 7,
+        "heightIn": 5,
+        "dpi": 300,
+        "widthPx": 2100,
+        "heightPx": 1500,
+        "dataOriginLabel": "Synthetic teaching data."
+      },
+      "participantDifferences": {
+        "path": "output/participant_differences.png",
+        "inputs": [
+          "output/participant_condition_summary.csv",
+          "output/participant_differences.csv"
+        ],
+        "lineGroups": 24,
+        "pointRows": 48,
+        "widthIn": 7,
+        "heightIn": 5,
+        "dpi": 300,
+        "widthPx": 2100,
+        "heightPx": 1500,
+        "dataOriginLabel": "Synthetic teaching data."
+      }
+    },
+    "finalPortfolio": {
+      "entryPoint": "step2_report_and_transfer.R",
+      "analysisScripts": [
+        "step2_descriptive.R",
+        "step2_condition_plot.R",
+        "step2_participant_differences_plot.R"
+      ],
+      "input": "data/expanded_pilot_trials.csv",
+      "outputs": [
+        "output/participant_condition_summary.csv",
+        "output/descriptive_statistics.csv",
+        "output/participant_differences.csv",
+        "output/condition_distributions.png",
+        "output/participant_differences.png",
+        "output/exploratory_note.txt"
+      ],
+      "noteSections": [
+        "データの由来:",
+        "分析対象:",
+        "図の選択理由（条件別分布）:",
+        "図の選択理由（参加者内対応）:",
+        "観察結果:",
+        "解釈の限界:",
+        "再生成手順:"
+      ],
+      "outputCount": 6
+    }
+  },
+  "runtime": {
+    "rVersion": null,
+    "verifiedAt": null
+  }
+}
