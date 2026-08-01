@@ -46,7 +46,22 @@
 | `write_csv()`・`write_tsv()`・`write_excel_csv()`で区切りテキストを保存する | [readr: write_delim](https://readr.tidyverse.org/reference/write_delim.html) | 列名、欠損値、上書き、BOM付きExcel向けCSVの挙動を確認。`write_excel_csv()`は`.xlsx`を作らないことを明記する |
 | 真の`.xlsx`を書き出すには専用関数が必要 | [writexl: write_xlsx](https://docs.ropensci.org/writexl/reference/write_xlsx.html) | `write_xlsx()`はdata frameまたは名前付きdata frameリストをxlsxへ書き出す。STEP 1の必須成果物はツール非依存のCSVとし、xlsx出力は任意紹介に留める |
 
-教材例の検証下限はdplyr 1.2.1、readr 2.2.0、readxl 1.5.0、tidyr 1.3.2、tibble 3.3.1、purrr 1.2.2、NB1抽出実行用knitr 1.51、Quarto描画用rmarkdown 2.31とし、CIが不足版を導入してから実行する。
+教材例の検証下限はdplyr 1.2.1、readr 2.2.0、readxl 1.5.0、tidyr 1.3.2、tibble 3.3.1、purrr 1.2.2、ggplot2 4.0.3、NB1抽出実行用knitr 1.51、Quarto描画用rmarkdown 2.31とし、CIが不足版を導入してから実行する。
+
+## STEP 2 記述統計・可視化
+
+| 教材上の主張 | 一次資料 | 確認内容 |
+|---|---|---|
+| `quantile()`の既定`type = 7`でQ1・中央値・Q3を計算する | [R stats: quantile](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html) | 分位点には複数定義があるため、教材値と他ソフトを照合するときは計算法も記録する |
+| `aes()`はデータ列を視覚属性へ対応付け、geomと役割が異なる | [ggplot2: ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)、[ggplot2: aes](https://ggplot2.tidyverse.org/reference/aes.html) | カテゴリ`condition`をx、連続量`mean_rt`をyへ対応付け、箱ひげと点を別レイヤーとして重ねる |
+| 箱ひげへ全参加者点を重ね、外れ値記号の二重表示を避ける | [ggplot2: geom_boxplot](https://ggplot2.tidyverse.org/reference/geom_boxplot.html) | `outlier.shape = NA`はデータ行の除外ではなく箱ひげ層の外れ値記号を非表示にする指定として使う |
+| jitterの横位置を再現可能にする | [ggplot2: position_jitter](https://ggplot2.tidyverse.org/reference/position_jitter.html) | `width = 0.08`、`height = 0`、`seed = 20260802`により反応時間の縦位置を変えず、横方向の重なりだけを固定して避ける |
+| 同じ参加者の2条件だけを線で結ぶ | [ggplot2: grouping](https://ggplot2.tidyverse.org/reference/aes_group_order.html)、[ggplot2: geom_line](https://ggplot2.tidyverse.org/reference/geom_path.html) | 離散xの既定groupへ任せず`aes(group = id)`を線レイヤーへ指定し、24名を24本の線・48点として描く |
+| PNGの対象plot・寸法・解像度を明示する | [ggplot2: ggsave](https://ggplot2.tidyverse.org/reference/ggsave.html) | `plot`、7×5 inch、300 dpi、白背景を指定し、2100×1500pxの出力を検査する |
+| L17〜L19を1つの入口から順番に実行する | [R: source](https://stat.ethz.ch/R-manual/R-devel/library/base/html/source.html) | 3スクリプトを専用environmentで順に評価し、Global Environmentの既存オブジェクトに依存しない入口を作る |
+| 入力と6成果物の内容指紋を記録する | [R tools: md5sum](https://stat.ethz.ch/R-manual/R-devel/library/tools/html/md5sum.html) | 入力が実行前後で不変であることと、成果物の再実行一致を検査する。妥当性・真正性の証明とは区別する |
+
+ggplot2公式サイトで4.0.3を確認し、L18〜L20はR 4.5.1 + ggplot2 4.0.3でもローカル実行した。公開CIではR 4.6.1と同じ検証下限を使う。
 
 ## RStudio
 

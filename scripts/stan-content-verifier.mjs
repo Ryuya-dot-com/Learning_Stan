@@ -17,6 +17,10 @@ function normalizeText(value) {
   return String(value).replace(/\r\n?/g, "\n").trim();
 }
 
+function normalizeLineEndings(value) {
+  return String(value).replace(/\r\n?/g, "\n");
+}
+
 export function stripStanComments(source) {
   let output = "";
   let state = "code";
@@ -267,9 +271,15 @@ export function loadStanContent(root = process.cwd()) {
   const base = resolve(root, "content", "stan");
   return {
     curriculum: JSON.parse(readFileSync(resolve(base, "curriculum.json"), "utf8")),
-    manuscript: readFileSync(resolve(base, "linear-regression.md"), "utf8"),
-    stanSource: readFileSync(resolve(base, "examples", "linear-regression.stan"), "utf8"),
-    runnerSource: readFileSync(resolve(base, "examples", "run-linear-regression.R"), "utf8"),
+    manuscript: normalizeLineEndings(
+      readFileSync(resolve(base, "linear-regression.md"), "utf8")
+    ),
+    stanSource: normalizeLineEndings(
+      readFileSync(resolve(base, "examples", "linear-regression.stan"), "utf8")
+    ),
+    runnerSource: normalizeLineEndings(
+      readFileSync(resolve(base, "examples", "run-linear-regression.R"), "utf8")
+    ),
     runtimeEvidence: JSON.parse(readFileSync(resolve(base, "validation.json"), "utf8")),
   };
 }

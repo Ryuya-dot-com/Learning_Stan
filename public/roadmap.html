@@ -336,32 +336,59 @@ html.js .reveal.in{opacity:1; transform:none}
       <div>
         <span class="pstep">STEP 2 / 統計・可視化編</span>
         <h2>レッスン 17–20 <span class="psub">数字と図で、結果を語る</span></h2>
-        <p class="ptag">記述統計とggplot2、そして古典的検定のミニマム。ここで感じる「p値のもどかしさ」が、ベイズ編への伏線になります。</p>
+        <p class="ptag">拡大した合成パイロットを1つの分析依頼として扱い、試行数と参加者数を区別して、分布・個人差・限界を追跡可能な図とCSVで報告します。公開前に、別のデバイス文脈へ図選択と限定付き報告を移せるか、適格な初学者3名以上で観察します。</p>
       </div>
       <div class="lessons">
         <article class="lesson">
           <span class="lnum">L17</span>
-          <h3>記述統計の深掘り</h3>
-          <p>中央値・四分位・分布の要約。データを開いて最初にやることを固めます。</p>
-          <div class="chips"><code>median</code><code>quantile</code><code>summary</code></div>
+          <h3>分析単位を決めて分布を要約する</h3>
+          <p>884正答試行を884人と数えず、24名×2条件の48行へ要約。中央値・四分位範囲と参加者内差を記述します。</p>
+          <div class="chips"><code>group_by</code><code>median</code><code>IQR</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L18</span>
-          <h3>ggplot2入門</h3>
-          <p>「データ・座標・図形」を重ねる文法。ヒストグラム・箱ひげ・散布図を、この1つの考え方で描き分けます。</p>
-          <div class="chips"><code>ggplot</code><code>aes</code><code>geom_histogram</code></div>
+          <h3>データ・対応付け・図形を重ねる</h3>
+          <p>問いと変数型から対応付けと図形を選び、参加者の全点と分布要約を同じ図で読めるようにします。</p>
+          <div class="chips"><code>ggplot</code><code>aes</code><code>geom_point</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L19</span>
-          <h3>論文品質の図</h3>
-          <p>条件別のパネル分割、テーマ調整、平均±SDの誤差棒、そして画像ファイルへの保存まで。</p>
-          <div class="chips"><code>facet_wrap</code><code>stat_summary</code><code>ggsave</code></div>
+          <h3>平均の背後にある個人差を示す</h3>
+          <p>同じ参加者の2条件を対応付け、平均値だけでは失われる差の方向とばらつきを図と文章で一致させます。</p>
+          <div class="chips"><code>group</code><code>geom_line</code><code>facet_wrap</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L20</span>
-          <h3>古典的検定ミニマム</h3>
-          <p>t検定と相関の検定、そして「p値が言えること・言えないこと」。頻度主義の作法を最小限おさえて、ベイズとの対照軸をつくります。</p>
-          <div class="chips"><code>t.test</code><code>cor.test</code><code>p値</code></div>
+          <h3>図を保存し、選択理由と限界を報告する</h3>
+          <p>寸法を固定した2図・3CSV・探索メモを再生成し、未見データでも図の選択理由と結論できないことを説明します。</p>
+          <div class="chips"><code>ggsave</code><code>caption</code><code>transfer</code></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 回帰ブリッジ -->
+    <section class="phase reveal" style="--pc:#3F557A; --ps:#EAF0F8;">
+      <span class="node" aria-hidden="true"></span>
+      <div>
+        <span class="pstep">BRIDGE / 線形回帰</span>
+        <h2>表示番号は公開前に確定 <span class="psub">要約からモデルへ橋を架ける</span></h2>
+        <p class="ptag">STEP 2の図を式で表す前に、<code>lm()</code>のフォーミュラ、切片・係数・予測・残差・仮定を、同じ分析シナリオから順に読みます。</p>
+      </div>
+      <div class="lessons">
+        <article class="lesson">
+          <h3>問いをフォーミュラへ翻訳する</h3>
+          <p>応答変数と説明変数を区別し、参照水準を明示して、式が比較している対象を言葉に戻します。</p>
+          <div class="chips"><code>lm</code><code>formula</code><code>relevel</code></div>
+        </article>
+        <article class="lesson">
+          <h3>係数・予測・残差を結び付ける</h3>
+          <p>係数表だけを読むのではなく、各行の予測値と残差を計算し、図の差がモデルのどこに現れるか確かめます。</p>
+          <div class="chips"><code>coef</code><code>predict</code><code>residuals</code></div>
+        </article>
+        <article class="lesson">
+          <h3>仮定と適用範囲を点検する</h3>
+          <p>独立性・線形性・分散・外れ値を診断し、反復測定を単純な回帰で扱えない理由を次のモデル選択へつなげます。</p>
+          <div class="chips"><code>plot</code><code>assumptions</code><code>limitations</code></div>
         </article>
       </div>
     </section>

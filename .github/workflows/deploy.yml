@@ -31,6 +31,11 @@ jobs:
       - run: npm run test:excel-samples
       - run: npm run test:step1-bundle
       - run: npm run test:step1-transfer-observation-pack
+      - run: npm run test:step2-samples
+      - run: npm run test:step2-content
+      - run: npm run test:step2-assessments
+      - run: npm run test:step2-observation-pack
+      - run: npm run gate:step2-observation:status
       - run: npm run gate:step1-transfer:status
       - run: npm run build
       - if: github.event_name != 'pull_request'
@@ -56,6 +61,11 @@ jobs:
       - run: Rscript scripts/verify-step1-analysis.R
       - run: Rscript scripts/verify-step1-transfer.R
       - run: Rscript scripts/verify-step1-transfer-observation-rehearsal.R
+      - run: Rscript scripts/verify-step2-descriptive.R
+      - run: Rscript scripts/verify-step2-condition-plot.R
+      - run: Rscript scripts/verify-step2-participant-differences.R
+      - run: Rscript scripts/verify-step2-report-and-transfer.R
+      - run: Rscript scripts/verify-step2-observation-rehearsal.R
       - run: node scripts/r-example-verifier.mjs
 
   deploy:

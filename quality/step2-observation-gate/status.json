@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "gateId": "S2O-CURRENT",
+  "updatedAt": "2026-08-01",
+  "decision": "NOT RUN",
+  "primaryImplementerCode": "CODEX",
+  "target": {
+    "commit": null,
+    "url": "https://ryuya-dot-com.github.io/Learning_Stan/"
+  },
+  "participants": {
+    "eligibleComplete": 0,
+    "records": [],
+    "blockedSessions": 0,
+    "invalidSessions": 0
+  },
+  "protocolValidity": {
+    "invalid": false,
+    "reason": null
+  },
+  "independentReview": {
+    "reviewerCode": null,
+    "signedAt": null
+  },
+  "decisionRecord": null,
+  "evidence": [
+    {
+      "id": "S201",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "適格な初学者によるコード前の分析単位・図選択計画は未実施"
+    },
+    {
+      "id": "S202",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "適格な初学者による3CSV作成と分析単位転移は未実施"
+    },
+    {
+      "id": "S203",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "適格な初学者による条件別分布図と単位内対応図の選択・作成は未実施"
+    },
+    {
+      "id": "S204",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "適格な初学者による保存・限定付き報告・クリーン再実行は未実施"
+    },
+    {
+      "id": "S205",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "適格な初学者による自己修正と未見文脈の説明は未実施"
+    }
+  ],
+  "issues": []
+}

@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-unpublished",
+  "sequencePolicy": "idは永続的な意味キー、displayNumberは公開時まで暫定とする",
+  "entryPrerequisite": "l16",
+  "releasePrerequisites": [
+    {
+      "gate": "foundation",
+      "requiredDecision": "PASS"
+    },
+    {
+      "gate": "step1-data-quality",
+      "requiredDecision": "OBSERVED"
+    },
+    {
+      "gate": "step1-independent-transfer",
+      "requiredDecision": "OBSERVED"
+    },
+    {
+      "gate": "step2-learning-observation",
+      "requiredDecision": "OBSERVED"
+    }
+  ],
+  "scenario": {
+    "id": "expanded-cognitive-pilot",
+    "dataOrigin": "synthetic",
+    "request": "拡大パイロットの条件別分布と個人差を、再生成可能な図・CSV・限界付きメモとして報告する",
+    "analysisUnit": "participant",
+    "deliverables": [
+      "output/participant_condition_summary.csv",
+      "output/descriptive_statistics.csv",
+      "output/participant_differences.csv",
+      "output/condition_distributions.png",
+      "output/participant_differences.png",
+      "output/exploratory_note.txt"
+    ]
+  },
+  "lessons": [
+    {
+      "id": "step2-describe-distributions",
+      "displayNumber": 17,
+      "title": "分析単位を決めて分布を要約する",
+      "prerequisites": ["l16"],
+      "outcome": "試行数と参加者数を区別し、参加者×条件の要約から中央値・四分位範囲・個人差を説明できる",
+      "outcomeDimensions": ["analysis-unit", "descriptive-summary", "interpretation-limits", "transfer"],
+      "concepts": ["analysis unit", "median", "quartile", "IQR", "participant-level summary"],
+      "directEvidence": [
+        {
+          "artifact": "参加者×条件の要約CSVと記述統計CSV",
+          "method": "performance-task",
+          "criterion": "24名を分析単位として48行を作り、条件別の中央値・Q1・Q3・IQRを再生成する"
+        },
+        {
+          "artifact": "分析単位の説明",
+          "method": "constructed-response",
+          "criterion": "884正答試行を884人として扱わず、参加者内反復を先に要約する理由を説明する",
+          "assessmentIds": ["step2-l17-q4-independence-explanation"]
+        },
+        {
+          "artifact": "未見の反復測定データにおける分析単位の再設計",
+          "method": "transfer-task",
+          "criterion": "列名と文脈が変わっても、誰のどの条件を1行にするかを説明する",
+          "assessmentIds": ["step2-l17-q5-transfer-diary"]
+        }
+      ]
+    },
+    {
+      "id": "step2-grammar-of-graphics",
+      "displayNumber": 18,
+      "title": "データ・対応付け・図形を重ねる",
+      "prerequisites": ["step2-describe-distributions"],
+      "outcome": "変数型と問いからaesとgeomを選び、分布を隠さない図を作成できる",
+      "outcomeDimensions": ["aesthetic-mapping", "layer-composition", "distribution-visibility", "reporting-context", "transfer"],
+      "concepts": ["ggplot", "aes", "geom", "layer", "distribution"],
+      "directEvidence": [
+        {
+          "artifact": "条件別分布図",
+          "method": "code-construction",
+          "criterion": "参加者平均の全点と分布要約を同時に示し、軸・単位・合成データ表記を付ける"
+        },
+        {
+          "artifact": "全点を残す作図理由と非主張事項の説明",
+          "method": "constructed-response",
+          "criterion": "箱ひげと参加者点の役割を分け、図だけでは有意差・母集団差・因果効果を結論しない",
+          "assessmentIds": ["step2-l18-q4-why-points"]
+        },
+        {
+          "artifact": "未見のカテゴリ×連続量データに対する作図設計",
+          "method": "transfer-task",
+          "criterion": "変数型からaesとgeomを選び、全観測・単位・データ由来を残す",
+          "assessmentIds": ["step2-l18-q5-transfer-yield"]
+        }
+      ]
+    },
+    {
+      "id": "step2-show-individuals",
+      "displayNumber": 19,
+      "title": "平均の背後にある個人差を示す",
+      "prerequisites": ["step2-grammar-of-graphics"],
+      "outcome": "対応のあるデータを参加者内で結び、平均値だけでは失われる方向とばらつきを説明できる",
+      "outcomeDimensions": ["pairing-key", "within-participant-change", "individual-heterogeneity", "interpretation-limits", "transfer"],
+      "concepts": ["paired data", "individual differences", "overplotting", "faceting"],
+      "directEvidence": [
+        {
+          "artifact": "参加者内条件差の図と解釈",
+          "method": "performance-task",
+          "criterion": "同一参加者を対応付け、24名の方向と差の範囲を図と文章で一致させる"
+        },
+        {
+          "artifact": "分布図と対応図の役割・限界の説明",
+          "method": "constructed-response",
+          "criterion": "条件内分布と参加者内変化を区別し、どちらも母集団差や因果効果を証明しないと説明する",
+          "assessmentIds": ["step2-l19-q4-compare-plots"]
+        },
+        {
+          "artifact": "未見の前後測定データに対する対応図設計",
+          "method": "transfer-task",
+          "criterion": "個体IDを対応キーとして、前後の点と線、単位、非主張事項を設計する",
+          "assessmentIds": ["step2-l19-q5-transfer-blood-pressure"]
+        }
+      ]
+    },
+    {
+      "id": "step2-report-and-transfer",
+      "displayNumber": 20,
+      "title": "図を保存し、選択理由と限界を報告する",
+      "prerequisites": ["step2-show-individuals"],
+      "outcome": "目的に合う図を選び、寸法を固定して保存し、未見データでも選択理由と非主張事項を説明できる",
+      "outcomeDimensions": ["reproducible-execution", "figure-export-contract", "evidence-matched-reporting", "interpretation-limits", "transfer"],
+      "concepts": ["ggsave", "figure dimensions", "caption", "transfer", "reporting limits"],
+      "directEvidence": [
+        {
+          "artifact": "再生成可能な2図・3CSV・探索メモ",
+          "method": "portfolio",
+          "criterion": "空のEnvironmentから全成果物を再生成し、入力・図の選択理由・観察結果・限界を第三者が追跡できる",
+          "assessmentIds": ["step2-l20-q4-final-report"]
+        },
+        {
+          "artifact": "未見データの図選択課題",
+          "method": "transfer-task",
+          "criterion": "列名と文脈を変えたデータで、問いと変数型に基づいて図を選び直す",
+          "assessmentIds": ["step2-l20-q5-transfer-sleep"]
+        }
+      ]
+    }
+  ],
+  "nextStage": "bridge-linear-model",
+  "officialSources": [
+    "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html",
+    "https://ggplot2.tidyverse.org/reference/ggplot.html",
+    "https://ggplot2.tidyverse.org/reference/aes.html",
+    "https://ggplot2.tidyverse.org/reference/geom_boxplot.html",
+    "https://ggplot2.tidyverse.org/reference/position_jitter.html",
+    "https://ggplot2.tidyverse.org/reference/aes_group_order.html",
+    "https://ggplot2.tidyverse.org/reference/geom_path.html",
+    "https://ggplot2.tidyverse.org/reference/ggsave.html",
+    "https://stat.ethz.ch/R-manual/R-devel/library/base/html/source.html",
+    "https://stat.ethz.ch/R-manual/R-devel/library/tools/html/md5sum.html"
+  ]
+}

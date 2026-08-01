@@ -16,6 +16,7 @@
 - L12→L13で「読込成功」と「分析可能な品質」を区別できるかの観察手順は [STEP 1 Data Quality Gate](quality/step1-data-gate/README.md) を参照
 - L16修了後に、中心課題を見ず別データへ品質検査・集計・解釈を移せるかの観察手順は [STEP 1独立転移観察キット](quality/step1-transfer-gate/README.md) を参照
 - Stan編は [非公開教材パック](content/stan/README.md) でL34–L41の設計と単回帰の縦切り原稿を検証中です。公開アプリにはまだ含まれません
+- STEP 2は [非公開教材パック](content/step2/README.md) でL17–L20の意味ID・依存関係・成果物契約、L17記述統計、L18分布図、L19参加者内対応図、L20一括再生成・限界報告、20件の診断的理解問題を検証中です。[初心者観察ゲート](quality/step2-observation-gate/README.md)の通過前は公開アプリへ含めません
 - 理解問題と実機チェックの進みぐあいは、版付きデータとしてブラウザ内に保存されます（サーバには何も送信しません）。記述回答の本文は保存せず、JSONの書き出し・読み込み・明示的なリセットができます
 
 ## レッスンの追加方法
@@ -49,7 +50,7 @@ Node.js 22.23.1 と同梱の npm 10.9.8 を使用します（`.node-version` と
 npm install
 npm run dev      # 開発サーバ(http://localhost:5173/Learning_Stan/ で開きます)
 npm test         # レッスンデータ・配色・ハイライトの検証
-npm run install:r-deps  # STEP 1の検証に必要なRパッケージを導入
+npm run install:r-deps  # STEP 1・非公開STEP 2の検証に必要なRパッケージを導入
 npm run generate:excel-samples  # 固定したExcelJSでExcel教材3件を再生成
 npm run test:excel-samples      # Excelのシート・型・行分割・書式契約を検査
 npm run generate:step1-bundle   # STEP 1のProject用スターターZIPを再生成
@@ -61,6 +62,17 @@ npm run test:nb1  # NB1の全実行チャンク、品質検査、CSV・結果メ
 npm run test:step1-analysis  # 完成版Rスクリプトのraw保全・品質ゲート・成果物を検査
 npm run test:step1-transfer  # 別シナリオの転移課題・期待成果物・自己チェッカーを検査
 npm run test:step1-transfer-observation-rehearsal  # 観察用ZIPの展開から初回提出後の採点までをRで検査
+npm run generate:step2-samples  # 非公開STEP 2の24名×2条件×20試行データを固定seedで再生成
+npm run test:step2-samples      # STEP 2データのfingerprint・構造・再現性を検査
+npm run test:step2-content      # STEP 2の順序・意味ID・公開ゲート・原稿・成果物契約を検査
+npm run test:step2-assessments  # L17–L20理解問題の目標次元・誤答診断・rubric・転移を検査
+npm run test:step2-descriptive  # L17完成版Rスクリプトを一時Projectで実行検査
+npm run test:step2-condition-plot  # L18の2箱・48点・固定jitter・PNG寸法を一時Projectで検査
+npm run test:step2-participant-differences  # L19の24対応線・48点・差CSV一致を一時Projectで検査
+npm run test:step2-report-and-transfer  # L20の6成果物・7報告節・反復再生成一致を一時Projectで検査
+npm run test:step2-observation-pack  # STEP 2初心者観察用ZIPの非露出・未見CSV・再現性を検査
+npm run test:step2-observation-rehearsal  # 観察用ZIP展開から初回提出後の採点までをRで検査
+npm run gate:step2-observation:status  # 実観察状態を表示（現在はNOT RUN）
 npm run test:r   # Rコード例と期待出力の照合（R 4.6.1が必要）
 npm run test:stan-content  # 非公開Stan原稿・.stan・R実行コード・評価設計の同期検査
 npm run gate:status        # Foundation Gateの現在状態を表示

@@ -9,6 +9,18 @@ public/notebooks/*.qmd text eol=lf
 public/scripts/*.R text eol=lf
 public/challenges/* text eol=lf
 quality/step1-transfer-gate/*.md text eol=lf
+quality/step2-observation-gate/*.md text eol=lf
+quality/step2-observation-gate/*.json text eol=lf
+quality/step2-observation-gate/*.R text eol=lf
+quality/step2-observation-gate/fixtures/*.csv text eol=lf
+content/step2/**/*.csv text eol=lf
+content/step2/**/*.json text eol=lf
+content/step2/**/*.md text eol=lf
+content/step2/**/*.R text eol=lf
+content/stan/**/*.md text eol=lf
+content/stan/**/*.stan text eol=lf
+content/stan/**/*.R text eol=lf
 public/data/**/*.xlsx binary
 public/downloads/*.zip binary
 quality/step1-transfer-gate/*.zip binary
+quality/step2-observation-gate/*.zip binary
