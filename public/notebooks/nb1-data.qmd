@@ -1,0 +1,497 @@
+---
+title: "NB1: 合成データを読み、整え、保存する"
+subtitle: "STEP 1 / データ操作編"
+format:
+  html:
+    toc: true
+    code-fold: false
+execute:
+  warning: false
+  message: false
+---
+
+## このノートで作るもの
+
+研究室で、文字の意味と表示色が一致する条件（`cong`）と一致しない条件（`incong`）の反応時間を3名から集めた、というケースを扱います。依頼は次のとおりです。
+
+> 正答試行だけを使い、この小さなデータ内でincong条件の平均反応時間がcong条件より長いかを参加者ごとに記述してください。分析過程を再実行できるCSVと結果メモを納品してください。
+
+これは教材用の合成パイロットデータです。母集団への一般化や、`bilingual`・`monolingual`間の差は結論しません。このノートでは、入力の品質を検査し、正答試行を条件別に要約し、参加者属性の欠損を確認して、再利用できる成果物として保存します。完成条件は次の4つです。
+
+1. 上から順にすべてのコードを実行できる
+2. `output/condition_means.csv` を作成できる
+3. `output/analysis_note.txt` に分析対象・記述結果・限界を分けて書ける
+4. Rを再起動しても同じ2ファイルを再生成できる
+
+RStudioで新しいProjectを作り、このファイルをProject直下へ保存してください。次のコードは、必要なパッケージがインストール済みであることを前提にします。未導入なら、Consoleで一度だけ `install.packages(c("tidyverse", "knitr", "rmarkdown"))` を実行します。
+
+同梱の `step1_analysis.R` は、このノートの中心処理を1本へまとめた完成版スクリプトです。まずノートで判断理由を確認し、次にスクリプトを空のEnvironmentから実行すると、「説明付きの記録」と「自動実行用の処理」をどう分けるか比較できます。
+
+## 1. パッケージを読み込む
+
+```{r}
+library(dplyr)
+library(readr)
+library(tidyr)
+```
+
+`install.packages()` はPCへ導入する操作、`library()` は今回のRセッションで使えるようにする操作です。Rを起動し直したら `library()` は再実行します。
+
+## 2. 演習データを用意する
+
+```{r}
+dir.create("data", showWarnings = FALSE)
+dir.create("data/batches", recursive = TRUE, showWarnings = FALSE)
+dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
+
+rt_url <- "https://ryuya-dot-com.github.io/Learning_Stan/data/rt_data.csv"
+dirty_url <- "https://ryuya-dot-com.github.io/Learning_Stan/data/rt_data_dirty.csv"
+participants_url <- "https://ryuya-dot-com.github.io/Learning_Stan/data/participants.csv"
+rt_tsv_url <- "https://ryuya-dot-com.github.io/Learning_Stan/data/rt_data.tsv"
+participants_pipe_url <- "https://ryuya-dot-com.github.io/Learning_Stan/data/participants_pipe.txt"
+trials_excel_url <- "https://ryuya-dot-com.github.io/Learning_Stan/data/trials.xlsx"
+batch_01_url <- "https://ryuya-dot-com.github.io/Learning_Stan/data/batches/batch_01.xlsx"
+batch_02_url <- "https://ryuya-dot-com.github.io/Learning_Stan/data/batches/batch_02.xlsx"
+
+if (!file.exists("data/rt_data.csv")) {
+  download.file(rt_url, "data/rt_data.csv", mode = "wb")
+}
+if (!file.exists("data/rt_data_dirty.csv")) {
+  download.file(dirty_url, "data/rt_data_dirty.csv", mode = "wb")
+}
+if (!file.exists("data/participants.csv")) {
+  download.file(participants_url, "data/participants.csv", mode = "wb")
+}
+if (!file.exists("data/rt_data.tsv")) {
+  download.file(rt_tsv_url, "data/rt_data.tsv", mode = "wb")
+}
+if (!file.exists("data/participants_pipe.txt")) {
+  download.file(
+    participants_pipe_url,
+    "data/participants_pipe.txt",
+    mode = "wb"
+  )
+}
+if (!file.exists("data/trials.xlsx")) {
+  download.file(trials_excel_url, "data/trials.xlsx", mode = "wb")
+}
+if (!file.exists("data/batches/batch_01.xlsx")) {
+  download.file(batch_01_url, "data/batches/batch_01.xlsx", mode = "wb")
+}
+if (!file.exists("data/batches/batch_02.xlsx")) {
+  download.file(batch_02_url, "data/batches/batch_02.xlsx", mode = "wb")
+}
+
+stopifnot(
+  file.exists("data/rt_data.csv"),
+  file.exists("data/rt_data_dirty.csv"),
+  file.exists("data/participants.csv"),
+  file.exists("data/rt_data.tsv"),
+  file.exists("data/participants_pipe.txt"),
+  file.exists("data/trials.xlsx"),
+  file.exists("data/batches/batch_01.xlsx"),
+  file.exists("data/batches/batch_02.xlsx")
+)
+```
+
+絶対パスではなく、Projectを起点にした相対パスを使います。これにより、Projectフォルダごと別のPCへ移しても同じコードを実行できます。
+
+## 3. CSVを読み、入口で検査する
+
+```{r}
+rt <- read_csv(
+  "data/rt_data.csv",
+  show_col_types = FALSE
+)
+
+participants <- read_csv(
+  "data/participants.csv",
+  na = c("", "NA"),
+  show_col_types = FALSE
+)
+
+stopifnot(
+  nrow(rt) == 12,
+  identical(names(rt), c("id", "cond", "rt", "correct")),
+  is.character(rt$id),
+  is.double(rt$rt),
+  is.logical(rt$correct),
+  !anyDuplicated(participants$id)
+)
+```
+
+`stopifnot()` は、前提が崩れた時点で処理を止めます。ファイルを取り違えたまま、もっともらしい結果を保存してしまうことを防ぐための検査です。
+
+```{r}
+glimpse(rt)
+glimpse(participants)
+```
+
+確認する問い:
+
+- `rt` は何行何列ですか。
+- `id`、`rt`、`correct` はそれぞれ何型ですか。
+- `participants$age` の欠損は何人分ですか。
+
+## 4. 問題入りデータで品質ゲートを練習する
+
+「読み込めた」と「分析に使える」は別です。`rt_data_dirty.csv` には、重複、不正な条件名、範囲外の反応時間、参加者表にないID、正誤の欠損を1行ずつ意図的に加えています。rawファイルは上書きせず、判定結果を `issue` 列へ記録します。
+
+```{r}
+dirty <- read_csv(
+  "data/rt_data_dirty.csv",
+  na = c("", "NA"),
+  show_col_types = FALSE
+)
+
+allowed_cond <- c("cong", "incong")
+reviewed <- dirty |>
+  mutate(
+    issue = case_when(
+      duplicated(dirty) ~ "duplicate",
+      !cond %in% allowed_cond ~ "invalid_cond",
+      is.na(rt) | !between(rt, 100, 3000) ~ "rt_out_of_range",
+      !id %in% participants$id ~ "unknown_participant",
+      is.na(correct) ~ "missing_correct",
+      TRUE ~ NA_character_
+    )
+  )
+
+issue_summary <- reviewed |>
+  filter(!is.na(issue)) |>
+  count(issue, name = "rows") |>
+  arrange(issue)
+
+issue_summary
+```
+
+ここで100〜3000msという値域は教材用の仮ルールです。実研究では、測定仕様や研究計画に基づいてルールを先に定めます。1行に複数問題がある場合、上の `case_when()` は最初の1件だけを記録するため、必要なら検査ごとの論理列へ分けます。
+
+```{r}
+issues <- reviewed |>
+  filter(!is.na(issue))
+
+cleaned <- reviewed |>
+  filter(is.na(issue)) |>
+  select(-issue)
+
+unmatched_ids <- cleaned |>
+  distinct(id) |>
+  anti_join(
+    distinct(participants, id),
+    by = "id"
+  )
+
+stopifnot(
+  nrow(issues) == 5,
+  !anyDuplicated(cleaned),
+  all(cleaned$cond %in% allowed_cond),
+  all(between(cleaned$rt, 100, 3000)),
+  !anyNA(cleaned$correct),
+  nrow(unmatched_ids) == 0,
+  isTRUE(all.equal(as.data.frame(cleaned), as.data.frame(rt)))
+)
+
+write_csv(issues, "data/processed/rt_data_issues.csv")
+write_csv(cleaned, "data/processed/rt_data_checked.csv")
+```
+
+この5行は練習用に追加した既知の問題なので除外しました。実データでは、除外、修正、再測定のどれを選ぶかを根拠とともに記録します。`rt_data_issues.csv` と `rt_data_checked.csv` を分けたことで、元の値、判定、分析入力を後からたどれます。
+
+## 5. 分析対象を明示する
+
+```{r}
+analysis_data <- rt |>
+  filter(correct) |>
+  select(id, cond, rt) |>
+  mutate(rt_sec = rt / 1000) |>
+  arrange(id, cond, rt)
+
+analysis_data
+```
+
+この時点では元の `rt` を上書きしません。「正答試行だけ」という判断がコードに残り、元データとの照合もできます。
+
+```{r}
+stopifnot(
+  nrow(analysis_data) == 10,
+  all(analysis_data$rt_sec == analysis_data$rt / 1000)
+)
+```
+
+## 6. 条件別に要約する
+
+```{r}
+condition_summary <- analysis_data |>
+  group_by(cond) |>
+  summarise(
+    n = n(),
+    mean_rt = mean(rt),
+    sd_rt = sd(rt),
+    .groups = "drop"
+  ) |>
+  arrange(cond)
+
+condition_summary
+```
+
+`n` は採用試行数、`mean_rt` は平均、`sd_rt` は標準偏差です。平均だけでなく件数も同時に保存すると、どれだけのデータに基づく値かを追跡できます。
+
+```{r}
+stopifnot(
+  nrow(condition_summary) == 2,
+  sum(condition_summary$n) == nrow(analysis_data)
+)
+```
+
+## 7. 参加者属性を結合し、欠損の影響を数える
+
+```{r}
+joined <- rt |>
+  left_join(
+    participants,
+    by = "id",
+    relationship = "many-to-one"
+  )
+
+missing_age_cells <- sum(is.na(joined$age))
+missing_age_participants <- joined |>
+  filter(is.na(age)) |>
+  distinct(id) |>
+  nrow()
+
+c(
+  missing_age_cells = missing_age_cells,
+  missing_age_participants = missing_age_participants
+)
+```
+
+参加者表で1人分の年齢が欠損していても、試行表へ結合すると、その人の全試行でNAが現れます。セル数と参加者数を区別して報告します。
+
+```{r}
+stopifnot(
+  nrow(joined) == nrow(rt),
+  missing_age_cells == 4,
+  missing_age_participants == 1
+)
+```
+
+## 8. 縦長と横長を相互変換する
+
+```{r}
+participant_summary <- analysis_data |>
+  group_by(id, cond) |>
+  summarise(mean_rt = mean(rt), .groups = "drop")
+
+wide_summary <- participant_summary |>
+  pivot_wider(
+    names_from = cond,
+    values_from = mean_rt
+  )
+
+wide_summary
+```
+
+横長表では、条件名 `cong` と `incong` が列名になります。次のコードで縦長へ戻し、元の要約値と一致するかを確かめます。
+
+```{r}
+long_again <- wide_summary |>
+  pivot_longer(
+    cols = c(cong, incong),
+    names_to = "cond",
+    values_to = "mean_rt"
+  ) |>
+  arrange(id, cond)
+
+expected_long <- participant_summary |>
+  arrange(id, cond)
+
+stopifnot(all.equal(long_again, expected_long))
+```
+
+## 9. 成果物を保存し、読み直す
+
+```{r}
+dir.create("output", showWarnings = FALSE)
+
+write_csv(
+  wide_summary,
+  "output/condition_means.csv"
+)
+
+saved_means <- read_csv(
+  "output/condition_means.csv",
+  show_col_types = FALSE
+)
+
+stopifnot(
+  isTRUE(all.equal(
+    as.data.frame(saved_means),
+    as.data.frame(wide_summary)
+  )),
+  nrow(saved_means) == 3,
+  ncol(saved_means) == 3
+)
+saved_means
+```
+
+## 10. 条件差を計算し、依頼へ答える
+
+横長の参加者別要約から、各参加者の `incong - cong` を計算します。正の値なら、このデータでは不一致条件の平均反応時間の方が長かったことを表します。
+
+```{r}
+scenario_result <- saved_means |>
+  mutate(incong_minus_cong = incong - cong)
+
+stopifnot(all(scenario_result$incong_minus_cong > 0))
+scenario_result
+```
+
+数値だけを渡すと、誤答を含むのか、どこまで一般化できるのかが分かりません。分析対象・記述結果・限界を分け、数値から再生成できる結果メモを作ります。
+
+```{r}
+analysis_note <- c(
+  "分析対象: 正答試行だけを参加者×条件で要約した。",
+  sprintf(
+    "記述結果: 3名全員でincong平均がcong平均より長く、差は%.2f〜%.2f msだった。",
+    min(scenario_result$incong_minus_cong),
+    max(scenario_result$incong_minus_cong)
+  ),
+  "解釈の限界: 3名の合成データなので、母集団へ一般化せず、言語群差も結論しない。"
+)
+
+writeLines(
+  analysis_note,
+  "output/analysis_note.txt",
+  useBytes = TRUE
+)
+
+stopifnot(file.exists("output/analysis_note.txt"))
+analysis_note
+```
+
+3名の差は55.05、80.65、104.55msで、すべて正です。したがって「この合成パイロットデータの正答試行では、3名全員でincong条件の平均反応時間がcong条件より長かった」と記述できます。これは母集団差や言語群差の証拠ではありません。
+
+## 11. 再現確認
+
+RStudioのメニューからRを再起動し、上からすべてのコードをもう一度実行します。次を確認できたらSTEP 1の実践チェックは完了です。
+
+- [ ] 読み込みから保存までを、このノートまたは1本のR Scriptで実行できた
+- [ ] `output/condition_means.csv` が作成された
+- [ ] `output/analysis_note.txt` に分析対象・記述結果・限界が記録された
+- [ ] Rを再起動した後も、同じCSVと結果メモを再生成できた
+
+最後に、`sessionInfo()` を記録しておくと、再現時にRとパッケージのバージョンを確認できます。
+
+```{r}
+sessionInfo()
+```
+
+## 12. 付録: TSV・Excel・複数Excelへ置き換える
+
+同じ処理でも、入力形式によって読込関数が変わります。
+
+| 入力 | 関数 | 追加で確認すること |
+|---|---|---|
+| カンマ区切り | `readr::read_csv()` | 列型、欠損表現 |
+| タブ区切り | `readr::read_tsv()` | 本当にタブ区切りか |
+| その他の区切りテキスト | `readr::read_delim()` | `delim`に指定する1文字 |
+| Excel `.xls` / `.xlsx` | `readxl::read_excel()` | シート名、表の範囲、結合セルや脚注 |
+
+TSVと縦線区切りTXTは、同じ `data` フォルダへダウンロード済みです。区切り文字に合う関数を使い、CSVと同じ列契約で読めることを確認します。
+
+```{r}
+rt_tsv <- readr::read_tsv(
+  "data/rt_data.tsv",
+  na = c("", "NA"),
+  show_col_types = FALSE
+)
+
+participants_pipe <- readr::read_delim(
+  "data/participants_pipe.txt",
+  delim = "|",
+  na = c("", "NA"),
+  show_col_types = FALSE
+)
+
+stopifnot(
+  identical(names(rt_tsv), names(rt)),
+  nrow(rt_tsv) == nrow(rt),
+  identical(names(participants_pipe), names(participants)),
+  nrow(participants_pipe) == nrow(participants)
+)
+```
+
+Excelではシート名を先に確認し、読むシートと範囲を明示します。配布ブックには説明用の`README`と、1行1試行の`trials`があります。`readxl`が未導入なら、Consoleで一度だけ `install.packages("readxl")` を実行してください。
+
+```{r}
+excel_path <- "data/trials.xlsx"
+readxl::excel_sheets(excel_path)
+
+rt_excel <- readxl::read_excel(
+  excel_path,
+  sheet = "trials",
+  range = "A1:D13",
+  na = c("", "NA")
+)
+
+stopifnot(
+  identical(names(rt_excel), names(rt)),
+  nrow(rt_excel) == nrow(rt),
+  isTRUE(all.equal(as.data.frame(rt_excel), as.data.frame(rt)))
+)
+```
+
+複数のExcelを一括読込するときは、まず対象ファイルを列挙し、全表の列契約を確認してから行方向へ結合します。元ファイル名を残すことで、問題のある行を追跡できます。
+
+```{r}
+files <- list.files(
+  "data/batches",
+  pattern = "\\.xlsx$",
+  full.names = TRUE,
+  ignore.case = TRUE
+)
+files <- sort(files[!startsWith(basename(files), "~$")])
+stopifnot(length(files) > 0)
+names(files) <- basename(files)
+
+tables <- files |>
+  purrr::map(\(path) {
+    readxl::read_excel(
+      path,
+      sheet = "trials",
+      na = c("", "NA")
+    )
+  })
+
+expected_cols <- c("id", "cond", "rt", "correct")
+stopifnot(purrr::every(
+  tables,
+  \(table) identical(names(table), expected_cols)
+))
+
+all_trials <- tables |>
+  purrr::list_rbind(names_to = "source_file")
+
+stopifnot(
+  length(files) == 2,
+  nrow(all_trials) == nrow(rt),
+  setequal(all_trials$source_file, basename(files)),
+  isTRUE(all.equal(
+    as.data.frame(all_trials[expected_cols]),
+    as.data.frame(rt)
+  ))
+)
+```
+
+書出しも用途で分けます。`write_excel_csv()` はExcelで開きやすいBOM付きCSVであり、複数シートやセル書式を持つ`.xlsx`ではありません。
+
+```{r}
+#| eval: false
+#| purl: false
+readr::write_tsv(wide_summary, "output/condition_means.tsv")
+readr::write_excel_csv(
+  wide_summary,
+  "output/condition_means_excel.csv"
+)
+```

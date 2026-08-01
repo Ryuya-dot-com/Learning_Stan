@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "gateId": "FG-CURRENT",
+  "updatedAt": "2026-08-01",
+  "decision": "BLOCKED",
+  "primaryImplementerCode": "CODEX",
+  "target": {
+    "commit": null,
+    "url": "https://ryuya-dot-com.github.io/Learning_Stan/"
+  },
+  "participants": {
+    "eligibleComplete": 0,
+    "records": []
+  },
+  "accessibility": {
+    "records": []
+  },
+  "independentReview": {
+    "reviewerCode": null,
+    "signedAt": null
+  },
+  "evidence": [
+    {
+      "id": "G01",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "ローカルでは固定版テスト成功。未コミットのため対象SHAに結び付く最終証拠ではない"
+    },
+    {
+      "id": "G02",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "ローカルではR 4.6.1検証成功。対象SHAのCI run待ち"
+    },
+    {
+      "id": "G03",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "ローカルではbuildとaudit成功。対象SHAの再検証待ち"
+    },
+    {
+      "id": "G04",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "未コミットのためGitHub Actions runなし"
+    },
+    {
+      "id": "G05",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "現在の変更は公開前のため本番スモークテスト未実施"
+    },
+    {
+      "id": "G06",
+      "status": "BLOCKED",
+      "artifacts": [],
+      "note": "Windows + NVDAの実機監査者と操作可能なブラウザが必要"
+    },
+    {
+      "id": "G07",
+      "status": "BLOCKED",
+      "artifacts": [],
+      "note": "macOS + VoiceOver実機が必要"
+    },
+    {
+      "id": "G08",
+      "status": "BLOCKED",
+      "artifacts": [],
+      "note": "モバイル + 読み上げ実機が必要"
+    },
+    {
+      "id": "G09",
+      "status": "BLOCKED",
+      "artifacts": [],
+      "note": "適格な初学者3名以上の観察が必要"
+    },
+    {
+      "id": "G10",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "ローカル構造テストは成功。対象SHA確定後に証拠化する"
+    },
+    {
+      "id": "G11",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "ローカル回帰テストは成功。対象SHA確定後に証拠化する"
+    },
+    {
+      "id": "G12",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "実機監査と学習者観察で得る問題のトリアージ待ち"
+    },
+    {
+      "id": "G13",
+      "status": "BLOCKED",
+      "artifacts": [],
+      "note": "初学者観察の基準値がないためD-001を確定できない"
+    },
+    {
+      "id": "G14",
+      "status": "BLOCKED",
+      "artifacts": [],
+      "note": "初学者観察の基準値がないためD-005を確定できない"
+    }
+  ],
+  "issues": []
+}

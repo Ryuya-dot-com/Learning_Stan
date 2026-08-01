@@ -1,0 +1,5 @@
+participant_id,training_group,age
+A01,trained,20
+A02,trained,24
+A03,control,22
+A04,control,

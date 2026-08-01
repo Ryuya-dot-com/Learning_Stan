@@ -1,0 +1,143 @@
+---
+title: "STEP 1 独立転移課題: 注意切替コスト"
+subtitle: "列名と条件名が変わっても、品質ゲートから納品まで再構成する"
+format:
+  html:
+    toc: true
+execute:
+  warning: false
+  message: false
+---
+
+## この課題の目的
+
+L11〜L16では、認知課題の`cong`・`incong`条件を分析しました。この課題では、別の研究者から届いた注意切替課題へ同じ考え方を移します。完成版`step1_analysis.R`は列名と条件名が違うため、そのままでは動きません。コードを丸ごと写すのではなく、各検査が何を守るのかを考えて変更してください。
+
+研究上の依頼:
+
+> 正答試行だけを使い、各参加者の切替コスト（`switch - repeat`）を記述してください。rawを保ち、問題行・検査済みデータ・参加者別成果物・解釈限界を再生成できる形で納品してください。
+
+これは4名の合成パイロットデータです。母集団への一般化や、`trained`・`control`間の効果差は結論しません。
+
+## 1. 課題ファイルを用意する
+
+スターターZIPには必要なファイルが入っています。個別にこのノートだけを取得した場合は、次のチャンクを1回実行してください。
+
+```{r}
+dir.create("data/transfer", recursive = TRUE, showWarnings = FALSE)
+
+base_url <- "https://ryuya-dot-com.github.io/Learning_Stan/"
+downloads <- c(
+  "data/transfer/switch_trials_dirty.csv",
+  "data/transfer/switch_participants.csv",
+  "challenges/step1_transfer_check.R"
+)
+destinations <- c(
+  "data/transfer/switch_trials_dirty.csv",
+  "data/transfer/switch_participants.csv",
+  "step1_transfer_check.R"
+)
+
+for (index in seq_along(downloads)) {
+  if (!file.exists(destinations[[index]])) {
+    download.file(
+      paste0(base_url, downloads[[index]]),
+      destinations[[index]],
+      mode = "wb"
+    )
+  }
+}
+
+stopifnot(file.exists(destinations))
+```
+
+## 2. まず表の意味を確認する
+
+元ケースとの対応は次のとおりです。名前を置き換えるだけでなく、1行の意味と許容値を確認します。
+
+| 元ケース | 転移課題 | 意味 |
+|---|---|---|
+| `id` | `participant_id` | 参加者ID |
+| `cond` | `trial_type` | `repeat`または`switch` |
+| `rt` | `response_ms` | 反応時間（ms） |
+| `correct` | `is_correct` | 正答か |
+| — | `block` | 実施ブロック |
+
+```{r}
+trials_path <- "data/transfer/switch_trials_dirty.csv"
+participants_path <- "data/transfer/switch_participants.csv"
+
+trials <- readr::read_csv(
+  trials_path,
+  na = c("", "NA"),
+  show_col_types = FALSE
+)
+participants <- readr::read_csv(
+  participants_path,
+  na = c("", "NA"),
+  show_col_types = FALSE
+)
+
+names(trials)
+dim(trials)
+names(participants)
+tools::md5sum(trials_path)
+```
+
+このMD5値を作業記録へ残します。課題の最後にも同じ値である必要があります。
+
+## 3. 自分のスクリプトを作る
+
+`step1_transfer.R`を新しく作り、次を上から再実行できるようにしてください。
+
+1. 期待する列名、列型、参加者キーの一意性を確認する。
+2. 完全重複、`repeat`・`switch`以外、100〜3000msの範囲外、参加者表にないID、`is_correct`欠損を別々に記録する。
+3. rawを上書きせず、次の2ファイルを作る。
+   - `data/processed/switch_trials_issues.csv`
+   - `data/processed/switch_trials_checked.csv`
+4. 検査済みデータから正答試行だけを残し、参加者×条件で平均を求める。
+5. 横長へ変換し、`switch_cost_ms = switch - repeat`を作る。
+6. 次の2成果物を保存する。
+   - `output/switch_costs.csv`
+   - `output/transfer_note.txt`
+7. 保存したファイルを読み直し、行数・列名・値を確認する。
+
+問題ラベルは自己チェッカーと合わせるため、次の5つを使います。
+
+- `duplicate`
+- `invalid_trial_type`
+- `response_out_of_range`
+- `unknown_participant`
+- `missing_correct`
+
+## 4. 完成条件
+
+自己チェッカーはコードの書き方ではなく成果物を検査します。次の契約をすべて満たしてください。
+
+- rawのMD5が配布時から変わっていない
+- 問題一覧が5行で、5種類のラベルが各1件
+- 検査済みデータが16行
+- 正答試行が14行
+- `switch_costs.csv`が4行で、列は`participant_id`、`repeat`、`switch`、`switch_cost_ms`
+- `transfer_note.txt`が、`分析対象:`・`記述結果:`・`解釈の限界:`で始まる3行
+- 1行目に`正答試行`、2行目に`4名全員`、3行目に`一般化`を含め、何を分析し、何が記述され、何を結論できないかを区別している
+
+## 5. 自己チェッカーを実行する
+
+すべての成果物を作った後、Consoleで実行します。`TRANSFER PASS`が表示されれば、データ契約を満たしています。
+
+```{r}
+#| eval: false
+#| purl: false
+source("step1_transfer_check.R", encoding = "UTF-8")
+```
+
+失敗した場合は、チェックを消したり期待値へ直接合わせたりせず、自分の中間表と処理順を確認します。特に、誤答除外の前後、問題行を除いた後、横長変換の前後で行数と1行の意味を言葉にしてください。
+
+## 6. 振り返り
+
+次の3点を短く記録します。
+
+1. 元ケースからそのまま再利用できた考え方は何ですか。
+2. 列名・条件名が変わったため修正した箇所はどこですか。
+3. 完成版スクリプトを見ずに判断できなかった箇所はどこですか。
