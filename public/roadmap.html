@@ -218,30 +218,22 @@ html.js .reveal.in{opacity:1; transform:none}
     <p class="eyebrow">学習アプリ「はじめてのRとStan」構想</p>
     <h1>学習ロードマップ</h1>
     <p class="lede">Rの文法の土台から、tidyverseによるデータ操作・ggplot2による可視化・モンテカルロ・シミュレーション、そしてベイズ推定の考え方へ。前半はbrmsで「ベイズで分析できる」状態をつくり、後半は生のStanコードでその中身を開きます。事前分布の選び方から事後分布の要約(HDI・ROPE・pd)、モデル比較(LOO)、論文での報告まで——「ベイズで考え、ベイズで語る」を一本道で積み上げるロードマップです。</p>
-    <p class="meta"><span>基礎編〜STEP 0 全10レッスン公開中</span><span class="sep">/</span><span>続編 27レッスン+ブリッジ3本・補講5本(構想)</span><span class="sep">/</span><span>対象:プログラミング未経験〜</span></p>
+    <p class="meta"><span>体験→STEP 0→R基礎→最終確認を公開中</span><span class="sep">/</span><span>続編 27レッスン+ブリッジ3本・補講5本(構想)</span><span class="sep">/</span><span>対象:プログラミング未経験〜</span></p>
   </header>
 
   <div class="route">
 
-    <!-- 基礎編 -->
+    <!-- インストール不要の体験 -->
     <section class="phase reveal" style="--pc:#2A2733; --ps:#EFEBE2;">
       <span class="node" aria-hidden="true"></span>
       <div>
-        <span class="pstep">基礎編・公開中</span>
-        <h2>レッスン 1–9 <span class="psub">文法の土台</span></h2>
-        <p class="ptag">変数からデータフレームまで、1画面1トピックで。アプリを読むだけで完結し、インストールは不要。最後は反応時間データの平均・SD・外れ値カウントを体験して修了します。</p>
+        <span class="pstep">体験・公開中</span>
+        <h2>最初の5〜10分 <span class="psub">準備なしでRに触れる</span></h2>
+        <p class="ptag">インストールは不要です。コードを読み、結果を予想して、Rが研究データに何をしてくれる道具かをつかみます。</p>
       </div>
       <div class="base-card">
         <ol class="base-list">
           <li><b>01</b>Rってなに?</li>
-          <li><b>02</b>変数と計算</li>
-          <li><b>03</b>データの型</li>
-          <li><b>04</b>ベクトル</li>
-          <li><b>05</b>文字列と因子</li>
-          <li><b>06</b>条件分岐</li>
-          <li><b>07</b>くり返しとベクトル化</li>
-          <li><b>08</b>関数</li>
-          <li><b>09</b>データ解析に挑戦</li>
         </ol>
       </div>
     </section>
@@ -251,16 +243,39 @@ html.js .reveal.in{opacity:1; transform:none}
       <span class="node" aria-hidden="true"></span>
       <div>
         <span class="pstep">STEP 0 / R環境構築・公開中</span>
-        <h2>レッスン 10 <span class="psub">RとRStudioを手元に</span></h2>
-        <p class="ptag">ここが最初の実機作業。あなたのPCにRを入れて、以降のすべてのレッスンを「自分でも試せる」状態にします。</p>
+        <h2>STEP 0 <span class="psub">RとRStudioを手元に</span></h2>
+        <p class="ptag">短い体験の次が最初の実機作業です。あなたのPCにRを入れて、以降のR基礎を「自分でも試せる」状態にします。</p>
       </div>
       <div class="lessons">
         <article class="lesson">
-          <span class="lnum">L10</span>
+          <span class="lnum">準備</span>
           <h3>RとRStudioを手元に入れる</h3>
           <p>CRANからのR本体、RStudioのインストール(macOS / Windows別)、install.packages() の使い方、コンソールとスクリプトの違い、RStudioプロジェクトによるフォルダ管理。Stanの環境構築はここではやりません——ベイズ編の直前(L26)で、万全の準備をしてから挑みます。</p>
           <div class="chips"><code>CRAN</code><code>RStudio</code><code>install.packages("tidyverse")</code></div>
         </article>
+      </div>
+    </section>
+
+    <!-- R基礎 -->
+    <section class="phase reveal" style="--pc:#2E7D1F; --ps:#EAF6E6;">
+      <span class="node" aria-hidden="true"></span>
+      <div>
+        <span class="pstep">R基礎・公開中</span>
+        <h2>8レッスン <span class="psub">読み、予想し、確かめる</span></h2>
+        <p class="ptag">変数から小さなデータ分析まで、アプリで読むだけでなく、STEP 0で準備したRStudioでも結果を確かめます。最後は独立したFoundation Checkで実行・保存・再実行を確認します。</p>
+      </div>
+      <div class="base-card">
+        <ol class="base-list">
+          <li><b>R1</b>変数と計算</li>
+          <li><b>R2</b>データの型</li>
+          <li><b>R3</b>ベクトル</li>
+          <li><b>R4</b>文字列と因子</li>
+          <li><b>R5</b>条件分岐</li>
+          <li><b>R6</b>くり返しとベクトル化</li>
+          <li><b>R7</b>関数</li>
+          <li><b>R8</b>データ解析に挑戦</li>
+          <li><b>確認</b>Foundation Check</li>
+        </ol>
       </div>
     </section>
 
@@ -482,52 +497,66 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
       <span class="node" aria-hidden="true"></span>
       <div>
         <span class="pstep">STEP 6 / Stan言語の世界</span>
-        <h2>レッスン 34–37 <span class="psub">ブラックボックスを開ける</span></h2>
-        <p class="ptag">brmsの1行が裏で生成していたStanコードを、こんどは自分の手で。式に縛られない自由なモデリングの入り口です。</p>
+        <h2>レッスン 34–41 <span class="psub">ブラックボックスを開ける</span></h2>
+        <p class="ptag">brmsの1行が裏で生成していたStanコードを、実行境界・型・対数密度・診断・予測へ分解します。コードが動くことではなく、モデルを読み、疑い、直せることがゴールです。</p>
       </div>
       <div class="lessons">
-        <article class="lesson featured">
+        <article class="lesson">
           <span class="badge badge-stan">ここからStan言語</span>
-          <h3>L34 .stanファイルの解剖</h3>
-          <p>data・parameters・model の3ブロックが読めれば、Stanは怖くない。「変数を宣言し、事前分布と尤度を書き下す」——単回帰なら、これだけです。</p>
-          <div class="code">
-            <div class="codehead"><i class="cd b" aria-hidden="true"></i><i class="cd p" aria-hidden="true"></i><i class="cd r" aria-hidden="true"></i><span>Stan</span></div>
-            <pre><span class="kw">data</span> {
-  <span class="kw">int</span>&lt;lower=0&gt; N;
-  <span class="kw">vector</span>[N] x;
-  <span class="kw">vector</span>[N] y;
-}
-<span class="kw">parameters</span> {
-  <span class="kw">real</span> alpha;
-  <span class="kw">real</span> beta;
-  <span class="kw">real</span>&lt;lower=0&gt; sigma;
-}
-<span class="kw">model</span> {
-  alpha ~ normal(<span class="num">0</span>, <span class="num">5</span>);        <span class="com">// 事前分布</span>
-  beta  ~ normal(<span class="num">0</span>, <span class="num">5</span>);
-  sigma ~ exponential(<span class="num">1</span>);
-  y ~ normal(alpha + beta * x, sigma);  <span class="com">// 尤度</span>
-}</pre>
-          </div>
-          <p class="fnote">※ <code>stancode(fit)</code> で、brmsが生成したStanコードをいつでも見られます。「答えを見ながら学ぶ」がこのSTEPの作戦です。</p>
+          <h3>L34 RからStanへ</h3>
+          <p>Rのdata.frame、名前付きlist、CmdStanR、.stanファイル、コンパイル済みモデル、drawの責務を分離。最初に「どこで何が動くか」とデータ契約を固定します。</p>
+          <div class="chips"><code>data list</code><code>cmdstanr</code><code>compile</code><code>draws</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L35</span>
-          <h3>cmdstanrで回帰を書く</h3>
-          <p>.stanファイルを自分で書き、cmdstanrでコンパイル・サンプリング。同じデータをbrmsにも投げて、推定値が一致することを確かめます。</p>
-          <div class="chips"><code>cmdstan_model</code><code>$sample()</code><code>posterior</code></div>
+          <h3>ブロック・型・制約を読む</h3>
+          <p>dataからgenerated quantitiesまでの6ブロック、int・real・vector、次元と制約を、実行時期と保存対象に結び付けて読みます。制約は事前分布ではありません。</p>
+          <div class="chips"><code>blocks</code><code>types</code><code>constraints</code><code>execution order</code></div>
+        </article>
+        <article class="lesson featured">
+          <span class="lnum">L36</span>
+          <h3>生成過程を対数密度へ翻訳する</h3>
+          <p>単回帰を、未知量、事前分布、尤度へ分解します。sampling statementの<code>~</code>は乱数代入ではなく、現在値の対数密度を<code>target</code>へ加える記法として理解します。</p>
+          <div class="code">
+            <div class="codehead"><i class="cd b" aria-hidden="true"></i><i class="cd p" aria-hidden="true"></i><i class="cd r" aria-hidden="true"></i><span>Stan</span></div>
+            <pre><span class="kw">model</span> {
+  alpha ~ normal(<span class="num">0</span>, <span class="num">2</span>);        <span class="com">// 事前分布</span>
+  beta  ~ normal(<span class="num">0</span>, <span class="num">1</span>);
+  sigma ~ exponential(<span class="num">1</span>);
+  y ~ normal(mu, sigma);             <span class="com">// 尤度</span>
+}</pre>
+          </div>
+          <p class="fnote">※ <code>stancode(fit)</code>でbrms生成コードと照合し、式・生成過程・Stanコードの3表現を往復します。</p>
         </article>
         <article class="lesson">
-          <span class="lnum">L36</span>
-          <h3>診断と再パラメータ化</h3>
-          <p>divergent transitions の警告は「無視しない」。階層モデルのfunnel(じょうご)を実際に踏んで、non-centered parameterization で抜け出します。</p>
-          <div class="chips"><code>divergences</code><code>adapt_delta</code><code>non-centered</code></div>
+          <span class="lnum">L37</span>
+          <h3>CmdStanRで再現可能に実行する</h3>
+          <p>構文確認、コンパイル、固定seed、複数chain、出力保存を分けて実行。同じデータをbrmsにも渡し、係数だけでなくモデル定義が対応しているか確かめます。</p>
+          <div class="chips"><code>$check_syntax()</code><code>$compile()</code><code>$sample()</code></div>
+        </article>
+        <article class="lesson">
+          <span class="lnum">L38</span>
+          <h3>推定値より先に診断する</h3>
+          <p>R-hat・ESS・MCSE・divergence・treedepth・E-BFMIを確認し、「数値が出た」と「信頼して解釈できる」を区別します。</p>
+          <div class="chips"><code>R-hat</code><code>ESS</code><code>divergences</code><code>E-BFMI</code></div>
+        </article>
+        <article class="lesson">
+          <span class="lnum">L39</span>
+          <h3>予測を生成してモデルを疑う</h3>
+          <p>generated quantitiesでlog_likとy_repを保存し、事後予測チェックへ。データに合うことを証明するのでなく、再現できない特徴から仮定の不足を見つけます。</p>
+          <div class="chips"><code>generated quantities</code><code>log_lik</code><code>y_rep</code><code>PPC</code></div>
+        </article>
+        <article class="lesson">
+          <span class="lnum">L40</span>
+          <h3>悪い幾何をモデル側から直す</h3>
+          <p>階層モデルのfunnelを実際に踏み、centeredとnon-centeredを比較します。adapt_deltaだけで警告を隠さず、尺度・事前分布・パラメータ化を根拠付きで直します。</p>
+          <div class="chips"><code>funnel</code><code>non-centered</code><code>standardization</code></div>
         </article>
         <article class="lesson">
           <span class="badge badge-stan">卒業制作</span>
-          <h3>L37 自分の実験をベイズで設計する</h3>
-          <p>事前分布の設定と正当化 → prior predictive check → 仮想データで推定精度のシミュレーション → 報告文の作成。ここまでの全部を、自分の研究デザイン1本につなげる統合課題です。</p>
-          <div class="chips"><code>brms</code><code>simulation</code><code>BARG</code></div>
+          <h3>L41 自分の実験をベイズで設計する</h3>
+          <p>データ契約、事前分布の根拠、prior predictive、Stan実装、計算診断、事後予測、感度分析、報告文を、自分の研究デザイン1本につなげます。</p>
+          <div class="chips"><code>Stan</code><code>diagnostics</code><code>PPC</code><code>reproducible report</code></div>
         </article>
       </div>
     </section>

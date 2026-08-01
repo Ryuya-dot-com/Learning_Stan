@@ -6,6 +6,14 @@ import { T, CodeBlock, TriDots, Btn, ResetButton, Feedback } from "./components.
 import { LESSONS } from "./data/lessons/index.js";
 import { SECTIONS } from "./data/sections.js";
 import { CHEATS } from "./data/cheats.js";
+import {
+  FOUNDATION_LESSON_ID,
+  JOURNEY_STAGES,
+  getJourneyState,
+  getLessonPathMeta,
+  getStageStatus,
+  lessonIsUnderstood,
+} from "./learningPath.js";
 
 /* ============================================================
    練習問題コンポーネント
@@ -382,25 +390,29 @@ function LessonView({
   onNextLesson,
   hasNext,
   onCheat,
+  pathLabel,
+  completionLabel,
+  nextLabel = "次のレッスンへすすむ",
+  includePractice = true,
 }) {
   // 番号なしレッスン(bridge/extra)は「LESSON null」にならないようセクション名を表示する(仕様4.4b)
   const sec = SECTIONS.find((s) => s.dir === lesson.section);
-  const headLabel = lesson.num != null ? `LESSON ${lesson.num}` : (sec ? sec.title : "");
-  const doneLabel = lesson.num != null ? `レッスン${lesson.num} 修了!` : `${lesson.title} 修了!`;
+  const headLabel = pathLabel || (lesson.num != null ? `LESSON ${lesson.num}` : (sec ? sec.title : ""));
+  const doneLabel = completionLabel || (lesson.num != null ? `レッスン${lesson.num} 修了!` : `${lesson.title} 修了!`);
   const items = useMemo(() => {
     const arr = lesson.pages.map((p) => ({ kind: "page", p }));
     lesson.ex.forEach((e, i) => arr.push({ kind: "ex", e, i }));
-    if (lesson.practice) arr.push({ kind: "practice", practice: lesson.practice });
+    if (lesson.practice && includePractice) arr.push({ kind: "practice", practice: lesson.practice });
     arr.push({ kind: "done" });
     return arr;
-  }, [lesson]);
+  }, [lesson, includePractice]);
 
-  const practiceTotal = lesson.practice?.items.length || 0;
+  const practiceTotal = includePractice ? lesson.practice?.items.length || 0 : 0;
   const practiceCount = practiceSet.size;
   const practiceComplete = practiceTotal === 0 || practiceCount === practiceTotal;
   const practiceIndex = lesson.pages.length + lesson.ex.length;
   const [idx, setIdx] = useState(() =>
-    doneSet.size === lesson.ex.length && lesson.practice && !practiceComplete ? practiceIndex : 0
+    doneSet.size === lesson.ex.length && lesson.practice && includePractice && !practiceComplete ? practiceIndex : 0
   );
   const contentRef = useRef(null);
 
@@ -426,7 +438,7 @@ function LessonView({
             style={{ color: C.accentDeep }}
             onClick={onHome}
           >
-            ← レッスン一覧
+            ← 学習ホーム
           </button>
           <span className="text-xs font-bold" style={{ color: C.sub, fontFamily: MONO }}>
             {idx + 1} / {items.length}
@@ -610,15 +622,15 @@ function LessonView({
                   {firstSet && firstSet.size > 0 && ` うち ${firstSet.size} 問は一発クリアです!`}
                 </p>
                 <div className="flex flex-col items-center gap-3">
-                  {lesson.practice && !practiceComplete ? (
+                  {lesson.practice && includePractice && !practiceComplete ? (
                     <Btn kind="ghost" onClick={() => setIdx(practiceIndex)}>実践チェックへすすむ</Btn>
                   ) : hasNext ? (
-                    <Btn onClick={onNextLesson}>次のレッスンへすすむ</Btn>
+                    <Btn onClick={onNextLesson}>{nextLabel}</Btn>
                   ) : (
                     <Btn onClick={onCheat}>チートシートを見る</Btn>
                   )}
                   <Btn kind="quiet" onClick={onHome}>
-                    レッスン一覧にもどる
+                    学習ホームにもどる
                   </Btn>
                 </div>
               </div>
@@ -645,7 +657,7 @@ function LessonView({
                   )}
                 </div>
                 <Btn kind="quiet" onClick={onHome}>
-                  レッスン一覧にもどる
+                  学習ホームにもどる
                 </Btn>
               </div>
             )}
@@ -668,24 +680,163 @@ function LessonView({
 }
 
 /* ============================================================
+   Foundation Check
+   ============================================================ */
+
+function FoundationCheck({ lesson, practiceSet, onPractice, onHome, onReviewSetup, onCheat, ready }) {
+  const practice = lesson.practice;
+  const checklistComplete = practice.items.every((item) => practiceSet.has(item.id));
+  const complete = ready && checklistComplete;
+  const count = practice.items.filter((item) => practiceSet.has(item.id)).length;
+  const pct = Math.round((count / practice.items.length) * 100);
+
+  return (
+    <div className="rise">
+      <div className="mb-5 flex items-center justify-between">
+        <button
+          className="inline-flex min-h-11 items-center text-sm font-bold"
+          style={{ color: C.accentDeep }}
+          onClick={onHome}
+        >
+          ← 学習ホーム
+        </button>
+        <span className="text-xs font-bold" style={{ color: C.sub, fontFamily: MONO }}>
+          {count} / {practice.items.length}
+        </span>
+      </div>
+
+      <div className="mb-2 text-xs font-bold tracking-widest" style={{ color: C.stan, fontFamily: MONO }}>
+        最終確認
+      </div>
+      <h1 tabIndex={-1} className="mb-2 text-3xl font-bold tracking-tight focus:outline-none" style={{ color: C.ink }}>
+        Foundation Check
+      </h1>
+      <p className="mb-5 text-sm leading-7" style={{ color: C.body }}>
+        <T>{practice.intro}</T>
+      </p>
+
+      {!ready && (
+        <div className="mb-5 rounded-2xl p-4" style={{ background: C.warnSoft, border: `1px solid ${C.warnLine}` }}>
+          <p className="text-sm font-bold" style={{ color: C.warnText }}>先にR基礎まで終えるのがおすすめです</p>
+          <p className="mt-1 text-xs leading-5" style={{ color: C.warnText }}>
+            この画面を直接開くことはできますが、学習ホームへ戻ると、未完了の段階から再開できます。
+          </p>
+        </div>
+      )}
+
+      <div
+        role="progressbar"
+        aria-label="Foundation Checkの進みぐあい"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+        className="mb-5 h-2 w-full overflow-hidden rounded-full"
+        style={{ background: C.track }}
+      >
+        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: C.ok, transition: "width 0.3s" }} />
+      </div>
+
+      <fieldset className="flex flex-col gap-3">
+        <legend className="sr-only">実機で確認できた項目</legend>
+        {practice.items.map((item) => {
+          const inputId = `foundation-${item.id}`;
+          const checked = practiceSet.has(item.id);
+          return (
+            <div
+              key={item.id}
+              className="rounded-2xl bg-white p-4"
+              style={{ border: `1.5px solid ${checked ? C.ok : C.line}`, background: checked ? C.okSoft : "#FFFFFF" }}
+            >
+              <div className="flex items-start gap-3">
+                <input
+                  id={inputId}
+                  type="checkbox"
+                  checked={checked}
+                  onChange={(event) => onPractice(item.id, event.target.checked)}
+                  className="mt-1 h-5 w-5 shrink-0 accent-current"
+                  style={{ color: C.okText }}
+                />
+                <div className="min-w-0 flex-1">
+                  <label htmlFor={inputId} className="cursor-pointer text-sm font-bold leading-6" style={{ color: C.ink }}>
+                    <T>{item.label}</T>
+                  </label>
+                  <p className="mt-1 text-xs leading-5" style={{ color: C.sub }}>
+                    <T>{item.criterion}</T>
+                  </p>
+                </div>
+              </div>
+              {item.code && <CodeBlock code={item.code} output={item.out} />}
+            </div>
+          );
+        })}
+      </fieldset>
+
+      <div role="status" aria-live="polite" className="mt-5">
+        {complete ? (
+          <div className="pop rounded-2xl p-5 text-center" style={{ background: C.accentSoft, border: `1px solid ${C.accentLine}` }}>
+            <div className="mb-2 flex justify-center"><TriDots filled={3} size={14} /></div>
+            <h2 className="text-xl font-bold" style={{ color: C.accentDeep }}>公開中のR基礎トラックを修了しました</h2>
+            <p className="mt-2 text-sm leading-6" style={{ color: C.accentDeep }}>
+              RStudioでコードを実行し、保存して、同じ結果を再現する土台ができました。
+            </p>
+            <div className="mt-5 flex flex-col items-center gap-2">
+              <Btn onClick={onCheat}>学んだR文法を復習する</Btn>
+              <a
+                className="inline-flex min-h-11 items-center text-xs font-bold underline"
+                style={{ color: C.accentDeep }}
+                href={import.meta.env.BASE_URL + "roadmap.html"}
+              >
+                この先の公開予定を見る
+              </a>
+            </div>
+          </div>
+        ) : checklistComplete ? (
+          <div className="rounded-2xl bg-white p-4" style={{ border: `1px solid ${C.line}` }}>
+            <p className="text-sm font-bold" style={{ color: C.okText }}>実機での5項目は確認できました</p>
+            <p className="mt-1 text-xs leading-5" style={{ color: C.sub }}>
+              公開中トラックの修了には、R基礎の未完了レッスンも終える必要があります。学習ホームが次の場所を案内します。
+            </p>
+            <button className="mt-2 inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} onClick={onHome}>
+              未完了の段階へ戻る
+            </button>
+          </div>
+        ) : (
+          <div className="rounded-2xl bg-white p-4" style={{ border: `1px solid ${C.line}` }}>
+            <p className="text-sm font-bold" style={{ color: C.ink }}>
+              あと {practice.items.length - count} 項目を実機で確認してください
+            </p>
+            <p className="mt-1 text-xs leading-5" style={{ color: C.sub }}>
+              一度に終えなくても大丈夫です。チェックはこのブラウザに保存されます。
+            </p>
+            <button className="mt-2 inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} onClick={onReviewSetup}>
+              STEP 0の手順を見直す
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
    ホーム画面
    ============================================================ */
 
-function Home({ progress, storageNotice, exportText, onImport, onImportError, onOpen, onCheat, onReset }) {
+function Home({ progress, storageNotice, exportText, onImport, onImportError, onOpen, onFoundation, onCheat, onReset }) {
   const totalEx = LESSONS.reduce((s, l) => s + l.ex.length, 0);
   const doneEx = LESSONS.reduce((s, l) => s + (progress.done[l.id] || []).length, 0);
-  const doneLessons = LESSONS.filter((l) => (progress.done[l.id] || []).length === l.ex.length).length;
-  const practiceLessons = LESSONS.filter((l) => l.practice);
-  const practicedLessons = practiceLessons.filter((lesson) =>
-    lesson.practice.items.every((item) => (progress.practice?.[lesson.id] || []).includes(item.id))
-  ).length;
-  const lessonIsComplete = (lesson) =>
-    (progress.done[lesson.id] || []).length === lesson.ex.length &&
-    (!lesson.practice || lesson.practice.items.every((item) => (progress.practice?.[lesson.id] || []).includes(item.id)));
-  const allDone = LESSONS.every(lessonIsComplete);
-  const firstIncomplete = LESSONS.find((lesson) => !lessonIsComplete(lesson));
-  const pct = Math.round((doneEx / totalEx) * 100);
-  const dotsFilled = allDone ? 3 : Math.min(2, Math.floor((doneEx / totalEx) * 3));
+  const doneLessons = LESSONS.filter((lesson) => lessonIsUnderstood(progress, lesson)).length;
+  const foundationLesson = LESSONS.find((lesson) => lesson.id === FOUNDATION_LESSON_ID);
+  const practiceTotal = foundationLesson.practice.items.length;
+  const practiceCount = (progress.practice?.[FOUNDATION_LESSON_ID] || []).length;
+  const journey = getJourneyState(progress);
+  const pct = Math.round(((doneEx + practiceCount) / (totalEx + practiceTotal)) * 100);
+  const dotsFilled = journey.complete ? 3 : Math.min(2, Math.floor((journey.completedStages / JOURNEY_STAGES.length) * 3));
+
+  const openJourneyTarget = () => {
+    if (journey.targetView?.name === "lesson") onOpen(journey.targetView.id);
+    if (journey.targetView?.name === "foundation") onFoundation();
+  };
 
   return (
     <div className="rise">
@@ -704,21 +855,65 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         はじめてのRとStan
       </h1>
       <p className="mb-6 text-sm leading-6" style={{ color: C.sub }}>
-        ゼロから学ぶ、研究のためのデータ分析。現在公開中の全{LESSONS.length}レッスンで、Rの基礎とRStudioの環境構築まで案内します。ベイズ統計以降は今後追加予定です。
+        プログラミング未経験から、研究でRを使うための土台を作ります。現在公開中なのはRの基礎とRStudioの環境構築までで、Stanとベイズ統計は今後の公開予定です。
       </p>
 
-      <div className="mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
+      <section aria-labelledby="orientation-title" className="mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
+        <h2 id="orientation-title" className="text-base font-bold" style={{ color: C.ink }}>最初に知っておくこと</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          {[
+            ["対象", "Rを初めて学ぶ人"],
+            ["最初の体験", "5〜10分・準備不要"],
+            ["公開範囲", "R基礎とRStudio"],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-xl p-3" style={{ background: C.accentSoft }}>
+              <div className="text-xs font-bold" style={{ color: C.accentDeep }}>{label}</div>
+              <div className="mt-1 text-sm font-bold" style={{ color: C.ink }}>{value}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="next-action-title" className="mb-6 rounded-2xl p-5" style={{ background: journey.complete ? C.okSoft : C.accentSoft, border: `1px solid ${journey.complete ? C.okLine : C.accentLine}` }}>
+        {journey.complete ? (
+          <>
+            <div className="mb-2 flex justify-center sm:justify-start"><TriDots filled={3} size={14} /></div>
+            <h2 id="next-action-title" className="text-xl font-bold" style={{ color: C.okText }}>公開中のR基礎トラックを修了しました</h2>
+            <p className="mt-2 text-sm leading-6" style={{ color: C.okText }}>
+              ここからは、学んだ文法を見直すか、この先の公開予定を確認できます。
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Btn onClick={onCheat}>学んだR文法を復習する</Btn>
+              <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + "roadmap.html"}>
+                この先の公開予定を見る
+              </a>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="text-xs font-bold tracking-wide" style={{ color: C.accentDeep }}>{journey.stage.label} ・ 現在地</div>
+            <h2 id="next-action-title" className="mt-1 text-xl font-bold" style={{ color: C.ink }}>
+              次にすること: {journey.targetLesson?.title || journey.stage.title}
+            </h2>
+            <p className="mt-2 text-sm leading-6" style={{ color: C.body }}>{journey.stage.description}</p>
+            <p className="mt-2 text-xs font-bold" style={{ color: C.sub }}>
+              目安 {journey.stage.time} ・ {journey.stage.install}
+            </p>
+            <div className="mt-4"><Btn onClick={openJourneyTarget}>{journey.cta}</Btn></div>
+          </>
+        )}
+      </section>
+
+      <section aria-labelledby="progress-title" className="mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
         <div className="mb-2 flex items-baseline justify-between">
-          <span className="text-sm font-bold" style={{ color: C.ink }}>
-            理解問題の進みぐあい
-          </span>
+          <h2 id="progress-title" className="text-sm font-bold" style={{ color: C.ink }}>公開中トラックの進みぐあい</h2>
           <span className="text-xs font-bold" style={{ color: C.sub, fontFamily: MONO }}>
-            {doneEx} / {totalEx} 問
+            {pct}%
           </span>
         </div>
         <div
           role="progressbar"
-          aria-label="理解問題の進みぐあい"
+          aria-label="公開中トラックの進みぐあい"
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={pct}
@@ -730,115 +925,73 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
             style={{ width: pct + "%", background: C.accent, transition: "width 0.4s" }}
           />
         </div>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <div className="text-xs" style={{ color: C.faint }}>
-            <span>理解済み {doneLessons} / {LESSONS.length} レッスン</span>
-            {practiceLessons.length > 0 && <span> ・ 実践済み {practicedLessons} / {practiceLessons.length}</span>}
-          </div>
-          {firstIncomplete && (
-            <Btn onClick={() => onOpen(firstIncomplete.id)} className="px-4 py-2">
-              {doneEx === 0 ? "レッスン1をはじめる" : "つづきから"}
-            </Btn>
-          )}
+        <div className="mt-3 text-xs" style={{ color: C.faint }}>
+          理解済み {doneLessons} / {LESSONS.length} レッスン ・ 実機確認 {practiceCount} / {practiceTotal} 項目
         </div>
-      </div>
+      </section>
 
-      {allDone && (
-        <div
-          className="pop mb-6 rounded-2xl p-5 text-center"
-          style={{ background: C.accentSoft, border: "1px solid " + C.accentLine }}
-        >
-          <div className="mb-2 flex justify-center">
-            <TriDots filled={3} size={14} />
-          </div>
-          <p className="text-base font-bold" style={{ color: C.accentDeep }}>
-            全レッスン修了、おめでとうございます!
-          </p>
-          <p className="mt-1 text-xs leading-5" style={{ color: C.accentDeep }}>
-            Foundation Checkまで完了しました。次はSTEP 1で、実データを読み、整えてみましょう。
-          </p>
-        </div>
-      )}
-
-      <div className="flex flex-col gap-7">
-        {SECTIONS.map((sec) => {
-          // レッスンが0本のセクションは表示しない(仕様4.3。移行直後は基礎編のみが並ぶ)
-          const ls = LESSONS.filter((l) => l.section === sec.dir);
-          if (ls.length === 0) return null;
-          return (
-            <div key={sec.dir}>
-              <div className="mb-2.5 flex items-baseline gap-2">
-                <span
-                  className="h-2.5 w-2.5 shrink-0 self-center rounded-full"
-                  style={{ background: sec.color }}
-                  aria-hidden="true"
-                />
-                <h2 className="text-sm font-bold" style={{ color: C.ink }}>
-                  {sec.title}
-                </h2>
-                <span className="min-w-0 flex-1 truncate text-xs" style={{ color: C.sub }}>
-                  {sec.sub}
+      <section aria-labelledby="path-title" className="mb-6">
+        <h2 id="path-title" className="mb-3 text-base font-bold" style={{ color: C.ink }}>学習の道すじ</h2>
+        <ol className="flex flex-col gap-3">
+          {JOURNEY_STAGES.map((stage, index) => {
+            const status = getStageStatus(stage, progress);
+            return (
+              <li key={stage.id} className="flex gap-3 rounded-2xl bg-white p-4" style={{ border: `1px solid ${status === "current" ? C.accentLine : status === "done" ? C.okLine : C.line}` }}>
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ background: status === "done" ? C.okSoft : status === "current" ? C.accentSoft : C.track, color: status === "done" ? C.okText : status === "current" ? C.accentDeep : C.faint }}>
+                  {status === "done" ? "✓" : index + 1}
                 </span>
-                {sec.notebook && (
-                  <a
-                    className="inline-flex min-h-11 shrink-0 items-center text-xs font-bold underline"
-                    style={{ color: C.accentDeep }}
-                    href={import.meta.env.BASE_URL + "notebooks/" + sec.notebook}
-                    download
-                  >
-                    演習ノート ↓
-                  </a>
-                )}
-              </div>
-              <div className="flex flex-col gap-3">
-                {ls.map((l) => {
-                  const got = (progress.done[l.id] || []).length;
-                  const understood = got === l.ex.length;
-                  const practiced = !l.practice || l.practice.items.every((item) =>
-                    (progress.practice?.[l.id] || []).includes(item.id)
-                  );
-                  const all = understood && practiced;
-                  // 番号なしトラックは mark+セクション内連番(例: R1, 補1)を表示する(仕様4.4b)
-                  const badge = l.num != null ? String(l.num).padStart(2, "0") : (sec.mark || "") + l.numInSection;
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline gap-x-2">
+                    <span className="text-xs font-bold" style={{ color: status === "current" ? C.accentDeep : C.sub }}>{stage.label}</span>
+                    <span className="text-sm font-bold" style={{ color: C.ink }}>{stage.title}</span>
+                    {status === "current" && <span className="text-xs font-bold" style={{ color: C.accentDeep }}>現在地</span>}
+                  </div>
+                  <p className="mt-1 text-xs leading-5" style={{ color: C.sub }}>{stage.time} ・ {stage.install}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      <details className="rounded-2xl bg-white" style={{ border: `1px solid ${C.line}` }}>
+        <summary className="cursor-pointer p-4 text-sm font-bold" style={{ color: C.accentDeep }}>
+          全{LESSONS.length}レッスンを見る
+        </summary>
+        <div className="flex flex-col gap-6 border-t p-4" style={{ borderColor: C.line }}>
+          {JOURNEY_STAGES.filter((stage) => stage.lessonIds.length > 0).map((stage) => (
+            <div key={stage.id}>
+              <h3 className="mb-2 text-xs font-bold" style={{ color: C.sub }}>{stage.label} / {stage.title}</h3>
+              <div className="flex flex-col gap-2">
+                {stage.lessonIds.map((id) => {
+                  const lesson = LESSONS.find((item) => item.id === id);
+                  const got = (progress.done[lesson.id] || []).length;
+                  const understood = lessonIsUnderstood(progress, lesson);
+                  const badge = getLessonPathMeta(lesson)?.badge;
                   return (
-                    <button
-                      key={l.id}
-                      onClick={() => onOpen(l.id)}
-                      className="flex items-center gap-4 rounded-2xl bg-white p-4 text-left transition-shadow hover:shadow-md"
-                      style={{ border: "1px solid " + (all ? C.okLine : C.line) }}
-                    >
-                      <span
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold"
-                        style={
-                          all
-                            ? { background: C.okSoft, color: C.okText }
-                            : { background: C.accentSoft, color: C.accentDeep, fontFamily: MONO }
-                        }
-                      >
-                        {all ? "✓" : understood && l.practice ? "実" : badge}
-                      </span>
+                    <button key={lesson.id} onClick={() => onOpen(lesson.id)} className="flex items-center gap-3 rounded-xl p-3 text-left" style={{ background: understood ? C.okSoft : C.paper }}>
+                      <span className="w-9 shrink-0 text-center text-xs font-bold" style={{ color: understood ? C.okText : C.accentDeep, fontFamily: MONO }}>{understood ? "✓" : badge}</span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-bold" style={{ color: C.ink }}>
-                          {l.title}
-                        </span>
-                        <span className="block text-xs" style={{ color: C.sub }}>
-                          {l.tag}
-                        </span>
+                        <span className="block text-sm font-bold" style={{ color: C.ink }}>{lesson.title}</span>
+                        <span className="block text-xs" style={{ color: C.sub }}>{lesson.tag}</span>
                       </span>
-                      <span
-                        className="shrink-0 text-xs font-bold"
-                        style={{ color: all ? C.okText : got > 0 ? C.accentDeep : C.faint, fontFamily: MONO }}
-                      >
-                        {all ? (l.practice ? "実践済" : "修了") : understood && l.practice ? "理解済" : got + " / " + l.ex.length}
-                      </span>
+                      <span className="shrink-0 text-xs font-bold" style={{ color: understood ? C.okText : C.faint }}>{understood ? "理解済" : `${got} / ${lesson.ex.length}`}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+          <button onClick={onFoundation} className="flex items-center gap-3 rounded-xl p-3 text-left" style={{ background: getStageStatus(JOURNEY_STAGES.at(-1), progress) === "done" ? C.okSoft : C.paper }}>
+            <span className="w-9 shrink-0 text-center text-xs font-bold" style={{ color: C.stan, fontFamily: MONO }}>確認</span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-bold" style={{ color: C.ink }}>Foundation Check</span>
+              <span className="block text-xs" style={{ color: C.sub }}>実機で実行・保存・再実行を確認</span>
+            </span>
+            <span className="shrink-0 text-xs font-bold" style={{ color: C.faint }}>{practiceCount} / {practiceTotal}</span>
+          </button>
+        </div>
+      </details>
 
       <div className="mt-8 flex flex-col items-center gap-2 pb-6 text-center">
         <p className="text-xs" style={{ color: C.faint }}>
@@ -886,13 +1039,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
             {storageNotice}
           </p>
         )}
-        <a
-          className="inline-flex min-h-11 items-center text-xs font-bold underline"
-          style={{ color: C.accentDeep }}
-          href={import.meta.env.BASE_URL + "roadmap.html"}
-        >
-          この先の学習ロードマップを見る
-        </a>
+        <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + "roadmap.html"}>この先の公開予定を見る</a>
         <ResetButton onReset={onReset} />
       </div>
     </div>
@@ -904,7 +1051,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
    lg以上の画面幅でのみ表示する。モバイルはホーム画面が目次を兼ねる
    ============================================================ */
 
-function Sidebar({ progress, currentId, viewName, onOpen, onCheat, onHome }) {
+function Sidebar({ progress, currentId, viewName, onOpen, onFoundation, onCheat, onHome }) {
   return (
     <nav
       aria-label="レッスンの目次"
@@ -928,35 +1075,39 @@ function Sidebar({ progress, currentId, viewName, onOpen, onCheat, onHome }) {
       </button>
 
       <div className="flex flex-col gap-4 pb-4">
-        {SECTIONS.map((sec) => {
-          const ls = LESSONS.filter((l) => l.section === sec.dir);
-          if (ls.length === 0) return null;
-          return (
-            <div key={sec.dir}>
-              <div className="mb-1 flex items-center gap-1.5">
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ background: sec.color }}
-                  aria-hidden="true"
-                />
-                <span className="text-xs font-bold" style={{ color: C.sub }}>
-                  {sec.title}
-                </span>
+        {JOURNEY_STAGES.map((stage) => {
+          if (stage.kind === "foundation") {
+            const current = viewName === "foundation";
+            const done = getStageStatus(stage, progress) === "done";
+            return (
+              <div key={stage.id}>
+                <div className="mb-1 text-xs font-bold" style={{ color: C.sub }}>{stage.label}</div>
+                <button
+                  onClick={onFoundation}
+                  aria-current={current ? "page" : undefined}
+                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs"
+                  style={current ? { background: C.accentSoft, color: C.accentDeep, fontWeight: 700 } : { color: C.body }}
+                >
+                  <span className="w-8 shrink-0 text-right" style={{ fontFamily: MONO, color: current ? C.accentDeep : C.faint }}>確認</span>
+                  <span className="min-w-0 flex-1 truncate">Foundation Check</span>
+                  {done && <span aria-label="修了" style={{ color: C.okText }}>✓</span>}
+                </button>
               </div>
+            );
+          }
+          return (
+            <div key={stage.id}>
+              <div className="mb-1 text-xs font-bold" style={{ color: C.sub }}>{stage.label} / {stage.title}</div>
               <div className="flex flex-col">
-                {ls.map((l) => {
-                  const got = (progress.done[l.id] || []).length;
-                  const understood = got === l.ex.length;
-                  const practiced = !l.practice || l.practice.items.every((item) =>
-                    (progress.practice?.[l.id] || []).includes(item.id)
-                  );
-                  const all = understood && practiced;
-                  const current = viewName === "lesson" && l.id === currentId;
-                  const badge = l.num != null ? String(l.num).padStart(2, "0") : (sec.mark || "") + l.numInSection;
+                {stage.lessonIds.map((id) => {
+                  const lesson = LESSONS.find((item) => item.id === id);
+                  const understood = lessonIsUnderstood(progress, lesson);
+                  const current = viewName === "lesson" && lesson.id === currentId;
+                  const badge = getLessonPathMeta(lesson)?.badge;
                   return (
                     <button
-                      key={l.id}
-                      onClick={() => onOpen(l.id)}
+                      key={lesson.id}
+                      onClick={() => onOpen(lesson.id)}
                       aria-current={current ? "page" : undefined}
                       className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs"
                       style={
@@ -968,8 +1119,8 @@ function Sidebar({ progress, currentId, viewName, onOpen, onCheat, onHome }) {
                       <span className="w-6 shrink-0 text-right" style={{ fontFamily: MONO, color: current ? C.accentDeep : C.faint }}>
                         {badge}
                       </span>
-                      <span className="min-w-0 flex-1 truncate">{l.title}</span>
-                      {all && (
+                      <span className="min-w-0 flex-1 truncate">{lesson.title}</span>
+                      {understood && (
                         <span aria-label="修了" style={{ color: C.okText }}>
                           ✓
                         </span>
@@ -997,7 +1148,7 @@ function Sidebar({ progress, currentId, viewName, onOpen, onCheat, onHome }) {
           className="inline-flex min-h-11 items-center rounded-lg px-2 text-xs font-bold"
           style={{ color: C.accentDeep }}
         >
-          学習ロードマップ
+          この先の公開予定
         </a>
       </div>
     </nav>
@@ -1055,8 +1206,8 @@ function CheatSheet({ onHome }) {
         className="mt-5 rounded-2xl p-4 text-sm leading-6"
         style={{ background: C.accentSoft, border: "1px solid " + C.accentLine, color: C.accentDeep }}
       >
-        <span className="font-bold">次のステップ:</span>
-        CRAN から R を、Posit から RStudio をインストール → コンソールで手を動かす → tidyverse で実データの分析へ。
+        <span className="font-bold">次に迷ったら:</span>
+        学習ホームへ戻ると、保存済みの進捗から次に取り組む段階を案内します。
       </div>
       <div className="h-8" />
     </div>
@@ -1064,4 +1215,4 @@ function CheatSheet({ onHome }) {
 }
 
 
-export { LessonView, Home, CheatSheet, Sidebar };
+export { LessonView, FoundationCheck, Home, CheatSheet, Sidebar };

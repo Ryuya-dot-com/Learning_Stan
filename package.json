@@ -14,6 +14,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:r": "node scripts/r-example-verifier.mjs",
+    "test:stan-content": "node scripts/stan-content-verifier.mjs",
     "gate:status": "node scripts/foundation-gate.mjs",
     "gate:require-pass": "node scripts/foundation-gate.mjs --require-pass",
     "postinstall": "node scripts/dropbox-ignore.mjs"

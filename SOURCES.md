@@ -47,10 +47,22 @@ CRAN の DESCRIPTION で確認した版。
 | loo | 2.10.1 |
 | rstan | 2.32.7 |
 | tidybayes | 3.0.7 |
-| cmdstanr | **CRANでは配布されていない**（r-universe 経由で入れる） |
+| cmdstanr | 0.9.0（CRANでは配布されていないためr-universe経由） |
 
 Stan本体は [stan-dev/stan](https://github.com/stan-dev/stan/releases) の v2.39.0（2026-05-19）が最新。
 rstan が同梱する Stan はこれより古い世代であるため、本教材は `backend = "cmdstanr"` を標準とします。
+
+## Stan教材原稿
+
+| 教材上の主張 | 一次資料 | 確認内容 |
+|---|---|---|
+| ブロックごとに実行時期・保存対象・許可される処理が異なる | [Stan Reference Manual: Program Blocks](https://mc-stan.org/docs/reference-manual/blocks.html) | transformed dataはデータ読込後、transformed parametersとmodelは対数密度評価時、generated quantitiesはdraw生成後に実行される |
+| 制約付きparameterは内部の無制約空間との間で変換される | [Stan Reference Manual: Program Blocks](https://mc-stan.org/docs/reference-manual/blocks.html) | parametersの制約変換とJacobian調整を、事前分布そのものと区別した |
+| 単回帰の正規尤度はvector化できる | [Stan User's Guide: Regression Models](https://mc-stan.org/docs/stan-users-guide/regression.html) | `y ~ normal(alpha + beta * x, sigma)`と観測ごとのloopが同じモデルを表す |
+| CmdStanRは`.stan`をコンパイルし、名前付きR listをdataとして`$sample()`へ渡す | [CmdStanR: Getting started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) | `cmdstan_model()`、`$sample()`、複数chain、seed、fit要約の基本経路を確認 |
+| 診断はdivergence、treedepth、E-BFMI、ESS、R-hatを含む | [CmdStan diagnose utility](https://mc-stan.org/docs/2_39/cmdstan-guide/diagnose_utility.html) | 推定値の解釈前に計算上の問題を確認する構成とした |
+
+Stan教材パックの一次資料は`mc-stan.org`に限定し、最終確認日は2026-08-01とする。静的検証の成功はStanコンパイラでの構文確認やMCMC診断の代替ではない。
 
 ## brms の挙動（同梱ヘルプで確認）
 

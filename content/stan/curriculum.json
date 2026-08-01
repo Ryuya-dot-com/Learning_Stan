@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-unpublished",
+  "entryPrerequisite": "l33",
+  "releasePolicy": "Foundation Gate通過後に、前段階の評価結果を反映して1レッスンずつ公開する",
+  "lessons": [
+    {
+      "id": "l34",
+      "title": "RからStanへ――実行経路とデータ契約",
+      "prerequisites": ["l33"],
+      "outcome": "R、CmdStanR、コンパイル済みStanモデル、サンプル出力の役割を区別し、Rのlistをdataブロックへ対応付けられる",
+      "concepts": ["RとStanの責務", ".stanファイル", "名前付きlist", "コンパイルとサンプリング"],
+      "directEvidence": [
+        {
+          "artifact": "実行経路図とデータ対応表",
+          "method": "constructed-response",
+          "criterion": "各処理をR、CmdStanR、Stanのいずれが担うか説明し、N・x・yの名前と型を対応付ける"
+        }
+      ]
+    },
+    {
+      "id": "l35",
+      "title": "ブロック、型、制約を読む",
+      "prerequisites": ["l34"],
+      "outcome": "6つの主要ブロックの実行時期と、int・real・vector・制約の意味をコードから説明できる",
+      "concepts": ["program blocks", "execution order", "types", "constraints"],
+      "directEvidence": [
+        {
+          "artifact": "ブロック分類と型エラー修正",
+          "method": "debugging-task",
+          "criterion": "宣言を適切なブロックへ移し、Nとvectorの不整合および不正な制約を修正する"
+        }
+      ]
+    },
+    {
+      "id": "l36",
+      "title": "生成過程を対数密度へ翻訳する",
+      "prerequisites": ["l35"],
+      "outcome": "単回帰の生成過程を事前分布と尤度へ分解し、sampling statementがtargetへ何を加えるか説明できる",
+      "concepts": ["generative model", "prior", "likelihood", "target", "vectorization"],
+      "directEvidence": [
+        {
+          "artifact": "単回帰Stanプログラム",
+          "method": "code-construction",
+          "criterion": "alpha・beta・sigmaの事前分布と、ベクトル化した正規尤度を自力で完成する"
+        }
+      ]
+    },
+    {
+      "id": "l37",
+      "title": "CmdStanRで再現可能に実行する",
+      "prerequisites": ["l36"],
+      "outcome": "Stanプログラムを構文確認・コンパイルし、固定seedと複数chainでサンプリングして出力を保存できる",
+      "concepts": ["cmdstan_model", "check_syntax", "sample", "seed", "chains", "output files"],
+      "directEvidence": [
+        {
+          "artifact": "実行可能なRスクリプトとCmdStan出力",
+          "method": "performance-task",
+          "criterion": "対象ファイル・データ・seed・chain数を記録し、同じ手順で再実行できる"
+        }
+      ]
+    },
+    {
+      "id": "l38",
+      "title": "推定値より先に診断を読む",
+      "prerequisites": ["l37"],
+      "outcome": "R-hat、ESS、MCSE、divergence、treedepth、E-BFMIを確認し、推定結果を解釈してよいか判断できる",
+      "concepts": ["R-hat", "ESS", "MCSE", "divergence", "treedepth", "E-BFMI"],
+      "directEvidence": [
+        {
+          "artifact": "診断判定メモ",
+          "method": "case-analysis",
+          "criterion": "警告を列挙するだけでなく、解釈を止める条件と次に調べるモデル箇所を説明する"
+        }
+      ]
+    },
+    {
+      "id": "l39",
+      "title": "generated quantitiesでモデルを検査する",
+      "prerequisites": ["l38"],
+      "outcome": "log_likとy_repを生成し、観測データとのずれを事後予測チェックで説明できる",
+      "concepts": ["generated quantities", "log likelihood", "posterior predictive check", "prediction"],
+      "directEvidence": [
+        {
+          "artifact": "事後予測図と解釈",
+          "method": "performance-task",
+          "criterion": "少なくとも1つの観測統計量をy_repと比較し、適合と妥当性を混同せず説明する"
+        }
+      ]
+    },
+    {
+      "id": "l40",
+      "title": "悪い幾何をモデル側から直す",
+      "prerequisites": ["l39"],
+      "outcome": "階層モデルのfunnelとdivergenceの関係を説明し、centered表現をnon-centered表現へ書き換えられる",
+      "concepts": ["hierarchical model", "funnel", "centered", "non-centered", "standardization"],
+      "directEvidence": [
+        {
+          "artifact": "再パラメータ化前後のコードと診断比較",
+          "method": "debugging-task",
+          "criterion": "adapt_deltaだけで警告を隠さず、モデル幾何とデータ尺度に基づく修正を比較する"
+        }
+      ]
+    },
+    {
+      "id": "l41",
+      "title": "自分のモデルを設計・診断・報告する",
+      "prerequisites": ["l40"],
+      "outcome": "自分の研究課題を生成過程として定義し、Stan実装、診断、予測検査、限界を一つの再現可能な成果物として報告できる",
+      "concepts": ["model specification", "prior predictive", "sampling diagnostics", "posterior predictive", "reporting"],
+      "directEvidence": [
+        {
+          "artifact": "Stan卒業制作",
+          "method": "portfolio",
+          "criterion": "データ契約、事前分布の根拠、診断、予測検査、感度分析、再現手順を第三者が追跡できる"
+        }
+      ]
+    }
+  ],
+  "officialSources": [
+    "https://mc-stan.org/docs/reference-manual/blocks.html",
+    "https://mc-stan.org/docs/reference-manual/execution.html",
+    "https://mc-stan.org/docs/stan-users-guide/regression.html",
+    "https://mc-stan.org/cmdstanr/articles/cmdstanr.html",
+    "https://mc-stan.org/docs/2_39/cmdstan-guide/diagnose_utility.html"
+  ]
+}

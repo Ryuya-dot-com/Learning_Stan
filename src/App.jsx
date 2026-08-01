@@ -1,7 +1,15 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { C, JP, GLOBAL_CSS } from "./theme.js";
-import { LessonView, Home, CheatSheet, Sidebar } from "./views.jsx";
+import { LessonView, FoundationCheck, Home, CheatSheet, Sidebar } from "./views.jsx";
 import { LESSONS } from "./data/lessons/index.js";
+import {
+  FOUNDATION_LESSON_ID,
+  LEARNING_LESSON_IDS,
+  getLessonPathMeta,
+  isLastLearningLesson,
+  lessonIsUnderstood,
+  nextLessonInPath,
+} from "./learningPath.js";
 import {
   PROGRESS_STORAGE_KEY,
   clearProgress,
@@ -23,12 +31,7 @@ import { hashForView, routeFromHash } from "./routing.js";
 //   番号なしトラック(bridge/extra)へは流れ込まない
 // - 番号なしレッスンは同一セクション内のみ次へ
 export function nextLessonOf(lesson) {
-  if (lesson.num != null) {
-    return LESSONS.find((l) => l.num === lesson.num + 1) || null;
-  }
-  const secLessons = LESSONS.filter((l) => l.section === lesson.section);
-  const i = secLessons.findIndex((l) => l.id === lesson.id);
-  return secLessons[i + 1] || null;
+  return nextLessonInPath(lesson);
 }
 
 export default function RStanLearningApp() {
@@ -105,6 +108,8 @@ export default function RStanLearningApp() {
     const lesson = view.name === "lesson" ? LESSONS.find((item) => item.id === view.id) : null;
     document.title = lesson
       ? `${lesson.title} — はじめてのRとStan`
+      : view.name === "foundation"
+        ? "Foundation Check — はじめてのRとStan"
       : view.name === "cheat"
         ? "R チートシート — はじめてのRとStan"
         : "はじめてのRとStan — 研究室のためのベイズ統計入門";
@@ -169,6 +174,12 @@ export default function RStanLearningApp() {
   if (view.name === "lesson") {
     const lesson = LESSONS.find((l) => l.id === view.id) || LESSONS[0];
     const next = nextLessonOf(lesson);
+    const nextView = next
+      ? { name: "lesson", id: next.id }
+      : isLastLearningLesson(lesson)
+        ? { name: "foundation" }
+        : null;
+    const pathMeta = getLessonPathMeta(lesson);
     body = (
       <LessonView
         key={lesson.id}
@@ -181,9 +192,26 @@ export default function RStanLearningApp() {
         onSolve={(i) => solve(lesson.id, i)}
         onPractice={(itemId, checked) => togglePractice(lesson.id, itemId, checked)}
         onHome={() => navigate({ name: "home" })}
-        hasNext={next != null}
-        onNextLesson={() => next && navigate({ name: "lesson", id: next.id })}
+        hasNext={nextView != null}
+        onNextLesson={() => nextView && navigate(nextView)}
         onCheat={() => navigate({ name: "cheat" })}
+        pathLabel={pathMeta?.eyebrow}
+        completionLabel={pathMeta ? `${pathMeta.eyebrow} 修了!` : undefined}
+        nextLabel={nextView?.name === "foundation" ? "Foundation Checkへすすむ" : "次の段階へすすむ"}
+        includePractice={lesson.id !== FOUNDATION_LESSON_ID}
+      />
+    );
+  } else if (view.name === "foundation") {
+    const lesson = LESSONS.find((item) => item.id === FOUNDATION_LESSON_ID);
+    body = (
+      <FoundationCheck
+        lesson={lesson}
+        practiceSet={new Set(progress.practice[lesson.id] || [])}
+        onPractice={(itemId, checked) => togglePractice(lesson.id, itemId, checked)}
+        onHome={() => navigate({ name: "home" })}
+        onReviewSetup={() => navigate({ name: "lesson", id: FOUNDATION_LESSON_ID })}
+        onCheat={() => navigate({ name: "cheat" })}
+        ready={LEARNING_LESSON_IDS.every((id) => lessonIsUnderstood(progress, id))}
       />
     );
   } else if (view.name === "cheat") {
@@ -197,6 +225,7 @@ export default function RStanLearningApp() {
         onImport={importProgress}
         onImportError={setStorageNotice}
         onOpen={(id) => navigate({ name: "lesson", id })}
+        onFoundation={() => navigate({ name: "foundation" })}
         onCheat={() => navigate({ name: "cheat" })}
         onReset={reset}
       />
@@ -222,6 +251,7 @@ export default function RStanLearningApp() {
           viewName={view.name}
           currentId={view.name === "lesson" ? view.id : null}
           onOpen={(id) => navigate({ name: "lesson", id })}
+          onFoundation={() => navigate({ name: "foundation" })}
           onCheat={() => navigate({ name: "cheat" })}
           onHome={() => navigate({ name: "home" })}
         />

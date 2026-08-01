@@ -12,9 +12,11 @@ describe("共有URL", () => {
     expect(routeFromHash(hash, lessons)).toMatchObject({ view, valid: true });
   });
 
-  it("ホームとチートシートを解釈する", () => {
+  it("ホーム、チートシート、Foundation Checkを解釈する", () => {
     expect(routeFromHash("").view).toEqual({ name: "home" });
     expect(routeFromHash("#/cheat").view).toEqual({ name: "cheat" });
+    expect(hashForView({ name: "foundation" })).toBe("#/foundation-check");
+    expect(routeFromHash("#/foundation-check").view).toEqual({ name: "foundation" });
   });
 
   it("未知・破損URLを正規のホームへフォールバックする", () => {

@@ -41,7 +41,7 @@ describe("主要画面のアクセシビリティ", () => {
     await expectNoMajorViolations(container);
   });
 
-  it("L10実践チェックに重大な自動検出違反がない", async () => {
+  it("Foundation Checkに重大な自動検出違反がない", async () => {
     window.localStorage.setItem(
       "learning-stan.progress",
       serializeProgress({
@@ -51,7 +51,7 @@ describe("主要画面のアクセシビリティ", () => {
         practice: {},
       })
     );
-    window.history.replaceState(null, "", "#/lesson/l10");
+    window.history.replaceState(null, "", "#/foundation-check");
     const { container } = render(<App />);
 
     await expectNoMajorViolations(container);

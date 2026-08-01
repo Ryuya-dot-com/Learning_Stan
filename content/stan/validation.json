@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "verifiedAt": "2026-08-01T13:39:55+09:00",
+  "sourceHashes": {
+    "linear-regression.stan": "b8510e393aaa886f524725b45634eaaedf7a9b35b688682b6499121f99f57445",
+    "run-linear-regression.R": "b9ab6f346458d64e21da0a33fe9c6de08e462d26ffd30bf56eb4fa744d9af496"
+  },
+  "environment": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "architecture": "AMD64",
+    "r": "4.6.1",
+    "cmdstanr": "0.9.0",
+    "cmdstan": "2.39.0"
+  },
+  "checks": {
+    "syntax": "PASS",
+    "compile": "PASS",
+    "sample": "PASS",
+    "diagnosticSummary": "PASS",
+    "posteriorPrediction": "PASS"
+  },
+  "sample": {
+    "seed": 20260801,
+    "chains": 4,
+    "iterWarmup": 1000,
+    "iterSampling": 1000
+  },
+  "diagnostics": {
+    "divergentByChain": [0, 0, 0, 0],
+    "maxTreedepthByChain": [0, 0, 0, 0],
+    "ebfmiByChain": [0.8952968, 0.6999719, 0.7885657, 0.9114807],
+    "reportedRhatMax": 1,
+    "reportedEssBulkMin": 1778,
+    "reportedEssTailMin": 1705
+  },
+  "posteriorSummary": {
+    "alphaMean": 1.61,
+    "betaMean": 0.647,
+    "sigmaMean": 0.219,
+    "predictedMeans": [-0.660118, -0.00944, 0.635337, 1.285631, 1.932212, 2.575423, 3.223131, 3.873764]
+  },
+  "limitations": [
+    "単一の合成データによるローカル実行証拠であり、学習者環境全体の互換性を保証しない",
+    "posterior要約は表示桁に丸めた記録であり、drawそのものを証拠ファイルとして保存していない",
+    "教材公開前にクリーンCI環境での再実行とStan経験者による独立レビューが必要"
+  ]
+}

@@ -15,7 +15,7 @@ afterEach(() => {
 });
 
 async function openLesson1(user) {
-  await user.click(screen.getByRole("button", { name: "レッスン1をはじめる" }));
+  await user.click(screen.getByRole("button", { name: /インストール不要で体験を始める|体験のつづきから/ }));
   for (let i = 0; i < 3; i += 1) {
     await user.click(screen.getByRole("button", { name: "次へ →" }));
   }
@@ -56,6 +56,13 @@ async function tabToAndActivate(user, role, options) {
   await user.keyboard("{Enter}");
 }
 
+function completedExercises(ids) {
+  return Object.fromEntries(ids.map((id) => {
+    const lesson = LESSONS.find((item) => item.id === id);
+    return [id, lesson.ex.map((_, index) => index)];
+  }));
+}
+
 describe("学習進捗", () => {
   it("初回正解と修了済み問題への再訪を正しく扱う", async () => {
     const user = userEvent.setup();
@@ -91,7 +98,7 @@ describe("学習進捗", () => {
     await user.click(screen.getByRole("button", { name: "← 前へ" }));
 
     // ホームへ戻ってレッスンを開き直しても、誤答履歴は失われない。
-    await user.click(screen.getByRole("button", { name: "← レッスン一覧" }));
+    await user.click(screen.getByRole("button", { name: "← 学習ホーム" }));
     await openLesson1(user);
     await finishLesson1(user);
     expect(screen.getByText(/うち 3 問は一発クリアです!/)).toBeTruthy();
@@ -104,7 +111,7 @@ describe("学習進捗", () => {
 
     await openLesson1(user);
     await user.click(screen.getByRole("button", { name: /echo/ }));
-    await user.click(screen.getByRole("button", { name: "← レッスン一覧" }));
+    await user.click(screen.getByRole("button", { name: "← 学習ホーム" }));
     await user.click(screen.getByRole("button", { name: "進みぐあいをリセット" }));
     await user.click(screen.getByRole("button", { name: "本当にリセットする(進みぐあいが消えます)" }));
     await waitFor(() => expect(window.localStorage.getItem("learning-stan.progress")).toBeNull());
@@ -183,17 +190,17 @@ describe("学習進捗", () => {
 });
 
 describe("レッスン遷移", () => {
-  it("最後の番号付きレッスンから構想中トラックへ流れ込まない", () => {
-    const lastNumbered = LESSONS.filter((lesson) => lesson.num != null).at(-1);
+  it("最後のR基礎レッスンから構想中トラックへ流れ込まない", () => {
+    const lastLearningLesson = LESSONS.find((lesson) => lesson.id === "l9");
 
-    expect(nextLessonOf(lastNumbered)).toBeNull();
+    expect(nextLessonOf(lastLearningLesson)).toBeNull();
   });
 
   it("画面をURLへ反映し、履歴イベントから復元する", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "レッスン1をはじめる" }));
+    await user.click(screen.getByRole("button", { name: "インストール不要で体験を始める" }));
     expect(window.location.hash).toBe("#/lesson/l1");
 
     act(() => {
@@ -208,7 +215,7 @@ describe("レッスン遷移", () => {
     window.history.replaceState(null, "", "#/lesson/l2");
     render(<App />);
 
-    expect(screen.getByText("LESSON 2")).toBeTruthy();
+    expect(screen.getByText("R基礎 1 / 8")).toBeTruthy();
     await waitFor(() => {
       expect(document.activeElement).toBe(screen.getByRole("heading", { name: "変数と計算", level: 1 }));
     });
@@ -227,7 +234,7 @@ describe("レッスン遷移", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await tabToAndActivate(user, "button", { name: "レッスン1をはじめる" });
+    await tabToAndActivate(user, "button", { name: "インストール不要で体験を始める" });
     for (let i = 0; i < 3; i += 1) {
       await tabToAndActivate(user, "button", { name: "次へ →" });
     }
@@ -247,7 +254,67 @@ describe("レッスン遷移", () => {
     await tabToAndActivate(user, "button", { name: "この基準を満たした" });
     await tabToAndActivate(user, "button", { name: "まとめへ" });
 
-    expect(screen.getByRole("heading", { name: "レッスン1 修了!" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "体験 修了!" })).toBeTruthy();
+  });
+});
+
+describe("初心者向けホーム導線", () => {
+  it("体験後は旧番号に関係なくSTEP 0を次の一手として示す", () => {
+    window.localStorage.setItem(
+      "learning-stan.progress",
+      serializeProgress({ done: completedExercises(["l1"]), first: {}, missed: {}, practice: {} })
+    );
+
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "次にすること: RとRStudioを手元に入れる" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "R / RStudioの準備へ" })).toBeTruthy();
+  });
+
+  it("STEP 0後はR基礎の最初へ進む", () => {
+    window.localStorage.setItem(
+      "learning-stan.progress",
+      serializeProgress({ done: completedExercises(["l1", "l10"]), first: {}, missed: {}, practice: {} })
+    );
+
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "次にすること: 変数と計算" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "R基礎を始める" })).toBeTruthy();
+  });
+
+  it("全理解問題の後はFoundation Checkへ案内する", async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem(
+      "learning-stan.progress",
+      serializeProgress({ done: completedExercises(LESSONS.map((lesson) => lesson.id)), first: {}, missed: {}, practice: {} })
+    );
+
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Foundation Checkへ" }));
+
+    expect(window.location.hash).toBe("#/foundation-check");
+    expect(screen.getByRole("heading", { name: "Foundation Check" })).toBeTruthy();
+    expect(screen.queryByText("先にR基礎まで終えるのがおすすめです")).toBeNull();
+  });
+
+  it("全修了後は未公開STEP 1ではなく復習と公開予定だけを示す", () => {
+    const practice = LESSONS.find((lesson) => lesson.id === "l10").practice.items.map((item) => item.id);
+    window.localStorage.setItem(
+      "learning-stan.progress",
+      serializeProgress({
+        done: completedExercises(LESSONS.map((lesson) => lesson.id)),
+        first: {},
+        missed: {},
+        practice: { l10: practice },
+      })
+    );
+
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "公開中のR基礎トラックを修了しました" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "学んだR文法を復習する" })).toBeTruthy();
+    expect(screen.queryByText(/次はSTEP 1/)).toBeNull();
   });
 });
 
@@ -263,10 +330,10 @@ describe("実践進捗", () => {
         practice: { l10: ["console", "calculation", "script", "project"] },
       })
     );
-    window.history.replaceState(null, "", "#/lesson/l10");
+    window.history.replaceState(null, "", "#/foundation-check");
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: "実機でFoundation Check" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Foundation Check" })).toBeTruthy();
     const checks = screen.getAllByRole("checkbox");
     expect(checks).toHaveLength(5);
     expect(checks.filter((checkbox) => checkbox.checked)).toHaveLength(4);
@@ -283,9 +350,8 @@ describe("実践進捗", () => {
       expect(stored.practice.l10).toHaveLength(5);
     });
 
-    await user.click(screen.getByRole("button", { name: "まとめへ" }));
-    expect(screen.getByRole("heading", { name: "RとRStudioを手元に入れる 実践完了!" })).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "レッスン一覧にもどる" }));
-    expect(screen.getByText("実践済")).toBeTruthy();
+    expect(screen.getByText("実機での5項目は確認できました")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "← 学習ホーム" }));
+    expect(screen.getByRole("button", { name: /Foundation Check.*5 \/ 5/ })).toBeTruthy();
   });
 });

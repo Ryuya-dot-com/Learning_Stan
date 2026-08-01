@@ -4,6 +4,7 @@ export const HOME_HASH = "#/";
 
 export function hashForView(view) {
   if (view.name === "lesson") return `#/lesson/${encodeURIComponent(view.id)}`;
+  if (view.name === "foundation") return "#/foundation-check";
   if (view.name === "cheat") return "#/cheat";
   return HOME_HASH;
 }
@@ -14,6 +15,9 @@ export function routeFromHash(hash, lessons = LESSONS) {
   }
   if (hash === "#/cheat") {
     return { view: { name: "cheat" }, canonicalHash: "#/cheat", valid: true };
+  }
+  if (hash === "#/foundation-check") {
+    return { view: { name: "foundation" }, canonicalHash: "#/foundation-check", valid: true };
   }
 
   const match = /^#\/lesson\/([^/]+)$/.exec(hash);
