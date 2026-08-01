@@ -6,6 +6,10 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const qualityRoot = join(root, "quality", "foundation-gate");
 const read = (name) => readFileSync(join(qualityRoot, name), "utf8");
+const step1QualityRoot = join(root, "quality", "step1-data-gate");
+const readStep1 = (name) => readFileSync(join(step1QualityRoot, name), "utf8");
+const transferQualityRoot = join(root, "quality", "step1-transfer-gate");
+const readTransfer = (name) => readFileSync(join(transferQualityRoot, name), "utf8");
 
 describe("Foundation Gate実施キット", () => {
   it("実施手順・監査票・観察票・判定票を追跡可能な場所に持つ", () => {
@@ -80,6 +84,22 @@ describe("Foundation Gate実施キット", () => {
         "LEARNER_OBSERVATION_RECORD.md",
         "GATE_DECISION.md",
       ].map((name) => join(qualityRoot, name)),
+      join(root, "quality", "beginner-journey", "README.md"),
+      ...[
+        "README.md",
+        "OBSERVATION_PROTOCOL.md",
+        "FACILITATOR_KEY.md",
+        "OBSERVATION_RECORD.md",
+        "DECISION_RECORD.md",
+      ].map((name) => join(step1QualityRoot, name)),
+      ...[
+        "README.md",
+        "PARTICIPANT_TASK.md",
+        "OBSERVATION_PROTOCOL.md",
+        "FACILITATOR_KEY.md",
+        "OBSERVATION_RECORD.md",
+        "DECISION_RECORD.md",
+      ].map((name) => join(transferQualityRoot, name)),
     ];
 
     for (const source of sources) {
@@ -93,5 +113,189 @@ describe("Foundation Gate実施キット", () => {
         expect(existsSync(join(dirname(source), target)), `${source}: ${target}`).toBe(true);
       }
     }
+  });
+});
+
+describe("STEP 1 Data Quality Gate", () => {
+  it("L12→L13観察の実施手順・採点キー・匿名記録・判断票を分離する", () => {
+    const hub = readStep1("README.md");
+
+    for (const file of [
+      "OBSERVATION_PROTOCOL.md",
+      "FACILITATOR_KEY.md",
+      "OBSERVATION_RECORD.md",
+      "DECISION_RECORD.md",
+    ]) {
+      expect(hub).toContain(`(${file})`);
+      expect(readStep1(file).length).toBeGreaterThan(1000);
+    }
+    expect(hub).toContain("現時点の状態は`NOT RUN`");
+    expect(hub).toContain("達成率を母集団へ一般化しません");
+  });
+
+  it("L13を見る前の判断、段階支援、raw保全、未見表転移を必須にする", () => {
+    const protocol = readStep1("OBSERVATION_PROTOCOL.md");
+    const key = readStep1("FACILITATOR_KEY.md");
+
+    for (let index = 1; index <= 5; index += 1) {
+      expect(protocol).toContain(`DQ${String(index).padStart(2, "0")}`);
+    }
+    for (const fragment of [
+      "L13をまだ見ていない",
+      "step1_analysis.R`をまだ開いていない",
+      "step1-transfer.qmd`・`step1_transfer_check.R`をまだ開いていない",
+      "7分間",
+      "H3",
+      "tools::md5sum",
+      "transfer_raw",
+      "fingerprint",
+      "最初のコホートでは恣意的な合格率を置かず",
+    ]) expect(protocol).toContain(fragment);
+    expect(key).toContain("参加者へ事前に見せません");
+    expect(key).toContain("13入力行");
+    expect(key).toContain("5問題行");
+    expect(key).toContain("8採用行");
+    expect(key).toContain("serialize(transfer_raw, NULL)");
+  });
+
+  it("転移表の準備規則が5問題・8採用行になる", () => {
+    const cleanLines = readFileSync(join(root, "public", "data", "rt_data.csv"), "utf8").trim().split(/\r?\n/);
+    const participants = new Set(
+      readFileSync(join(root, "public", "data", "participants.csv"), "utf8")
+        .trim()
+        .split(/\r?\n/)
+        .slice(1)
+        .map((line) => line.split(",")[0])
+    );
+    const transfer = cleanLines.slice(1).map((line) => {
+      const [id, cond, rt, correct] = line.split(",");
+      return { id, cond, rt: Number(rt), correct };
+    });
+    transfer[1].cond = "practice";
+    transfer[3].rt = 90;
+    transfer[5].id = "P04";
+    transfer[7].correct = "";
+    transfer.push({ ...transfer[0] });
+
+    const seen = new Set();
+    const issues = transfer.map((row) => {
+      const key = [row.id, row.cond, row.rt, row.correct].join("|");
+      const duplicate = seen.has(key);
+      seen.add(key);
+      if (duplicate) return "duplicate";
+      if (!["cong", "incong"].includes(row.cond)) return "invalid_cond";
+      if (row.rt < 100 || row.rt > 3000) return "rt_out_of_range";
+      if (!participants.has(row.id)) return "unknown_participant";
+      if (row.correct === "") return "missing_correct";
+      return null;
+    });
+
+    expect(transfer).toHaveLength(13);
+    expect(issues.filter(Boolean).sort()).toEqual([
+      "duplicate",
+      "invalid_cond",
+      "missing_correct",
+      "rt_out_of_range",
+      "unknown_participant",
+    ]);
+    expect(issues.filter((issue) => issue == null)).toHaveLength(8);
+  });
+
+  it("匿名記録とコホート判断が事実・仮説・単一変更を分ける", () => {
+    const record = readStep1("OBSERVATION_RECORD.md");
+    const decision = readStep1("DECISION_RECORD.md");
+
+    expect(record).toContain("氏名・学籍番号・メール・成績・診断情報を記録しない");
+    expect(record).toContain("DQ01の最初の判断を後から上書きしていない");
+    expect(record).toContain("観察した事実");
+    expect(record).toContain("観察者の仮説");
+    expect(record).toContain("外部要因を教材理解の失敗に含めていない");
+    expect(decision).toContain("次版の単一変更");
+    expect(decision).toContain("達成率を母集団へ一般化しません");
+    expect(decision).toContain("`OBSERVED`は実施済みを意味し");
+    expect(decision).toContain("反証条件");
+  });
+});
+
+describe("STEP 1 Independent Transfer Gate", () => {
+  it("参加者用課題と、期待値を持つ進行役資料・記録票・判断票を分離する", () => {
+    const hub = readTransfer("README.md");
+
+    for (const file of [
+      "PARTICIPANT_TASK.md",
+      "OBSERVATION_PROTOCOL.md",
+      "FACILITATOR_KEY.md",
+      "OBSERVATION_RECORD.md",
+      "DECISION_RECORD.md",
+    ]) {
+      expect(hub).toContain(`(${file})`);
+      expect(readTransfer(file).length).toBeGreaterThan(1000);
+    }
+    expect(hub).toContain("現時点の状態は`NOT RUN`");
+    expect(hub).toContain("学習効果や母集団の達成率として一般化しません");
+    expect(hub).toContain("これは運用検査であり、学習者観察や`OBSERVED`の証拠には数えません");
+  });
+
+  it("初回提出までは解答を隠し、公式ヘルプを許可してTR01〜TR05を観察する", () => {
+    const protocol = readTransfer("OBSERVATION_PROTOCOL.md");
+
+    for (let index = 1; index <= 5; index += 1) {
+      expect(protocol).toContain(`TR${String(index).padStart(2, "0")}`);
+    }
+    for (const fragment of [
+      "自発的なR Helpと公式パッケージ文書は利用可能",
+      "step1_transfer_check.R`を開かない",
+      "7分間",
+      "H3",
+      "初回提出を記録した後",
+      "1回だけ修正",
+      "REHEARSAL PASS",
+      "この結果は参加者証拠へ数えない",
+      "INDEPENDENT",
+      "SELF_REPAIRED",
+      "最初のコホートの結果を見てから",
+    ]) expect(protocol).toContain(fragment);
+  });
+
+  it("参加者用課題は成果物契約を示すが、期待件数・数値・MD5を露出しない", () => {
+    const task = readTransfer("PARTICIPANT_TASK.md");
+
+    for (const fragment of [
+      "data/processed/switch_trials_issues.csv",
+      "data/processed/switch_trials_checked.csv",
+      "output/switch_costs.csv",
+      "output/transfer_note.txt",
+      "switch_cost_ms = switch条件の平均response_ms - repeat条件の平均response_ms",
+      "公式文書は参照できます",
+    ]) expect(task).toContain(fragment);
+    expect(task).not.toContain("55e3056af5bda9a8cf86c19df9b0ad6f");
+    expect(task).not.toContain("21入力行");
+    expect(task).not.toContain("16行");
+    expect(task).not.toContain("| A01 | 420 | 500 | 80 |");
+    expect(task).not.toContain("TRANSFER PASS");
+  });
+
+  it("採点キー・匿名記録・コホート判断が初回と修正後、事実と仮説を分ける", () => {
+    const key = readTransfer("FACILITATOR_KEY.md");
+    const record = readTransfer("OBSERVATION_RECORD.md");
+    const decision = readTransfer("DECISION_RECORD.md");
+
+    for (const fragment of [
+      "55e3056af5bda9a8cf86c19df9b0ad6f",
+      "21入力行",
+      "5行",
+      "16行",
+      "14行",
+      "| A01 | 420 | 500 | 80 |",
+      "初回提出を固定",
+    ]) expect(key).toContain(fragment);
+    expect(record).toContain("氏名、学籍番号、メール、成績、診断情報");
+    expect(record).toContain("初回チェッカー");
+    expect(record).toContain("1回の自己修正");
+    expect(record).toContain("観察した事実");
+    expect(record).toContain("観察者の仮説");
+    expect(decision).toContain("次版で検証する単一変更");
+    expect(decision).toContain("競合する説明");
+    expect(decision).toContain("自動チェッカーのPASS率だけでSTEP 2開始を決めません");
   });
 });

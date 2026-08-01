@@ -69,3 +69,7 @@ quality/foundation-gate/evidence/
 ## 完了の定義
 
 実施キットの作成完了とFoundation Gate通過は別です。Gateの合否は、[判定票](GATE_DECISION.md)の条件に従い、実施済み証拠を確認して初めて決定します。
+
+## STEP 1との境界
+
+このGateはL1–L10の基礎と環境構築を判定します。L12→L13の読込成功・品質検査・raw保全・未見表への転移は[STEP 1 Data Quality Gate](../step1-data-gate/README.md)、L16修了後の分析一周の独立転移は[STEP 1独立転移観察キット](../step1-transfer-gate/README.md)で別に観察します。後続課題の失敗をFoundation Gateの成功へ丸めず、どの前提または教材接続が不足したかを各記録から追跡します。

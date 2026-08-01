@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "gateId": "STR-CURRENT",
+  "updatedAt": "2026-08-01",
+  "decision": "NOT RUN",
+  "primaryImplementerCode": "CODEX",
+  "target": {
+    "commit": null,
+    "url": "https://ryuya-dot-com.github.io/Learning_Stan/"
+  },
+  "participants": {
+    "eligibleComplete": 0,
+    "records": [],
+    "blockedSessions": 0,
+    "invalidSessions": 0
+  },
+  "protocolValidity": {
+    "invalid": false,
+    "reason": null
+  },
+  "independentReview": {
+    "reviewerCode": null,
+    "signedAt": null
+  },
+  "decisionRecord": null,
+  "evidence": [
+    {
+      "id": "TR01",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "適格な初学者によるコード前の計画観察は未実施"
+    },
+    {
+      "id": "TR02",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "適格な初学者による品質ゲートとraw保全の観察は未実施"
+    },
+    {
+      "id": "TR03",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "適格な初学者による参加者別切替コスト作成の観察は未実施"
+    },
+    {
+      "id": "TR04",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "適格な初学者による結果メモと再現確認の観察は未実施"
+    },
+    {
+      "id": "TR05",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "適格な初学者による説明と自己修正の観察は未実施"
+    }
+  ],
+  "issues": []
+}
