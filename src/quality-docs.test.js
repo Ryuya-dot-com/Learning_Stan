@@ -10,6 +10,8 @@ const step1QualityRoot = join(root, "quality", "step1-data-gate");
 const readStep1 = (name) => readFileSync(join(step1QualityRoot, name), "utf8");
 const transferQualityRoot = join(root, "quality", "step1-transfer-gate");
 const readTransfer = (name) => readFileSync(join(transferQualityRoot, name), "utf8");
+const stanReleaseQualityRoot = join(root, "quality", "stan-release-gate");
+const readStanRelease = (name) => readFileSync(join(stanReleaseQualityRoot, name), "utf8");
 
 describe("Foundation Gate実施キット", () => {
   it("実施手順・監査票・観察票・判定票を追跡可能な場所に持つ", () => {
@@ -100,6 +102,10 @@ describe("Foundation Gate実施キット", () => {
         "OBSERVATION_RECORD.md",
         "DECISION_RECORD.md",
       ].map((name) => join(transferQualityRoot, name)),
+      ...[
+        "README.md",
+        "DECISION_RECORD.md",
+      ].map((name) => join(stanReleaseQualityRoot, name)),
     ];
 
     for (const source of sources) {
@@ -297,5 +303,48 @@ describe("STEP 1 Independent Transfer Gate", () => {
     expect(decision).toContain("次版で検証する単一変更");
     expect(decision).toContain("競合する説明");
     expect(decision).toContain("自動チェッカーのPASS率だけでSTEP 2開始を決めません");
+  });
+});
+
+describe("Stan Release Gate文書", () => {
+  it("10証拠と現在のBLOCKEDを公開条件として明記する", () => {
+    const hub = readStanRelease("README.md");
+
+    for (let index = 1; index <= 10; index += 1) {
+      expect(hub).toContain(`SRG${String(index).padStart(2, "0")}`);
+    }
+    expect(hub).toContain("現在は`BLOCKED`");
+    expect(hub).toContain("decision`だけを`PASS`へ書き換えても");
+    expect(hub).toContain("7〜14日");
+    expect(hub).toContain("初学者3名以上");
+  });
+
+  it("L40実測の二条件・診断・再現情報を判断票に持つ", () => {
+    const decision = readStanRelease("DECISION_RECORD.md");
+
+    for (const fragment of [
+      "弱い群情報",
+      "強い群情報",
+      "source SHA-256",
+      "R / CmdStanR / CmdStan",
+      "divergence / treedepth / E-BFMI",
+      "R-hat / bulk ESS / tail ESS / MCSE",
+      "ESS per second",
+      "事後同値性",
+    ]) expect(decision).toContain(fragment);
+  });
+
+  it("公開する集約証拠と非公開の観察原本を分離する", () => {
+    const hub = readStanRelease("README.md");
+    const decision = readStanRelease("DECISION_RECORD.md");
+
+    for (const fragment of [
+      "入力済み観察記録",
+      "録画・録音",
+      "直接識別子",
+      "private-variants",
+      "匿名化した集約結果",
+    ]) expect(hub).toContain(fragment);
+    expect(decision).toContain("少人数の完遂率を母集団へ一般化しません");
   });
 });

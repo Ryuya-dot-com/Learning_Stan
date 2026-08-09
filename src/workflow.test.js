@@ -19,6 +19,7 @@ describe("GitHub Pages workflow", () => {
         "npm run test:excel-samples",
         "npm run test:step1-transfer-observation-pack",
         "npm run gate:step1-transfer:status",
+        "npm run gate:stan-release:status",
         "npm run build",
       ])
     );
@@ -48,6 +49,21 @@ describe("GitHub Pages workflow", () => {
     );
     expect(config.jobs.build.steps.map((step) => step.run).filter(Boolean)).not.toContain(
       "npm run gate:step1-transfer:require-observed"
+    );
+  });
+
+  it("Stan公開判定はBLOCKEDをCIで検証し、PASS要求を公開時の別コマンドにする", () => {
+    expect(packageJson.scripts["gate:stan-release:status"]).toBe(
+      "node scripts/stan-release-gate.mjs"
+    );
+    expect(packageJson.scripts["gate:stan-release:require-pass"]).toBe(
+      "node scripts/stan-release-gate.mjs --require-pass"
+    );
+    expect(config.jobs.build.steps.map((step) => step.run).filter(Boolean)).toContain(
+      "npm run gate:stan-release:status"
+    );
+    expect(config.jobs.build.steps.map((step) => step.run).filter(Boolean)).not.toContain(
+      "npm run gate:stan-release:require-pass"
     );
   });
 

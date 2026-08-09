@@ -118,9 +118,11 @@ npm run run:stan-scenario
 npm run test:stan-scenario-runtime
 npm run run:stan-link-comparison
 npm run test:stan-model-comparison-runtime
+npm run gate:stan-release:status
+npm run gate:stan-release:require-pass
 ```
 
-1つ目はL34–L41の受講用原稿8本・理解問題40問、8単元32課題、構文エラー8組、コンパイル成功レビュー6組、保持・転移10課題、7つの実行可能なStan例、2ケース、6つの実行証拠を原稿・コード・SHA-256まで同期検査します。2つ目は固定版stanc3 2.39.0で、壊れた8例が期待診断を伴って失敗し、修正版8例が成功することを一時ディレクトリで再検証します。3つ目はcandidate / reference 6組の両方が構文確認を通り、必須の意味差・警告数・証拠SHAと一致することを確認します。4つ目は3チェックポイント・10課題と未見lognormal参照モデルの構造・hash・構文成功を確認します。5つ目と6つ目は、分布文法およびリンク関数の可視化をStanコンパイルなしで検査します。7つ目と8つ目は切断ケースの通常実行と空の一時ディレクトリでの再実行です。9つ目と10つ目はリンク・LOOケースの通常実行と、2モデルの再コンパイル、4 chain、13成果物、ELPD差、Pareto k、stacking、入力不変の検査です。
+1つ目はL34–L41の受講用原稿8本・理解問題40問、8単元32課題、構文エラー8組、コンパイル成功レビュー6組、保持・転移10課題、7つの実行可能なStan例、2ケース、6つの実行証拠を原稿・コード・SHA-256まで同期検査します。2つ目は固定版stanc3 2.39.0で、壊れた8例が期待診断を伴って失敗し、修正版8例が成功することを一時ディレクトリで再検証します。3つ目はcandidate / reference 6組の両方が構文確認を通り、必須の意味差・警告数・証拠SHAと一致することを確認します。4つ目は3チェックポイント・10課題と未見lognormal参照モデルの構造・hash・構文成功を確認します。5つ目と6つ目は、分布文法およびリンク関数の可視化をStanコンパイルなしで検査します。7つ目と8つ目は切断ケースの通常実行と空の一時ディレクトリでの再実行です。9つ目と10つ目はリンク・LOOケースの通常実行と、2モデルの再コンパイル、4 chain、13成果物、ELPD差、Pareto k、stacking、入力不変の検査です。最後の2つは[Stan Release Gate](../../quality/stan-release-gate/README.md)の状態表示と強制判定で、後者は現在の`BLOCKED`に対して意図どおり失敗します。
 
 現行コードは2026-08-01にR 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0で構文確認・コンパイル・4 chainのサンプリングを実行済みです。divergenceと最大treedepth到達は全chainで0、報告R-hat最大1.00、bulk ESS最小1778、tail ESS最小1705でした。詳細と限界は`validation.json`に記録しています。
 
@@ -128,13 +130,7 @@ npm run test:stan-model-comparison-runtime
 
 リンク・LOOケースも2026-08-02にR 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0、loo 2.10.1で実行済みです。同じ400観測に対する線形・二次logitのELPDは-231.412・-212.278、線形の`elpd_diff=-19.134`、`se_diff=5.601`でした。Pareto k閾値超過は両モデル0件、divergence・最大treedepth到達も0です。これは固定合成ケースの予測比較であり、stacking weightをモデル真実確率とは解釈しません。
 
-公開候補へ昇格するには、ローカル実測だけで完了とせず、次を満たす必要があります。
-
-1. クリーンなCI環境でも`model$check_syntax()`と`model$compile()`が成功する。
-2. CIまたは保存可能な検証環境で4 chainのサンプリングが完了する。
-3. divergence、最大treedepth、E-BFMI、R-hat、ESS、MCSEを確認する。
-4. `y_rep`による事後予測チェックを人が解釈する。
-5. Stan経験者が、数学・コード・説明・演習の対応を独立レビューする。
+公開候補への昇格条件は`quality/stan-release-gate/status.json`を機械可読な正本とします。Foundation Gate、対象commitの静的検証とクリーンCI、既存runtime証拠の再検証、L40の弱情報・強情報centered / non-centered比較、独立専門レビュー、適格な初学者3名以上の観察、L41後7〜14日の保持3名以上、公開範囲監査、最終判断の10項目です。現在は`BLOCKED`であり、原稿完成や過去のローカル実測だけでは`PASS`になりません。
 
 ## 執筆原則
 
