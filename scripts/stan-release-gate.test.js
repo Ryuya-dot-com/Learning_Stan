@@ -4,8 +4,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import {
+  REQUIRED_STAN_CI_JOBS,
   REQUIRED_REVIEW_SCOPES,
   REQUIRED_STAN_RELEASE_EVIDENCE_IDS,
+  REQUIRED_STAN_STATIC_COMMANDS,
   deriveStanReleaseDecision,
   validateStanReleaseStatus,
 } from "./stan-release-gate.mjs";
@@ -24,6 +26,19 @@ function passingStatus() {
   status.foundationGate = {
     decision: "PASS",
     artifact: "evidence/SRG-TEST/foundation-gate.json",
+  };
+  status.staticVerification = {
+    status: "PASS",
+    commit: status.target.commit,
+    commands: [...REQUIRED_STAN_STATIC_COMMANDS],
+    artifact: "evidence/SRG-TEST/static-verification.json",
+  };
+  status.cleanCi = {
+    status: "PASS",
+    commit: status.target.commit,
+    runUrl: "https://github.com/example/Learning_Stan/actions/runs/123456",
+    event: "pull_request",
+    jobs: Object.fromEntries(REQUIRED_STAN_CI_JOBS.map((job) => [job, "PASS"])),
   };
   status.runtimeComparison = {
     weakInformation: {
@@ -136,6 +151,32 @@ describe("Stan Release Gateの機械判定", () => {
     status.evidence[1].artifacts = [];
     const errors = validateStanReleaseStatus(status).join("\n");
     expect(errors).toContain("SRG02: PASSには匿名化された証拠リンク");
+  });
+
+  it("SRG02は対象commitと必須静的検証コマンドの一致を要求する", () => {
+    const wrongCommit = passingStatus();
+    wrongCommit.decision = "BLOCKED";
+    wrongCommit.staticVerification.commit = "d".repeat(40);
+    expect(validateStanReleaseStatus(wrongCommit).join("\n")).toContain("SRG02のPASS");
+    expect(deriveStanReleaseDecision(wrongCommit)).toBe("BLOCKED");
+
+    const missingCommand = passingStatus();
+    missingCommand.decision = "BLOCKED";
+    missingCommand.staticVerification.commands.pop();
+    expect(validateStanReleaseStatus(missingCommand).join("\n")).toContain("必須静的検証コマンド");
+  });
+
+  it("SRG03は対象commitのGitHub runとNode・R・Stan全job成功を要求する", () => {
+    const wrongCommit = passingStatus();
+    wrongCommit.decision = "BLOCKED";
+    wrongCommit.cleanCi.commit = "d".repeat(40);
+    expect(validateStanReleaseStatus(wrongCommit).join("\n")).toContain("SRG03のPASS");
+    expect(deriveStanReleaseDecision(wrongCommit)).toBe("BLOCKED");
+
+    const failedStan = passingStatus();
+    failedStan.decision = "BLOCKED";
+    failedStan.cleanCi.jobs["stan-verify"] = "FAIL";
+    expect(validateStanReleaseStatus(failedStan).join("\n")).toContain("Node・R・Stan各job");
   });
 
   it("全10証拠と付帯条件が揃った場合だけPASSにする", () => {

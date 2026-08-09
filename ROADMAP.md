@@ -151,7 +151,7 @@ M1の事実訂正だけは、D-001の最終決定を待たずに着手できる�
 
 目的: 人手レビューだけに依存せず、誤りの再発を止める。
 
-状態: **進行中**。React UIテスト、分類付きR実行検証器、workflow構文テスト、base branchを問わないPR時のtest/build/R/Stan検証、job単位の権限分離、ActionsのSHA固定、Node 22.23.1 / npm 10.9.8固定は実装済み。Pages公開は`main`へのpushだけに限定した。GitHub上の成功run確認は未完了。
+状態: **実装完了**。React UIテスト、分類付きR実行検証器、workflow構文テスト、base branchを問わないPR時のtest/build/R/Stan検証、job単位の権限分離、ActionsのSHA固定、Node 22.23.1 / npm 10.9.8固定を実装した。Pages公開は`main`へのpushだけに限定し、2026-08-10の[GitHub Actions run 31323415009](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31323415009)でbuild・R・Stanの3 job成功とPR時deploy skipを確認した。
 
 作業:
 
@@ -423,8 +423,8 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 | 4 | FIX-003 | L10の外部URLをリンク化 | なし | 完了 | Codex | HTTPSリンクのhref・別タブ・relを自動検査 |
 | 5 | FIX-004 | 現在公開中の範囲に文言を合わせる | なし | 完了 | Codex | README・ホーム・metaの公開範囲を整合 |
 | 6 | FIX-005 | 因子水準を明示する | なし | 完了 | Codex | `levels` 明示を内容テストで固定 |
-| 7 | TEST-002 | Rコード実行検証器 | M1 | 現変更の互換検証完了・GitHub R 4.6.1 run待ち | Codex | 追加前はR 4.6.1で56件成功。ケース追加後はR 4.5.1で57件成功・27件manual・失敗0件。現変更をR 4.6.1で通すGitHub runで完了 |
-| 8 | OPS-001 | CI権限分離・SHA固定・PR実行 | なし | 実装済み・run待ち | Codex | YAML構造テスト成功。GitHub上の成功runで完了 |
+| 7 | TEST-002 | Rコード実行検証器 | M1 | 完了 | Codex | R 4.6.1の独立CI jobで全R検証が成功（run 31323415009） |
+| 8 | OPS-001 | CI権限分離・SHA固定・PR実行 | なし | 完了 | Codex | SHA固定したNode・R・Stan jobがPRで成功し、deployはskip（run 31323415009） |
 | 9 | UX-001 | 進捗スキーマv2とlocalStorage | D-003, TEST-001 | 完了 | Codex | 理解・実践進捗のreload・v1移行・破損保護・将来版保護・明示削除テスト成功 |
 | 10 | UX-002 | URLルーティングとフォーカス管理 | TEST-001 | 完了 | Codex | deep link・未知URL・履歴・見出しfocus・キーボード完走テスト成功 |
 | 11 | EDU-001 | L1–L10の目標―評価対応表 | D-001 | 完了 | Codex | 全10目標の文言・認知水準・次元・直接証拠を構造化し、完全被覆を自動検査 |
@@ -436,7 +436,7 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 | 17 | STAN-001 | L34–L41の目標・依存・直接評価設計 | D-007, M4 | 非公開ドラフト完了 | Codex | `curriculum.json`の連番・逆依存・直接証拠を自動検査 |
 | 18 | STAN-002 | 単回帰Stanコードの行単位解説 | STAN-001 | 非公開ドラフト完了 | Codex | 6ブロック、target、ベクトル化、診断、y_repを1本の原稿で接続 |
 | 19 | STAN-003 | Stan原稿・実行コード同期検証器 | STAN-002 | 完了 | Codex | 原稿と`.stan` / `.R`の一致、事前分布・尤度・生成量・seed・実行証拠SHAを検査 |
-| 20 | STAN-004 | 固定版CmdStanで構文・実行・診断証拠を取得 | STAN-003 | ローカル実測完了・CI / 独立レビュー待ち | Codex / レビュー者 | CmdStan 2.39.0で4 chain完走、divergence / treedepth 0、診断・予測・限界を記録 |
+| 20 | STAN-004 | 固定版CmdStanで構文・実行・診断証拠を取得 | STAN-003 | ローカル・CI実測完了、独立レビュー待ち | Codex / レビュー者 | CmdStan 2.39.0で4 chain完走、診断・予測・限界を記録し、固定版CI jobも成功（run 31323415009） |
 | 21 | EDU-003 | STEP 1データ操作とNB1 | D-007, D-010, M4 | 実装済み・対象者観察待ち | Codex / 実施者 | L11–L16、認知課題パイロットの分析依頼、CSV 5件・TSV 1件・区切りTXT 1件・Excel 3件、15ファイルの一括スターターZIP、完成版Rスクリプト、raw/issue/processed分離、条件差と解釈限界、再現可能なNB1、全6目標の直接証拠、R実行検証、成果物4項目 |
 | 22 | OBS-002 | L12→L13データ品質観察 | EDU-003, UX-PATH-001 | 実施準備完了・対象者観察待ち | Codex / 実施者 | DQ01–DQ05、中立プロンプト、支援水準、raw fingerprint、未見表転移、匿名記録、単一変更の判断票を構造テストで固定 |
 | 23 | EDU-004 | STEP 1独立転移課題 | EDU-003, M7 | 実装済み・対象者実施待ち | Codex / 実施者 | 列名・条件名・参加者数を変更し、完成コード非掲載、raw MD5固定、既知問題5件、検査済み16行、参加者別切替コスト80・100・100・110ms、3行メモを独立Rチェッカーで検査 |
@@ -616,9 +616,9 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 - 公開前敵対的監査: STEP 1の合成データを「実データ」と見せる章名、L9・L10と検索向け説明に残った「STEP 1は今後公開予定」、自己申告チェックより強い修了時の能力断定を修正。現在の公開範囲・証拠水準・データ由来を固定する回帰を追加し、スターターZIPも同じ入力から再生成した
 - 進捗互換性: 内容版を`2026-08-01-l1-l16-v3`へ更新。旧`l1-l10-v2`の理解・初見・誤答・実践進捗を保持したまま移行し、L1〜L16を正しく名乗るJSONへ再保存できることを検査
 - 固定版Node検証: 公式Node 22.23.1 Windows ZIPのSHA-256`7df0bc9375723f4a86b3aa1b7cc73342423d9677a8df4538aca31a049e309c29`を再照合し、17ファイル・272テスト、Excel 3ブック、スターターZIP 15ファイル、観察用ZIP 3ファイル、本番ビルドがすべて成功
-- 現変更のR互換検証: R 4.5.1で57件成功・27件理由付きmanual・失敗0件。ファイル入出力、NB1、完成版スクリプト、転移課題、観察リハーサルも一時Projectで成功。正規版R 4.6.1はGitHubの独立R job待ち
+- 現変更のR互換検証: R 4.5.1で57件成功・27件理由付きmanual・失敗0件。ファイル入出力、NB1、完成版スクリプト、転移課題、観察リハーサルも一時Projectで成功し、正規版R 4.6.1の独立R jobでも[run 31323415009](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31323415009)により再検証した
 - リリース安全性: 依存ツリー整合、秘密情報・秘密鍵・`.env`定型スキャン、固定メタデータを持つ生成物を確認し、`npm audit`は既知脆弱性0件。Foundation Gateは`BLOCKED`、STEP 1独立転移観察は`NOT RUN`のままで、対象者検証済みとは表示しない
-- 独立転移観察の進行役Rリハーサル: R 4.5.1で3ファイルの観察用ZIPを一時Projectへ展開し、完成版・公開転移QMD・採点キー・自己チェッカーが初回提出前に存在しないことを確認。採点用fixtureの4成果物を固定した後だけチェッカーを追加し、`TRANSFER PASS`と`REHEARSAL PASS`、raw MD5・元ZIP MD5不変を確認。運用検査であり学習者証拠へ数えず、正規版R 4.6.1はCI run待ち
+- 独立転移観察の進行役Rリハーサル: R 4.5.1で3ファイルの観察用ZIPを一時Projectへ展開し、完成版・公開転移QMD・採点キー・自己チェッカーが初回提出前に存在しないことを確認。採点用fixtureの4成果物を固定した後だけチェッカーを追加し、`TRANSFER PASS`と`REHEARSAL PASS`、raw MD5・元ZIP MD5不変を確認。運用検査であり学習者証拠へ数えず、正規版R 4.6.1のCIでも成功
 - 進行役Rリハーサル追加後の`npm test`: 17ファイル・268テスト成功。R 4.6.1独立jobへのリハーサル接続と、リハーサル結果を`OBSERVED`へ数えない文書契約を含む。`npm run build`も成功
 - STEP 1独立転移観察の機械判定追加後の`npm test`: 17ファイル・267テスト成功。現在の`status.json`を正当な`NOT RUN`として検証し、対象SHA・TR01〜TR05の匿名証拠・適格記録3件以上・判断票・独立レビュー・未解決P0/P1ゼロが揃う場合だけ`OBSERVED`と判定。証拠なしの宣言、重複・欠落記録、管理されないP2、プロトコル汚染を拒否する回帰を含む
 - `npm run gate:step1-transfer:status`: `NOT RUN`、OBSERVED 0/5、valid participants 0/3を終了コード0で報告。`npm run gate:step1-transfer:require-observed`は同じ状態を報告して終了コード1となり、観察完了を要求する運用だけを意図どおり停止
@@ -630,11 +630,11 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 - STEP 1独立転移課題追加後の`npm run build`: Vite本番ビルド成功。CSV 5件・TSV 1件・区切りTXT 1件・Excel 3件、ケース対応`notebooks/nb1-data.qmd`、`scripts/step1_analysis.R`、`challenges/step1-transfer.qmd`、`challenges/step1_transfer_check.R`、`downloads/learning-stan-step1.zip`を配布物へ収録
 - STEP 1一括スターター生成検証: JSZip 3.10.1を直接・固定依存とし、単一のProjectルート以下に案内文・NB1・完成版Rスクリプト・独立転移課題・自己チェッカー・全入力の15ファイルを収録。絶対パス・親参照を含まず、元ファイルとバイト単位で一致し、再生成ZIPも一致。`npm audit`で既知脆弱性0件
 - STEP 1のR正規版ローカル検証: R 4.6.1、dplyr 1.2.1、readr 2.2.0、readxl 1.5.0、tidyr 1.3.2、tibble 3.3.1、purrr 1.2.2で56件成功・27件理由付きmanual・失敗0件。L13品質ゲート、単一Excel、複数Excelの完全コードを実ファイルで自動実行
-- ケーススタディ追加後のR互換検証: R 4.5.1と固定版dplyr 1.2.1、readr 2.2.0、readxl 1.5.0、tidyr 1.3.2、tibble 3.3.1、purrr 1.2.2で57件成功・27件理由付きmanual・失敗0件。L16の参加者別incong−cong差55.05・80.65・104.55msと結果メモ生成を含む。正規版R 4.6.1の現変更検証はGitHub run待ち
-- 完成版`step1_analysis.R`の一時Project実行smoke: R 4.5.1でraw MD5不変、既知問題5件、検査済み12行、参加者別条件差55.05・80.65・104.55ms、要約CSV、3行の限界付き結果メモを検査。CIの独立R jobへ`verify-step1-analysis.R`を追加し、R 4.6.1 run待ち
-- 独立転移課題の一時Project実行smoke: R 4.5.1で転移rawのMD5不変、既知問題5件、検査済み16行・正答14行、参加者別切替コスト80・100・100・110ms、3行の限界付き結果メモを検査。課題文に完成処理を置かず、成果物だけを別Rチェッカーで判定する。CIの独立R jobへ`verify-step1-transfer.R`を追加し、R 4.6.1 run待ち
+- ケーススタディ追加後のR互換検証: R 4.5.1と固定版dplyr 1.2.1、readr 2.2.0、readxl 1.5.0、tidyr 1.3.2、tibble 3.3.1、purrr 1.2.2で57件成功・27件理由付きmanual・失敗0件。L16の参加者別incong−cong差55.05・80.65・104.55msと結果メモ生成を含み、正規版R 4.6.1のCIでも成功
+- 完成版`step1_analysis.R`の一時Project実行smoke: R 4.5.1でraw MD5不変、既知問題5件、検査済み12行、参加者別条件差55.05・80.65・104.55ms、要約CSV、3行の限界付き結果メモを検査。`verify-step1-analysis.R`はR 4.6.1の独立CI jobでも成功
+- 独立転移課題の一時Project実行smoke: R 4.5.1で転移rawのMD5不変、既知問題5件、検査済み16行・正答14行、参加者別切替コスト80・100・100・110ms、3行の限界付き結果メモを検査。課題文に完成処理を置かず、成果物だけを別Rチェッカーで判定し、R 4.6.1の独立CI jobでも成功
 - ファイル入出力smoke: R 4.6.1でclean/dirty CSV、TSV、任意区切り、単一Excel、複数Excelの反復読込、元ファイル名付き結合、元CSVとの一致、3形式の書出しと再読込に成功
-- NB1実行smoke: ケース追加後はR 4.5.1の`knitr::purl()`で全実行チャンクを一時Project内に再実行し、問題一覧5行、cleanと一致するcheckedデータ、参加者別要約CSV、3名全員で正の条件差、分析対象・記述結果・限界の3行メモを検査。追加前はR 4.6.1 + Quarto 1.9.38で41段階を完走しHTML生成にも成功。現変更のR 4.6.1 / Quarto確認はGitHub run待ち
+- NB1実行smoke: ケース追加後はR 4.5.1の`knitr::purl()`で全実行チャンクを一時Project内に再実行し、問題一覧5行、cleanと一致するcheckedデータ、参加者別要約CSV、3名全員で正の条件差、分析対象・記述結果・限界の3行メモを検査。現変更のR 4.6.1実行は独立CI jobで成功。Quarto 1.9.38のHTML生成は追加前の正規版ローカル検証で41段階を完走済み
 - Excel生成検証: ExcelJS 4.4.0とuuid 11.1.1を固定し、3ブック・6シート・結合12試行、シート名・セル型・ヘッダー書式・固定行・元CSV一致を検査。全シートの目視確認と`npm audit`脆弱性0件を確認
 - 初心者導線追加後の`npm test`: 14ファイル・180テスト成功。体験→STEP 0→R基礎→Foundation Check、全修了、前提未完了の実機確認、共有URLを検査
 - 初心者導線追加後の`npm run build`: Vite本番ビルド成功
