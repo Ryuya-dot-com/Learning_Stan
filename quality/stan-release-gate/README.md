@@ -32,13 +32,15 @@ npm run gate:stan-release:require-pass
 
 `SRG05`では弱情報だけ、強情報だけ、単一chain、構文成功だけを実測比較として扱いません。両StanソースのSHA-256とR・CmdStanR・CmdStan版を固定します。divergence、最大treedepth、E-BFMI、R-hat、bulk / tail ESS、MCSE、時間を確認し、同じモデルを表す条件では事後分布の実質的同値性も確認します。2026-08-09に弱・強情報の両条件を各表現4 chain・3反復で実測し、`content/stan/reparameterization-validation.json`を正本として`SRG05`は`PASS`になりました。
 
+`SRG04`は2026-08-10にDarwin arm64、R 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0、loo 2.10.1で再検証しました。単回帰、切断、リンク/LOOのcanonical source hash、全chain診断、教材上の統計的結論、合計22成果物を`content/stan/runtime-revalidation.json`へ保存しています。切断モデルは1,000 samplingで境界的なR-hatが観測されたため、閾値を緩めず各chain 2,000 samplingで再検証しました。
+
 ## 状態
 
 - `PASS`: 10証拠と構造化された付帯条件がすべて揃った
 - `FAIL`: 証拠または監査が失敗した、Foundation Gateが失敗した、またはP0・P1が未解決
 - `BLOCKED`: 未実施、外部の実行環境・レビュー・参加者待ち、または証拠不足
 
-現在は`BLOCKED`です。L40の複数chain実測は完了しましたが、Foundation Gate、対象commitのクリーンCI、独立専門レビュー、初学者3名以上の観察、7〜14日後の遅延保持などが未完了です。`status.json`の`decision`だけを`PASS`へ書き換えても、判定器は構造化された証拠不足を拒否します。
+現在は`BLOCKED`です。`SRG04`と`SRG05`は`PASS`（2/10）ですが、Foundation Gate、対象commitのクリーンCI、独立専門レビュー、初学者3名以上の観察、7〜14日後の遅延保持などが未完了です。`status.json`の`decision`だけを`PASS`へ書き換えても、判定器は構造化された証拠不足を拒否します。
 
 ## 証拠の保存と公開範囲
 

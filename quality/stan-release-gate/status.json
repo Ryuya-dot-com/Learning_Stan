@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "gateId": "SRG-CURRENT",
-  "updatedAt": "2026-08-09",
+  "updatedAt": "2026-08-10",
   "decision": "BLOCKED",
   "primaryImplementerCode": "CODEX",
   "target": {
@@ -43,6 +43,26 @@
       "timingChecked": true,
       "posteriorEquivalenceChecked": true
     }
+  },
+  "existingRuntimeRevalidation": {
+    "status": "PASS",
+    "artifact": "content/stan/runtime-revalidation.json",
+    "verifier": "scripts/verify-stan-existing-runtime.R",
+    "scenarios": {
+      "linearRegression": "PASS",
+      "truncation": "PASS",
+      "linkLoo": "PASS"
+    },
+    "environment": {
+      "rVersion": "4.6.1",
+      "cmdstanrVersion": "0.9.0",
+      "cmdstanVersion": "2.39.0",
+      "looVersion": "2.10.1"
+    },
+    "sourceHashesChecked": true,
+    "diagnosticsChecked": true,
+    "teachingConclusionsChecked": true,
+    "artifactsChecked": true
   },
   "independentReview": {
     "reviewerCode": null,
@@ -91,9 +111,13 @@
     },
     {
       "id": "SRG04",
-      "status": "NOT RUN",
-      "artifacts": [],
-      "note": "既存の単回帰・切断・リンク比較を対象commitの保存可能な環境で再検証する必要がある"
+      "status": "PASS",
+      "artifacts": [
+        "content/stan/runtime-revalidation.json",
+        "content/stan/examples/run-existing-runtime-revalidation.R",
+        "scripts/verify-stan-existing-runtime.R"
+      ],
+      "note": "単回帰、切断、リンク・LOOをDarwin arm64のCmdStan 2.39.0で再実行し、canonical source hash、全chain診断、教材上の統計的結論、22成果物を保存・再検証した"
     },
     {
       "id": "SRG05",

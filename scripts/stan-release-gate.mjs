@@ -79,6 +79,24 @@ function hasRuntimeComparison(status) {
     diagnostics?.posteriorEquivalenceChecked === true;
 }
 
+function hasExistingRuntimeRevalidation(status) {
+  const revalidation = status?.existingRuntimeRevalidation;
+  return revalidation?.status === "PASS" &&
+    hasText(revalidation?.artifact) &&
+    hasText(revalidation?.verifier) &&
+    revalidation?.scenarios?.linearRegression === "PASS" &&
+    revalidation?.scenarios?.truncation === "PASS" &&
+    revalidation?.scenarios?.linkLoo === "PASS" &&
+    hasText(revalidation?.environment?.rVersion) &&
+    hasText(revalidation?.environment?.cmdstanrVersion) &&
+    hasText(revalidation?.environment?.cmdstanVersion) &&
+    hasText(revalidation?.environment?.looVersion) &&
+    revalidation?.sourceHashesChecked === true &&
+    revalidation?.diagnosticsChecked === true &&
+    revalidation?.teachingConclusionsChecked === true &&
+    revalidation?.artifactsChecked === true;
+}
+
 function hasIndependentReview(status) {
   const review = status?.independentReview;
   return hasText(review?.reviewerCode) &&
@@ -147,6 +165,7 @@ export function deriveStanReleaseDecision(status) {
     status?.foundationGate?.decision === "FAIL" ||
     status?.runtimeComparison?.weakInformation?.status === "FAIL" ||
     status?.runtimeComparison?.strongInformation?.status === "FAIL" ||
+    status?.existingRuntimeRevalidation?.status === "FAIL" ||
     status?.publicScopeReview?.secretScan === "FAIL" ||
     status?.publicScopeReview?.personalDataScan === "FAIL" ||
     status?.publicScopeReview?.appScopeConfirmed === "FAIL" ||
@@ -162,6 +181,7 @@ export function deriveStanReleaseDecision(status) {
     allEvidencePasses &&
     hasFinalTarget(status) &&
     hasFoundationPass(status) &&
+    hasExistingRuntimeRevalidation(status) &&
     hasRuntimeComparison(status) &&
     hasIndependentReview(status) &&
     learnerObservationComplete(status) &&
@@ -268,6 +288,49 @@ function validateRuntimeComparison(status, errors) {
 
   if (evidenceById(status, "SRG05")?.status === "PASS" && !hasRuntimeComparison(status)) {
     errors.push("SRG05のPASSには弱情報・強情報の4-chain実測、環境、診断、source hashが必要です");
+  }
+}
+
+function validateExistingRuntimeRevalidation(status, errors) {
+  const revalidation = status.existingRuntimeRevalidation;
+  if (!isRecord(revalidation) || !RUNTIME_STATES.has(revalidation?.status)) {
+    errors.push("existingRuntimeRevalidation.statusが不正です");
+    return;
+  }
+  for (const key of ["artifact", "verifier"]) {
+    if (revalidation[key] !== null && !hasText(revalidation[key])) {
+      errors.push(`existingRuntimeRevalidation.${key}はnullまたは文字列です`);
+    }
+  }
+  if (!isRecord(revalidation.scenarios)) {
+    errors.push("existingRuntimeRevalidation.scenariosが必要です");
+  } else {
+    for (const key of ["linearRegression", "truncation", "linkLoo"]) {
+      if (!RUNTIME_STATES.has(revalidation.scenarios[key])) {
+        errors.push(`existingRuntimeRevalidation.scenarios.${key}が不正です`);
+      }
+    }
+  }
+  if (!isRecord(revalidation.environment)) {
+    errors.push("existingRuntimeRevalidation.environmentが必要です");
+  } else {
+    for (const key of ["rVersion", "cmdstanrVersion", "cmdstanVersion", "looVersion"]) {
+      const value = revalidation.environment[key];
+      if (value !== null && !hasText(value)) {
+        errors.push(`existingRuntimeRevalidation.environment.${key}はnullまたは文字列です`);
+      }
+    }
+  }
+  for (const key of [
+    "sourceHashesChecked", "diagnosticsChecked", "teachingConclusionsChecked", "artifactsChecked",
+  ]) {
+    if (typeof revalidation[key] !== "boolean") {
+      errors.push(`existingRuntimeRevalidation.${key}はbooleanです`);
+    }
+  }
+  if (evidenceById(status, "SRG04")?.status === "PASS" &&
+      !hasExistingRuntimeRevalidation(status)) {
+    errors.push("SRG04のPASSには単回帰・切断・リンク/LOOの再実行、環境、source hash、診断、教材結論、成果物が必要です");
   }
 }
 
@@ -409,6 +472,7 @@ export function validateStanReleaseStatus(status) {
   }
 
   validateRuntimeComparison(status, errors);
+  validateExistingRuntimeRevalidation(status, errors);
   validateIndependentReview(status, errors);
   validateLearnerObservation(status, errors);
   validateDelayedRetention(status, errors);
@@ -426,6 +490,7 @@ export function validateStanReleaseStatus(status) {
   if (status.decision === "PASS") {
     if (!hasFinalTarget(status)) errors.push("PASSには40桁commit SHAとHTTPS URLが必要です");
     if (!hasFoundationPass(status)) errors.push("PASSにはFoundation GateのPASSが必要です");
+    if (!hasExistingRuntimeRevalidation(status)) errors.push("PASSには既存runtime証拠の再検証が必要です");
     if (!hasRuntimeComparison(status)) errors.push("PASSにはL40の弱情報・強情報runtime比較が必要です");
     if (!hasIndependentReview(status)) errors.push("PASSには独立レビューが必要です");
     if (!learnerObservationComplete(status)) errors.push("PASSには適格な初学者観察3件以上が必要です");

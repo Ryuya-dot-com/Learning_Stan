@@ -170,6 +170,19 @@ describe("Stan Release Gateの機械判定", () => {
     expect(validateStanReleaseStatus(sameHash).join("\n")).toContain("SRG05のPASS");
   });
 
+  it("SRG04は3つの既存runtime、環境、hash、診断、教材結論、成果物を要求する", () => {
+    const missingLoo = passingStatus();
+    missingLoo.decision = "BLOCKED";
+    missingLoo.existingRuntimeRevalidation.scenarios.linkLoo = "NOT RUN";
+    expect(validateStanReleaseStatus(missingLoo).join("\n")).toContain("SRG04のPASS");
+    expect(deriveStanReleaseDecision(missingLoo)).toBe("BLOCKED");
+
+    const uncheckedHashes = passingStatus();
+    uncheckedHashes.decision = "BLOCKED";
+    uncheckedHashes.existingRuntimeRevalidation.sourceHashesChecked = false;
+    expect(validateStanReleaseStatus(uncheckedHashes).join("\n")).toContain("SRG04のPASS");
+  });
+
   it("自己レビューとscope不足を独立レビューとして扱わない", () => {
     const selfReview = passingStatus();
     selfReview.decision = "BLOCKED";
@@ -228,7 +241,7 @@ describe("Stan Release Gateの機械判定", () => {
     const report = spawnSync(process.execPath, [scriptPath, statusPath], { encoding: "utf8" });
     expect(report.status).toBe(0);
     expect(report.stdout).toContain("Stan Release Gate: BLOCKED");
-    expect(report.stdout).toContain("PASS 1/10");
+    expect(report.stdout).toContain("PASS 2/10");
     expect(report.stdout).toContain("learners: 0/3");
     expect(report.stdout).toContain("delayed retention: 0/3");
 
