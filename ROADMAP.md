@@ -465,6 +465,13 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 - 同runのビルドと公開範囲自動監査も成功した。`SRG09`は自動部分を記録済みだが、主実装者以外による確認と署名がないため`NOT RUN`を維持する
 - Stan Release Gateは`SRG02`〜`SRG05`の4/10が`PASS`になった。Foundation Gate、独立専門レビュー、初学者観察、遅延保持、公開範囲の独立確認、最終判断が残るため全体は正しく`BLOCKED`である
 
+### 2026-08-10 Stan独立レビューパック
+
+- `SRG06`のStan言語・統計モデル・学習原稿3 scopeと、`SRG09`の公開範囲手動確認を対象SHA`f7276e2`へ固定した
+- review plan、実施手順、未実施記録票を分離し、別worktreeで対象候補を再現してからレビューする契約にした
+- 参照正本、必須コマンド、CI URL、repository内pathを機械検査し、対象SHAのずれ、scope欠落、repository外証拠、未実施planへの署名混入を拒否する
+- パックの`READY TO REVIEW`はレビュー完了を意味しない。主実装者以外の記録と署名が受理されるまで`SRG06`・`SRG09`の状態は変更しない
+
 ### 2026-08-10 Stan公開範囲の自動監査
 
 - Git管理対象の非公開観察path、credentialファイル、代表的なsecret、メールアドレス、実ユーザー名を含む絶対pathを検出する`npm run audit:stan-public-scope`を追加した

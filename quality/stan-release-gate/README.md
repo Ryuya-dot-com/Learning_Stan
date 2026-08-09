@@ -42,6 +42,16 @@ CI workflow自体はbase branchを問わずpull requestを検証し、Node・一
 
 同じrunで`npm run build`と`npm run audit:stan-public-scope`も成功し、`SRG09`の自動監査3項目は`PASS`になりました。ただし、主実装者以外による公開対象の確認と署名は自動化できません。したがって、`SRG09`自体は`NOT RUN`のままです。
 
+## 独立レビューの実施
+
+`SRG06`と`SRG09`は、[独立レビュー実施手順](INDEPENDENT_REVIEW_PROTOCOL.md)と[未実施の記録票](INDEPENDENT_REVIEW_RECORD.md)を使います。[機械可読plan](review-plan.json)は対象SHA、3 review scope、公開範囲確認、必須コマンド、参照する正本を固定します。
+
+```bash
+npm run test:stan-review-plan
+```
+
+出力の`READY TO REVIEW (review not completed)`は実施準備完了だけを意味します。第三者が対象SHAを確認し、コピーした記録票へ結果と署名を残すまで`SRG06`・`SRG09`を`PASS`へ変更しません。
+
 ## 状態
 
 - `PASS`: 10証拠と構造化された付帯条件がすべて揃った

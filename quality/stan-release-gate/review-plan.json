@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "status": "ready-not-reviewed",
+  "gateId": "SRG-CURRENT",
+  "target": {
+    "commit": "f7276e235ed36d39c016982a2b34b5cc87d98af3",
+    "url": "https://github.com/Ryuya-dot-com/Learning_Stan/commit/f7276e235ed36d39c016982a2b34b5cc87d98af3"
+  },
+  "primaryImplementerCode": "CODEX",
+  "requiredReviewScopes": [
+    "stan-language",
+    "statistical-model",
+    "learner-material"
+  ],
+  "protocol": "quality/stan-release-gate/INDEPENDENT_REVIEW_PROTOCOL.md",
+  "recordTemplate": "quality/stan-release-gate/INDEPENDENT_REVIEW_RECORD.md",
+  "commands": [
+    "npm ci",
+    "npm test",
+    "npm run test:stan-content",
+    "npm run build",
+    "npm run audit:stan-public-scope"
+  ],
+  "automatedEvidence": {
+    "ciRun": "https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31325892271"
+  },
+  "evidenceSets": {
+    "stan-language": [
+      "content/stan/curriculum.json",
+      "content/stan/syntax-error-corpus.json",
+      "content/stan/syntax-error-validation.json",
+      "content/stan/model-review-corpus.json",
+      "content/stan/model-review-validation.json",
+      "content/stan/lessons/l35-blocks-types-constraints.md",
+      "content/stan/lessons/l36-generative-process-target.md",
+      "content/stan/lessons/l39-generated-quantities-predictive-checks.md",
+      "content/stan/lessons/l40-reparameterization-geometry.md"
+    ],
+    "statistical-model": [
+      "content/stan/model-review-corpus.json",
+      "content/stan/scenario-validation.json",
+      "content/stan/link-comparison-validation.json",
+      "content/stan/reparameterization-validation.json",
+      "content/stan/runtime-revalidation.json",
+      "content/stan/lessons/l36-generative-process-target.md",
+      "content/stan/lessons/l38-diagnostics-before-estimates.md",
+      "content/stan/lessons/l39-generated-quantities-predictive-checks.md",
+      "content/stan/lessons/l40-reparameterization-geometry.md",
+      "content/stan/lessons/l41-capstone-reporting.md"
+    ],
+    "learner-material": [
+      "content/stan/curriculum.json",
+      "content/stan/foundation-assessments.json",
+      "content/stan/grammar-drills.json",
+      "content/stan/syntax-retention-plan.json",
+      "content/stan/syntax-retention-assessments.json",
+      "content/stan/lessons/l34-execution-data-contract.md",
+      "content/stan/lessons/l35-blocks-types-constraints.md",
+      "content/stan/lessons/l36-generative-process-target.md",
+      "content/stan/lessons/l37-reproducible-cmdstanr.md",
+      "content/stan/lessons/l38-diagnostics-before-estimates.md",
+      "content/stan/lessons/l39-generated-quantities-predictive-checks.md",
+      "content/stan/lessons/l40-reparameterization-geometry.md",
+      "content/stan/lessons/l41-capstone-reporting.md"
+    ],
+    "public-scope": [
+      "PUBLICATION_SCOPE.md",
+      "scripts/audit-stan-public-scope.mjs",
+      "src/learningPath.js",
+      "content/stan/curriculum.json",
+      "quality/stan-release-gate/status.json"
+    ]
+  }
+}

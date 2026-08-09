@@ -105,6 +105,8 @@ describe("Foundation Gate実施キット", () => {
       ...[
         "README.md",
         "DECISION_RECORD.md",
+        "INDEPENDENT_REVIEW_PROTOCOL.md",
+        "INDEPENDENT_REVIEW_RECORD.md",
       ].map((name) => join(stanReleaseQualityRoot, name)),
     ];
 

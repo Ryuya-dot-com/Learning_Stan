@@ -42,6 +42,7 @@
     "gate:step2-observation:require-observed": "node scripts/step2-observation-gate.mjs --require-observed",
     "test:r": "node scripts/r-example-verifier.mjs",
     "test:stan-content": "node scripts/stan-content-verifier.mjs",
+    "test:stan-review-plan": "node scripts/stan-review-plan.mjs",
     "test:stan-syntax-errors": "node scripts/verify-stan-syntax-errors.mjs",
     "test:stan-model-review": "node scripts/verify-stan-model-review.mjs",
     "test:stan-retention": "node scripts/verify-stan-retention.mjs",
