@@ -456,7 +456,15 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 | 37 | STAN-009 | コンパイル成功後のモデルレビューと計算文法 | STAN-007, STAN-008 | 非公開コア実装・L40実測完了、残り実測 / 独立レビュー待ち | Codex / 統計レビュー者 | Jacobian、Bernoulli-logit数値安定性、centered / non-centered、Poisson offset、pointwise log_lik、切断正規化のcandidate / reference 6組。全12ソースの構文証拠に加え、切断とL40弱・強情報比較は複数chain実測済み。残る数値極限・真値回収と独立レビューを待つ |
 | 38 | STAN-010 | 累積復習・遅延想起・未見転移 | STAN-007, STAN-009 | 非公開コア実装・pilot / 対象者観察待ち | Codex / 実施者 | L37後・L40後・L41後の3地点、10課題、6評価次元。初回／修正版／支援を分離し、L41後7〜14日の未見lognormal転移、facilitator参照モデル、匿名記録schema、pilot前は合格閾値未固定を構造検証。保持の実測は未実施 |
 | 39 | OBS-005 | Stan構文初心者観察ゲート | STAN-008, STAN-009, STAN-010, M7 | 未着手 | 実施者 / 独立レビュー者 | 適格な初学者3名以上について、公式資料利用、初回エラー、支援水準、自己修正、正答コード、正しく動く誤モデルの発見、遅延転移を匿名記録し、未解決P0/P1ゼロで判定 |
-| 40 | STAN-011 | Stan公開判定ゲート | STAN-004, STAN-007, STAN-008, STAN-009, STAN-010, OBS-005 | SRG05 PASS・1/10、全体はBLOCKED | Codex / 実施者 / 独立レビュー者 | SRG01〜SRG10、対象SHA、Foundation PASS、L40弱・強情報4-chain比較、独立レビュー、初学者3名、7〜14日後保持3名、公開範囲監査、問題トリアージ、最終判断を機械判定。宣言だけのPASS、証拠欠落、自己レビュー、期間外保持、未解決P0/P1を拒否 |
+| 40 | STAN-011 | Stan公開判定ゲート | STAN-004, STAN-007, STAN-008, STAN-009, STAN-010, OBS-005 | SRG04・SRG05 PASS（2/10）、全体はBLOCKED | Codex / 実施者 / 独立レビュー者 | SRG01〜SRG10、対象SHA、Foundation PASS、既存runtime再検証、L40弱・強情報4-chain比較、独立レビュー、初学者3名、7〜14日後保持3名、公開範囲監査、問題トリアージ、最終判断を機械判定。宣言だけのPASS、証拠欠落、自己レビュー、期間外保持、未解決P0/P1を拒否 |
+
+### 2026-08-10 既存Stan runtime再検証
+
+- Darwin arm64のR 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0、loo 2.10.1で単回帰、切断、リンク/LOOを一括再実行した
+- 単回帰は最大R-hat 1.0011、切断は各chain 2,000 samplingで最大1.0029となり、両ケースの全chainでdivergence・最大treedepth到達0、E-BFMI 0.3以上を確認した
+- リンク/LOOは線形`elpd_diff=-19.052`、`se_diff=5.574`、Pareto k閾値超過0、二次モデルstacking weight 0.999997で、予測比較の教材結論を再確認した
+- CRLF/LF差でsource hashがOS依存にならないよう改行をLFへ正規化したcanonical SHA-256を採用し、3ケースの診断・教材結論・22成果物を保存証拠と静的検証へ結び付けた
+- Stan Release Gateの`SRG04`を`PASS`へ更新した。`SRG04`・`SRG05`の2/10が`PASS`で、対象commitのクリーンCI、Foundation Gate、独立レビュー、初学者観察、遅延保持、公開範囲監査は未完了のため全体は`BLOCKED`である
 
 ### 2026-08-09 L40 centered / non-centered実測
 

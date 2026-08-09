@@ -51,6 +51,8 @@
     "test:stan-model-comparison-runtime": "Rscript scripts/verify-stan-model-comparison-runtime.R",
     "run:stan-reparameterization": "Rscript content/stan/examples/run-reparameterization-comparison.R outputs/stan-reparameterization-comparison",
     "test:stan-reparameterization-runtime": "Rscript scripts/verify-stan-reparameterization-runtime.R",
+    "run:stan-existing-runtime": "Rscript content/stan/examples/run-existing-runtime-revalidation.R outputs/stan-existing-runtime-revalidation",
+    "test:stan-existing-runtime": "Rscript scripts/verify-stan-existing-runtime.R",
     "gate:stan-release:status": "node scripts/stan-release-gate.mjs",
     "gate:stan-release:require-pass": "node scripts/stan-release-gate.mjs --require-pass",
     "gate:status": "node scripts/foundation-gate.mjs",

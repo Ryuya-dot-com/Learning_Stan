@@ -1256,6 +1256,105 @@ export function validateReparameterizationEvidence(evidence, sources) {
   return errors;
 }
 
+export function validateExistingRuntimeRevalidation(evidence, sources) {
+  const errors = [];
+  if (evidence?.schemaVersion !== 1) {
+    errors.push("runtime-revalidation.schemaVersionは1である必要があります");
+  }
+  if (evidence?.status !== "PASS") {
+    errors.push("既存Stan runtime再検証証拠はPASSである必要があります");
+  }
+  for (const [name, source] of Object.entries(sources)) {
+    if (evidence?.sourceHashes?.[name] !== sha256(source)) {
+      errors.push(`${name}が既存runtime再検証後に変更されています`);
+    }
+  }
+  if (Object.keys(evidence?.sourceHashes || {}).length !== Object.keys(sources).length) {
+    errors.push("既存runtime再検証のsource hash集合が固定契約と一致しません");
+  }
+  for (const [name, expected] of [
+    ["r", "4.6.1"], ["cmdstanr", "0.9.0"], ["cmdstan", "2.39.0"], ["loo", "2.10.1"],
+  ]) {
+    if (evidence?.environment?.[name] !== expected) {
+      errors.push(`既存runtime再検証の${name}版は${expected}である必要があります`);
+    }
+  }
+  for (const check of ["sourceIntegrity", "linearRegression", "truncation", "linkLoo"]) {
+    if (evidence?.checks?.[check] !== "PASS") {
+      errors.push(`既存runtime再検証の${check}がPASSではありません`);
+    }
+  }
+
+  const validDiagnostics = (rows, expectedRows) => Array.isArray(rows) &&
+    rows.length === expectedRows && rows.every((row) =>
+      row.num_divergent === 0 && row.num_max_treedepth === 0 &&
+      Number.isFinite(row.ebfmi) && row.ebfmi >= 0.3
+    );
+  const validSummary = (rows, expectedRows) => Array.isArray(rows) &&
+    rows.length === expectedRows && rows.every((row) =>
+      Number.isFinite(row.rhat) && row.rhat <= 1.01 &&
+      Number.isFinite(row.ess_bulk) && row.ess_bulk >= 400 &&
+      Number.isFinite(row.ess_tail) && row.ess_tail >= 400
+    );
+
+  const linear = evidence?.scenarios?.linearRegression || {};
+  if (linear.status !== "PASS" || linear.originalEvidence !== "content/stan/validation.json" ||
+      linear.sample?.seed !== 20260801 || linear.sample?.chains !== 4 ||
+      linear.sample?.iterWarmup !== 1000 || linear.sample?.iterSampling !== 1000 ||
+      !validSummary(linear.parameterSummary, 3) || !validDiagnostics(linear.chainDiagnostics, 4) ||
+      !Array.isArray(linear.predictedMeans) || linear.predictedMeans.length !== 8) {
+    errors.push("単回帰runtime再検証が固定サンプリング・診断・予測契約を満たしません");
+  }
+
+  const truncation = evidence?.scenarios?.truncation || {};
+  const truncationRows = truncation.parameterSummary || [];
+  const truncationRow = (model, variable) => truncationRows.find((row) =>
+    row.model === model && row.variable === variable
+  ) || {};
+  if (truncation.status !== "PASS" ||
+      truncation.originalEvidence !== "content/stan/scenario-validation.json" ||
+      truncation.sample?.seed !== 20260802 || truncation.sample?.chains !== 4 ||
+      truncation.sample?.iterWarmup !== 1000 || truncation.sample?.iterSampling !== 2000 ||
+      !validSummary(truncationRows, 4) || !validDiagnostics(truncation.chainDiagnostics, 8) ||
+      Math.abs(truncationRow("correct_truncated", "mu").mean - 0.15) > 0.02 ||
+      Math.abs(truncationRow("correct_truncated", "sigma").mean - 0.45) > 0.02 ||
+      Math.abs(truncationRow("wrong_naive", "mu").mean - 0.15) < 0.2 ||
+      Math.abs(truncationRow("wrong_naive", "sigma").mean - 0.45) < 0.1) {
+    errors.push("切断モデルruntime再検証が高精度サンプリング・診断・教材対比契約を満たしません");
+  }
+
+  const link = evidence?.scenarios?.linkLoo || {};
+  const linearComparison = link.modelComparison?.find((row) => row.model === "linear") || {};
+  const quadraticComparison = link.modelComparison?.find((row) => row.model === "quadratic") || {};
+  const quadraticWeight = link.stackingWeights?.find((row) => row.model === "quadratic")?.weight;
+  if (link.status !== "PASS" ||
+      link.originalEvidence !== "content/stan/link-comparison-validation.json" ||
+      link.sample?.seed !== 20260802 || link.sample?.chains !== 4 ||
+      link.sample?.iterWarmup !== 750 || link.sample?.iterSampling !== 750 ||
+      link.sample?.observations !== 400 || link.sample?.successes !== 113 ||
+      !validSummary(link.parameterSummary, 5) || !validDiagnostics(link.chainDiagnostics, 8) ||
+      !(linearComparison.elpd_diff < -2 * linearComparison.se_diff) ||
+      !(linearComparison.elpd_diff > -30 && linearComparison.elpd_diff < -10) ||
+      quadraticComparison.elpd_diff !== 0 || linearComparison.pareto_k_flagged !== 0 ||
+      quadraticComparison.pareto_k_flagged !== 0 ||
+      linearComparison.pareto_k_max > linearComparison.pareto_threshold ||
+      quadraticComparison.pareto_k_max > quadraticComparison.pareto_threshold ||
+      !(quadraticWeight >= 0.95) ||
+      Math.abs(link.pointwiseElpdDifferenceSum + linearComparison.elpd_diff) > 1e-6) {
+    errors.push("リンク・LOO runtime再検証が診断・予測比較・Pareto-k契約を満たしません");
+  }
+
+  if (evidence?.artifacts?.truncation?.length !== 8 ||
+      evidence?.artifacts?.linkLoo?.length !== 13 ||
+      evidence?.artifacts?.report !== "runtime-revalidation-report.json") {
+    errors.push("既存runtime再検証の成果物契約が22点と一致しません");
+  }
+  if (!Array.isArray(evidence?.limitations) || evidence.limitations.length < 4) {
+    errors.push("既存runtime再検証の限界が十分に記録されていません");
+  }
+  return errors;
+}
+
 export function validateCurriculum(curriculum) {
   const errors = [];
   if (curriculum?.schemaVersion !== 1) errors.push("curriculum.schemaVersionは1である必要があります");
@@ -1611,6 +1710,9 @@ export function loadStanContent(root = process.cwd()) {
     reparameterizationRunner: normalizeLineEndings(
       readFileSync(resolve(base, "examples", "run-reparameterization-comparison.R"), "utf8")
     ),
+    existingRuntimeRunner: normalizeLineEndings(
+      readFileSync(resolve(base, "examples", "run-existing-runtime-revalidation.R"), "utf8")
+    ),
     runtimeEvidence: JSON.parse(readFileSync(resolve(base, "validation.json"), "utf8")),
     scenarioEvidence: JSON.parse(readFileSync(resolve(base, "scenario-validation.json"), "utf8")),
     linkComparisonEvidence: JSON.parse(
@@ -1618,6 +1720,9 @@ export function loadStanContent(root = process.cwd()) {
     ),
     reparameterizationEvidence: JSON.parse(
       readFileSync(resolve(base, "reparameterization-validation.json"), "utf8")
+    ),
+    existingRuntimeEvidence: JSON.parse(
+      readFileSync(resolve(base, "runtime-revalidation.json"), "utf8")
     ),
   };
 }
@@ -1695,6 +1800,20 @@ export function validateStanContent(content) {
       ],
       "run-reparameterization-comparison.R": content.reparameterizationRunner,
     }),
+    ...validateExistingRuntimeRevalidation(content.existingRuntimeEvidence, {
+      "content/stan/examples/linear-regression.stan": content.stanSource,
+      "content/stan/examples/run-linear-regression.R": content.runnerSource,
+      "content/stan/examples/prior-predictive.stan": content.priorPredictiveStan,
+      "content/stan/examples/truncated-normal.stan": content.truncatedNormalStan,
+      "content/stan/examples/wrong-naive-bounded-normal.stan": content.wrongNaiveStan,
+      "content/stan/examples/run-distribution-models.R": content.scenarioRunner,
+      "content/stan/examples/binary-logit-linear.stan": content.binaryLogitLinearStan,
+      "content/stan/examples/binary-logit-quadratic.stan": content.binaryLogitQuadraticStan,
+      "content/stan/examples/poisson-log-exposure.stan": content.poissonLogExposureStan,
+      "content/stan/examples/simulate-link-functions.R": content.linkSimulationRunner,
+      "content/stan/examples/run-link-model-comparison.R": content.linkComparisonRunner,
+      "content/stan/examples/run-existing-runtime-revalidation.R": content.existingRuntimeRunner,
+    }),
   ];
 }
 
@@ -1723,7 +1842,7 @@ function runCli() {
     `${content.syntaxErrorCorpus.cases.length} compiler-error pairs, ` +
     `${content.modelReviewCorpus.cases.length} compile-success review pairs, ` +
     `${content.syntaxRetentionAssessments.tasks.length} retention tasks, ` +
-    `8 executable Stan examples, 3 runtime-verified comparison scenarios)`
+    `8 executable Stan examples, 3 runtime-verified comparison scenarios, 1 existing-runtime revalidation suite)`
   );
   console.log(
     `Compiler/runtime evidence: PASS (R ${content.runtimeEvidence.environment.r}, ` +

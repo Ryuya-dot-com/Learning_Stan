@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "verifiedAt": "2026-08-10T00:33:33+0900",
+  "sourceHashes": {
+    "content/stan/examples/linear-regression.stan": "b8510e393aaa886f524725b45634eaaedf7a9b35b688682b6499121f99f57445",
+    "content/stan/examples/run-linear-regression.R": "b9ab6f346458d64e21da0a33fe9c6de08e462d26ffd30bf56eb4fa744d9af496",
+    "content/stan/examples/prior-predictive.stan": "282168eb81cf82b2854136922cfc992f8265c635bdb5b5fba68a60877e9927bb",
+    "content/stan/examples/truncated-normal.stan": "85178554a760decaaec6081d55d74ac280c7b63b11342f918c448c116b1b870a",
+    "content/stan/examples/wrong-naive-bounded-normal.stan": "d177d3afb69ed76525ab683e6200f90cbdaa7dbe221b0ebd8ec0d3da0d9f5e07",
+    "content/stan/examples/run-distribution-models.R": "0247c16773b5607e509b5a73dfa4ef9e8657fec088a5749a9455da1c2af85652",
+    "content/stan/examples/binary-logit-linear.stan": "71254a369cb972f3a043d96e32f19cfd7b5f82ec8fd663cd0db92e6ce2a67d08",
+    "content/stan/examples/binary-logit-quadratic.stan": "25f8c64b4ae23a97e1bd794c73ca6fe35c1dc7b15138135d111b45d6b35fad89",
+    "content/stan/examples/poisson-log-exposure.stan": "5c4add7cfdc62a5626ba4843ab2fad9ab40e818688e314069e68aaebd8b313bc",
+    "content/stan/examples/simulate-link-functions.R": "dd39f95cca748f640f433e6354dde392fb52a671a5430a702a02983abc753743",
+    "content/stan/examples/run-link-model-comparison.R": "7ed4f28da6140f8edc093bfd77e12b1fa217cc2b3d2b24cd21274b6ebef2913f",
+    "content/stan/examples/run-existing-runtime-revalidation.R": "1fcd81e471945c10477ca7b1749d3d3d3b93e7948f40b4e7e5acfe323321fa24"
+  },
+  "environment": {
+    "os": "Darwin",
+    "osRelease": "25.5.0",
+    "architecture": "arm64",
+    "r": "4.6.1",
+    "cmdstanr": "0.9.0",
+    "cmdstan": "2.39.0",
+    "loo": "2.10.1"
+  },
+  "scenarios": {
+    "linearRegression": {
+      "status": "PASS",
+      "originalEvidence": "content/stan/validation.json",
+      "sample": {
+        "seed": 20260801,
+        "chains": 4,
+        "iterWarmup": 1000,
+        "iterSampling": 1000
+      },
+      "parameterSummary": [
+        {
+          "variable": "alpha",
+          "mean": 1.6078008431,
+          "rhat": 1.0006856621,
+          "ess_bulk": 2555.9760553767,
+          "ess_tail": 1888.9015020367
+        },
+        {
+          "variable": "beta",
+          "mean": 0.64517387121,
+          "rhat": 1.001102754,
+          "ess_bulk": 2444.5895038923,
+          "ess_tail": 1442.4960460892
+        },
+        {
+          "variable": "sigma",
+          "mean": 0.21569449714,
+          "rhat": 1.0008290217,
+          "ess_bulk": 1491.3853455091,
+          "ess_tail": 1763.105687908
+        }
+      ],
+      "chainDiagnostics": [
+        {"chain": 1, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 0.90735126816},
+        {"chain": 2, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 0.88597938146},
+        {"chain": 3, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 0.8036797497},
+        {"chain": 4, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 0.7397879694}
+      ],
+      "predictedMeans": [-0.6579259169, -0.0057917008611, 0.63879464622, 1.2862556709, 1.9269912296, 2.5801357071, 3.2262180206, 3.8683275715]
+    },
+    "truncation": {
+      "status": "PASS",
+      "originalEvidence": "content/stan/scenario-validation.json",
+      "sample": {
+        "seed": 20260802,
+        "chains": 4,
+        "iterWarmup": 1000,
+        "iterSampling": 2000,
+        "priorIterationsPerScenario": 1000
+      },
+      "parameterSummary": [
+        {
+          "model": "correct_truncated",
+          "variable": "mu",
+          "truth": 0.15,
+          "mean": 0.14938681999,
+          "rhat": 1.0029353277,
+          "ess_bulk": 1498.4007025245,
+          "ess_tail": 1761.9805992741
+        },
+        {
+          "model": "correct_truncated",
+          "variable": "sigma",
+          "truth": 0.45,
+          "mean": 0.450922786,
+          "rhat": 1.0027350327,
+          "ess_bulk": 1449.4355975291,
+          "ess_tail": 1926.6319944406
+        },
+        {
+          "model": "wrong_naive",
+          "variable": "mu",
+          "truth": 0.15,
+          "mean": 0.4174772053,
+          "rhat": 1.000058127,
+          "ess_bulk": 8584.9950110054,
+          "ess_tail": 6129.4557846731
+        },
+        {
+          "model": "wrong_naive",
+          "variable": "sigma",
+          "truth": 0.45,
+          "mean": 0.29406432011,
+          "rhat": 1.0002790312,
+          "ess_bulk": 5475.5020050053,
+          "ess_tail": 4901.9691382038
+        }
+      ],
+      "chainDiagnostics": [
+        {"model": "correct_truncated", "chain": 1, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.0659549373},
+        {"model": "correct_truncated", "chain": 2, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.0415690018},
+        {"model": "correct_truncated", "chain": 3, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 0.96884823401},
+        {"model": "correct_truncated", "chain": 4, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.1183978397},
+        {"model": "wrong_naive", "chain": 1, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.0959298624},
+        {"model": "wrong_naive", "chain": 2, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.1415986812},
+        {"model": "wrong_naive", "chain": 3, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.1524368409},
+        {"model": "wrong_naive", "chain": 4, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.0488949837}
+      ]
+    },
+    "linkLoo": {
+      "status": "PASS",
+      "originalEvidence": "content/stan/link-comparison-validation.json",
+      "sample": {
+        "seed": 20260802,
+        "chains": 4,
+        "iterWarmup": 750,
+        "iterSampling": 750,
+        "observations": 400,
+        "successes": 113
+      },
+      "parameterSummary": [
+        {"model": "linear", "variable": "alpha", "rhat": 0.99987530163, "ess_bulk": 2091.5526705138, "ess_tail": 1740.1995514818},
+        {"model": "linear", "variable": "beta", "rhat": 1.0001239819, "ess_bulk": 2386.9358748614, "ess_tail": 1905.655962977},
+        {"model": "quadratic", "variable": "alpha", "rhat": 1.0023516158, "ess_bulk": 1785.0606071391, "ess_tail": 1915.3229123327},
+        {"model": "quadratic", "variable": "beta_linear", "rhat": 1.0008642948, "ess_bulk": 1752.5845133523, "ess_tail": 1444.969093555},
+        {"model": "quadratic", "variable": "beta_square", "rhat": 1.0012246319, "ess_bulk": 1624.7555680478, "ess_tail": 1620.9928059562}
+      ],
+      "chainDiagnostics": [
+        {"model": "linear", "chain": 1, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.1223116494},
+        {"model": "linear", "chain": 2, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.1614998882},
+        {"model": "linear", "chain": 3, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.0903041618},
+        {"model": "linear", "chain": 4, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.0996611718},
+        {"model": "quadratic", "chain": 1, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 0.95852230387},
+        {"model": "quadratic", "chain": 2, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.0800767346},
+        {"model": "quadratic", "chain": 3, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 0.99467800082},
+        {"model": "quadratic", "chain": 4, "num_divergent": 0, "num_max_treedepth": 0, "ebfmi": 1.1616087504}
+      ],
+      "modelComparison": [
+        {
+          "model": "linear",
+          "elpd_loo": -231.4173451758,
+          "elpd_diff": -19.0521967469,
+          "se_diff": 5.5740109031,
+          "pareto_k_max": 0.096641150849,
+          "pareto_threshold": 0.7,
+          "pareto_k_flagged": 0
+        },
+        {
+          "model": "quadratic",
+          "elpd_loo": -212.3651484289,
+          "elpd_diff": 0,
+          "se_diff": 0,
+          "pareto_k_max": 0.13437443071,
+          "pareto_threshold": 0.7,
+          "pareto_k_flagged": 0
+        }
+      ],
+      "stackingWeights": [
+        {"model": "linear", "weight": 0.000002676352225},
+        {"model": "quadratic", "weight": 0.99999732365}
+      ],
+      "pointwiseElpdDifferenceSum": 19.0521967469
+    }
+  },
+  "artifacts": {
+    "truncation": [
+      "truncation/scenario-data.csv",
+      "truncation/scenario-metadata.csv",
+      "truncation/prior-predictive-summary.csv",
+      "truncation/model-comparison.csv",
+      "truncation/diagnostics.csv",
+      "truncation/01-stan-prior-predictive.png",
+      "truncation/02-truncation-estimates.png",
+      "truncation/03-truncated-posterior-predictive.png"
+    ],
+    "linkLoo": [
+      "link-loo/link-function-summary.csv",
+      "link-loo/logit-baseline-effects.csv",
+      "link-loo/01-binary-inverse-links.png",
+      "link-loo/02-logit-coefficient-baseline.png",
+      "link-loo/03-poisson-log-exposure.png",
+      "link-loo/simulated-binary-data.csv",
+      "link-loo/model-comparison.csv",
+      "link-loo/pareto-k.csv",
+      "link-loo/stacking-weights.csv",
+      "link-loo/diagnostics.csv",
+      "link-loo/04-loo-model-predictions.png",
+      "link-loo/pointwise-elpd.csv",
+      "link-loo/05-pointwise-elpd.png"
+    ],
+    "report": "runtime-revalidation-report.json"
+  },
+  "checks": {
+    "sourceIntegrity": "PASS",
+    "linearRegression": "PASS",
+    "truncation": "PASS",
+    "linkLoo": "PASS"
+  },
+  "limitations": [
+    "固定seedの合成教材ケースに対する再検証であり、実データや別モデルへ一般化しない",
+    "OS間でMCMC drawが完全一致することは要求せず、source hash、診断、教材上の統計的結論、成果物契約を検査する",
+    "切断モデルは1,000 samplingで境界的なR-hatが観測されたため、再検証では各chain 2,000 samplingを用いる",
+    "独立専門レビューと初学者観察は別のStan Release Gate条件である"
+  ]
+}

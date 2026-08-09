@@ -4,6 +4,7 @@ import {
   validateCmdStanRunner,
   validateCurriculum,
   validateDistributionGrammarLab,
+  validateExistingRuntimeRevalidation,
   validateFoundationLessons,
   validateGrammarDrills,
   validateLinkComparisonEvidence,
@@ -268,6 +269,33 @@ describe("Stan教材パック", () => {
     };
     expect(validateReparameterizationEvidence(broken, sources)).toContain(
       "L40弱情報実測がcenteredの幾何問題とnon-centeredの修復を示していません"
+    );
+  });
+
+  it("既存runtime再検証後にLOOの結論が崩れると検出する", () => {
+    const broken = structuredClone(content.existingRuntimeEvidence);
+    broken.scenarios.linkLoo.modelComparison.find((row) => row.model === "linear").elpd_diff = -2;
+    const sources = Object.fromEntries(
+      Object.keys(content.existingRuntimeEvidence.sourceHashes).map((path) => {
+        const key = {
+          "content/stan/examples/linear-regression.stan": "stanSource",
+          "content/stan/examples/run-linear-regression.R": "runnerSource",
+          "content/stan/examples/prior-predictive.stan": "priorPredictiveStan",
+          "content/stan/examples/truncated-normal.stan": "truncatedNormalStan",
+          "content/stan/examples/wrong-naive-bounded-normal.stan": "wrongNaiveStan",
+          "content/stan/examples/run-distribution-models.R": "scenarioRunner",
+          "content/stan/examples/binary-logit-linear.stan": "binaryLogitLinearStan",
+          "content/stan/examples/binary-logit-quadratic.stan": "binaryLogitQuadraticStan",
+          "content/stan/examples/poisson-log-exposure.stan": "poissonLogExposureStan",
+          "content/stan/examples/simulate-link-functions.R": "linkSimulationRunner",
+          "content/stan/examples/run-link-model-comparison.R": "linkComparisonRunner",
+          "content/stan/examples/run-existing-runtime-revalidation.R": "existingRuntimeRunner",
+        }[path];
+        return [path, content[key]];
+      })
+    );
+    expect(validateExistingRuntimeRevalidation(broken, sources)).toContain(
+      "リンク・LOO runtime再検証が診断・予測比較・Pareto-k契約を満たしません"
     );
   });
 
