@@ -5,7 +5,7 @@
   "releasePolicy": "Foundation Gate通過後に、前段階の評価結果を反映して1レッスンずつ公開する",
   "lessonDelivery": {
     "status": "draft-unpublished",
-    "authoredLessonIds": ["l34", "l35", "l36", "l37", "l38", "l39", "l40"],
+    "authoredLessonIds": ["l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41"],
     "assessmentArtifact": "foundation-assessments.json",
     "requiredSections": [
       "このレッスンのゴール",
@@ -408,14 +408,33 @@
     {
       "id": "l41",
       "title": "自分のモデルを設計・診断・報告する",
+      "manuscript": "lessons/l41-capstone-reporting.md",
       "prerequisites": ["l40"],
-      "outcome": "自分の研究課題を生成過程として定義し、Stan実装、診断、予測検査、限界を一つの再現可能な成果物として報告できる",
+      "outcome": "研究質問・estimand・予測課題を生成過程へ翻訳し、Stan実装、停止規則、診断、予測検査、感度分析、claim–evidence–limit、第三者再実行を一つの追跡可能な成果物として報告できる",
+      "outcomeDimensions": ["question-target", "workflow-integration", "evidence-traceability", "diagnostic-stop-rule", "sensitivity-analysis", "reporting-boundary", "transfer"],
+      "assessmentIds": [
+        "stan-l41-q1-prior-predictive-gate",
+        "stan-l41-q2-evidence-ladder",
+        "stan-l41-q3-claim-evidence-limit",
+        "stan-l41-q4-sensitivity-classification",
+        "stan-l41-q5-transfer-capstone"
+      ],
       "concepts": ["model specification", "prior predictive", "sampling diagnostics", "posterior predictive", "predictive comparison", "sensitivity analysis", "reporting"],
       "directEvidence": [
         {
-          "artifact": "Stan卒業制作",
-          "method": "portfolio",
-          "criterion": "データ契約、事前分布の根拠、診断、予測検査、感度分析、再現手順を第三者が追跡できる"
+          "artifact": "Stan卒業制作のコード前プロトコルと成果物対応表",
+          "method": "constructed-response",
+          "criterion": "研究質問、対象母集団、観測単位、estimand、prediction task、データ契約、prior、停止規則、PPC、感度分析、claimとartifactを実行前に対応付ける"
+        },
+        {
+          "artifact": "初回失敗を含むStan卒業制作の監査・修正記録",
+          "method": "debugging-task",
+          "criterion": "構文・密度・支持範囲・診断・予測単位・PPC・artifact identityの問題で解釈を止め、初回を残して原因ごとに修正する"
+        },
+        {
+          "artifact": "未見文脈の再現可能なStan成果物",
+          "method": "transfer-task",
+          "criterion": "実装、複数chain診断、予測、感度分析、claim–evidence–limit、manifest、clean environmentの第三者再実行を一つの入口へ統合する"
         }
       ]
     }
@@ -448,6 +467,10 @@
     "https://mc-stan.org/loo/reference/loo.html",
     "https://mc-stan.org/loo/reference/loo-glossary.html",
     "https://mc-stan.org/loo/reference/loo_compare.html",
-    "https://mc-stan.org/loo/reference/loo_model_weights.html"
+    "https://mc-stan.org/loo/reference/loo_model_weights.html",
+    "https://mc-stan.org/docs/stan-users-guide/reparameterization.html",
+    "https://mc-stan.org/docs/stan-users-guide/posterior-prediction.html",
+    "https://mc-stan.org/cmdstanr/reference/fit-method-metadata.html",
+    "https://mc-stan.org/cmdstanr/reference/fit-method-save_output_files.html"
   ]
 }

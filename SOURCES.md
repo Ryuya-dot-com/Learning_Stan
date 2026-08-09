@@ -119,6 +119,9 @@ rstan が同梱する Stan はこれより古い世代であるため、本教�
 | centeredとnon-centeredの効率はデータ情報量に依存し、データが少ない場合はnon-centered、多い場合はcenteredが有利になり得る | [Stan User's Guide: Reparameterization and Change of Variables](https://mc-stan.org/docs/stan-users-guide/reparameterization.html) | 一方を常時正解にせず、弱い群情報と強い群情報で診断・MCSE・ESS/secを比較する |
 | 予測子・応答の標準化は計算効率を改善し得るが、prior尺度と元尺度への逆変換を対応させる必要がある | [Stan User's Guide: Standardizing Predictors and Outputs](https://mc-stan.org/docs/stan-users-guide/efficiency-tuning.html#standardizing-predictors-and-outputs) | 中心・尺度を保存し、prior predictive checkと元尺度での係数・予測報告までをL40の契約に含める |
 | 強く変化する曲率では数値積分誤差によるdivergenceや小さいstep sizeによる長いtrajectoryが生じ得る | [Stan Reference Manual: Hamiltonian Monte Carlo](https://mc-stan.org/docs/reference-manual/mcmc.html) | `adapt_delta`だけを原因説明にせず、funnel、尺度、divergent位置、treedepth、効率を診断する |
+| prior predictive checkは観測データで条件付ける前、posterior predictive checkは条件付けた後の生成含意を調べる | [Stan User's Guide: Posterior and Prior Predictive Checks](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html) | L41のコード前protocolでprior predictiveを正式fit前のgateとし、posterior predictiveを重要な全体・条件付き統計量のモデル批判へ使う |
+| 新しいデータのposterior predictionは、既存観測の複製によるモデル検査とは予測対象・入力が異なる | [Stan User's Guide: Posterior Prediction](https://mc-stan.org/docs/stan-users-guide/posterior-prediction.html) | estimand、既存参加者の次観測、新規参加者の予測を分け、holdout単位と生成する量を先に定義する |
+| CmdStanR fit metadataは実際の出力CSVに記録された版・seed・chain ID・設定を取得できる | [CmdStanR: Extract metadata](https://mc-stan.org/cmdstanr/reference/fit-method-metadata.html) | スクリプト上の予定値ではなくrun実績をartifact manifestとreportへ対応付ける |
 
 Stan教材パックの一次資料は`mc-stan.org`に限定し、最終確認日は2026-08-09とする。静的検証の成功はStanコンパイラでの構文確認やMCMC診断の代替ではない。
 
