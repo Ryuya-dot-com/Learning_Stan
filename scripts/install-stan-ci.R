@@ -62,8 +62,10 @@ if (any(package_version(minimum_versions) < package_version(required_minimum))) 
   )
 }
 
-cmdstan_root <- Sys.getenv("CMDSTAN", unset = "")
-if (!nzchar(cmdstan_root)) stop("CMDSTAN must name the CI installation root")
+cmdstan_root <- Sys.getenv("LEARNING_STAN_CMDSTAN_ROOT", unset = "")
+if (!nzchar(cmdstan_root)) {
+  stop("LEARNING_STAN_CMDSTAN_ROOT must name the CI installation root")
+}
 cmdstan_root <- normalizePath(cmdstan_root, winslash = "/", mustWork = FALSE)
 cmdstan_target <- file.path(cmdstan_root, "cmdstan-2.39.0")
 

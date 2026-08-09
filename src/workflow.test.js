@@ -124,10 +124,12 @@ describe("GitHub Pages workflow", () => {
     expect(stanJob["timeout-minutes"]).toBe(30);
     expect(stanJob.env).toBeUndefined();
     const configurePaths = stanJob.steps.find((step) => step.name === "Configure CmdStan paths");
-    expect(configurePaths.run).toContain("CMDSTAN=${RUNNER_TEMP}/cmdstan");
+    expect(configurePaths.run).toContain("LEARNING_STAN_CMDSTAN_ROOT=${RUNNER_TEMP}/cmdstan");
     expect(configurePaths.run).toContain("LEARNING_STAN_CMDSTAN=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0");
     expect(configurePaths.run).toContain("LEARNING_STAN_STANC=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0/bin/stanc");
+    expect(configurePaths.run).not.toMatch(/echo "CMDSTAN=/);
     expect(workflow).not.toContain("${{ runner.temp }}");
+    expect(stanInstaller).toContain('Sys.getenv("LEARNING_STAN_CMDSTAN_ROOT"');
     expect(stanInstaller).toContain('install.packages("loo", repos = cran_repository)');
     expect(stanInstaller).toContain('install.packages("cmdstanr", repos = repositories)');
     expect(runs).toEqual(expect.arrayContaining([

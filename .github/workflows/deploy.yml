@@ -85,7 +85,7 @@ jobs:
           r-version: "4.6.1"
       - name: Configure CmdStan paths
         run: |
-          echo "CMDSTAN=${RUNNER_TEMP}/cmdstan" >> "${GITHUB_ENV}"
+          echo "LEARNING_STAN_CMDSTAN_ROOT=${RUNNER_TEMP}/cmdstan" >> "${GITHUB_ENV}"
           echo "LEARNING_STAN_CMDSTAN=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0" >> "${GITHUB_ENV}"
           echo "LEARNING_STAN_STANC=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0/bin/stanc" >> "${GITHUB_ENV}"
       - run: Rscript scripts/install-stan-ci.R
