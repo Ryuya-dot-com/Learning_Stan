@@ -376,6 +376,193 @@
           "retryHint": "応答の支持範囲、Stanの型、連続・離散の分布関数、link尺度を順に対応付けます。"
         }
       ]
+    },
+    {
+      "lessonId": "l36",
+      "outcomeDimensions": [
+        "generative-translation",
+        "target-semantics",
+        "vectorized-likelihood",
+        "prior-role",
+        "link-scale",
+        "transfer"
+      ],
+      "questions": [
+        {
+          "id": "stan-l36-q1-target-semantics",
+          "kind": "selected-response",
+          "cognitiveProcess": "analyze",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "target-semantics"
+          ],
+          "prompt": "modelブロックのy ~ normal(mu, sigma);を最も正確に説明しているものはどれですか。",
+          "choices": [
+            {
+              "id": "draw-y",
+              "text": "normal(mu, sigma)から乱数を生成してyへ代入する",
+              "diagnostic": "distribution statementと乱数生成関数を混同している"
+            },
+            {
+              "id": "add-unnormalized",
+              "text": "yの正規対数密度を、パラメータに依存しない定数を落としてtargetへ加える",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "define-prior-only",
+              "text": "muとsigmaの事前分布だけを定義し、yは使わない",
+              "diagnostic": "左辺の観測yが尤度へ寄与することを見落としている"
+            },
+            {
+              "id": "normalize-target",
+              "text": "targetを0から1へ正規化して確率に変える",
+              "diagnostic": "対数密度の蓄積と確率への正規化を混同している"
+            }
+          ],
+          "correctChoiceId": "add-unnormalized",
+          "correctFeedback": "distribution statementは対数密度をtargetへ加え、推定に不要なパラメータ非依存の定数を落とします。乱数生成や代入ではありません。",
+          "retryHint": "同じ式をtarget += normal_lupdf(y | mu, sigma)の形で読み替えます。"
+        },
+        {
+          "id": "stan-l36-q2-vectorized-equivalence",
+          "kind": "output-prediction",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "target-semantics",
+            "vectorized-likelihood"
+          ],
+          "prompt": "次のA・B・Cについて、事後推論とtarget()の数値の関係を最も正確に説明しているものはどれですか。",
+          "code": "// A\ny ~ normal(mu, sigma);\n\n// B\nfor (n in 1:N)\n  y[n] ~ normal(mu[n], sigma);\n\n// C\ntarget += normal_lpdf(y | mu, sigma);",
+          "choices": [
+            {
+              "id": "all-exact",
+              "text": "A・B・Cは、target()も必ず浮動小数点まで完全一致する",
+              "diagnostic": "distribution statementが定数項を落とすことを見落としている"
+            },
+            {
+              "id": "a-b-same-c-constant",
+              "text": "AとBは同じ尤度のベクトル表記とループ表記で、Cも通常は同じ事後推論を定義するが定数項によりtarget()は違い得る",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "a-correlated-b-independent",
+              "text": "Aは観測を相関させ、Bだけが条件付き独立を表す",
+              "diagnostic": "ベクトル化というコード表現だけで依存構造が変わると考えている"
+            },
+            {
+              "id": "c-rng",
+              "text": "Cだけが正規乱数を生成するため、A・Bとは異なるデータを作る",
+              "diagnostic": "lpdfによる密度評価とrngによる乱数生成を混同している"
+            }
+          ],
+          "correctChoiceId": "a-b-same-c-constant",
+          "correctFeedback": "AとBは同じ正規尤度のベクトル化表現とループ表現です。Cは正規化定数を含むためtarget()の値は定数だけ違い得ますが、通常は同じ事後推論を定義します。",
+          "retryHint": "ベクトル化の違いと、_lupdf・_lpdfの定数項の違いを別々に比較します。"
+        },
+        {
+          "id": "stan-l36-q3-translate-regression",
+          "kind": "constructed-response",
+          "cognitiveProcess": "construct",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "generative-translation",
+            "vectorized-likelihood",
+            "prior-role"
+          ],
+          "prompt": "xを平均0に中心化してx_centeredとした単回帰について、mu_n = alpha + beta x_centered_n、alpha ~ Normal(0, 2)、beta ~ Normal(0, 1)、sigma ~ Exponential(1)、y_n ~ Normal(mu_n, sigma)をStanのparameters・transformed parameters・modelへ翻訳し、各項の役割と単位を説明してください。",
+          "rubric": [
+            {
+              "id": "parameter-support",
+              "criterion": "alphaとbetaをreal、sigmaを正のreal parameterとして宣言する"
+            },
+            {
+              "id": "deterministic-mu",
+              "criterion": "長さNのmuをalpha + beta * x_centeredとして決定論的に定義する"
+            },
+            {
+              "id": "prior-and-likelihood",
+              "criterion": "3つの事前分布とy ~ normal(mu, sigma)のベクトル化尤度を区別して書く"
+            },
+            {
+              "id": "units-interpretation",
+              "criterion": "中心化後のalpha、x1単位当たりのbeta、yと同じ単位のsigmaを説明する"
+            }
+          ],
+          "modelAnswer": "parameters { real alpha; real beta; real<lower=0> sigma; } transformed parameters { vector[N] mu = alpha + beta * x_centered; } model { alpha ~ normal(0, 2); beta ~ normal(0, 1); sigma ~ exponential(1); y ~ normal(mu, sigma); }とする。muは決定論的な条件付き平均、前半3文は事前分布、最後は尤度である。alphaは平均的なxでの応答平均、betaはxが1単位増えたときの平均応答変化、sigmaはyと同じ単位の条件付き標準偏差である。事前分布の数値は変数の尺度に合わせて検討する。",
+          "retryHint": "未知量、未知量から一意に決まる量、未知量に置く分布、観測に置く分布の4種類へ分けます。"
+        },
+        {
+          "id": "stan-l36-q4-missing-prior",
+          "kind": "selected-response",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "prior-role"
+          ],
+          "prompt": "次のmodelブロックはbetaの事前分布を含みません。最も適切なレビューはどれですか。",
+          "code": "model {\n  alpha ~ normal(0, 2);\n  sigma ~ exponential(1);\n  y ~ normal(alpha + beta * x_centered, sigma);\n}",
+          "choices": [
+            {
+              "id": "compiler-adds-normal",
+              "text": "Stanがbeta ~ normal(0, 1)を自動挿入するため問題ない",
+              "diagnostic": "parameter制約やコンパイラが特定の事前分布を補うと誤解している"
+            },
+            {
+              "id": "syntax-failure",
+              "text": "事前分布がないparameterは構文エラーになるためコンパイルできない",
+              "diagnostic": "構文・型の検査と統計的なモデルレビューを混同している"
+            },
+            {
+              "id": "review-implicit-prior",
+              "text": "コンパイルは通り得るが、betaには事前分布としての明示的な密度項がなく、暗黙の不適切一様事前分布を意図したかと事後分布の適切性を確認する",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "likelihood-is-prior",
+              "text": "正規尤度にbetaが入るため、それがbetaのproperな事前分布も兼ねる",
+              "diagnostic": "尤度による情報と事前分布を同一視している"
+            }
+          ],
+          "correctChoiceId": "review-implicit-prior",
+          "correctFeedback": "Stanは事前分布の研究上の意図を判定しません。事前分布として明示的な密度項がないparameterは宣言支持上の暗黙の不適切一様事前分布として扱え、尤度への寄与や事後分布の適切性とは分けて確認します。",
+          "retryHint": "コンパイラが検査できる構文・型と、研究者が検査する確率モデルの妥当性を分けます。"
+        },
+        {
+          "id": "stan-l36-q5-transfer-logit",
+          "kind": "transfer-task",
+          "responseMode": "constructed",
+          "cognitiveProcess": "transfer",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "generative-translation",
+            "link-scale",
+            "transfer"
+          ],
+          "scenario": "正規単回帰を、各人の0/1の正答を予測するモデルへ変更します。説明変数xは実数で、線形予測子はeta_n = alpha + beta x_nです。",
+          "prompt": "最小のdata・parameters・modelブロックを書き、生成過程、bernoulli_logitへ渡す尺度、betaの解釈、確率尺度へ戻す方法を説明してください。",
+          "rubric": [
+            {
+              "id": "binary-contract",
+              "criterion": "yを長さNの0/1整数配列、xを長さNのvectorとして宣言する"
+            },
+            {
+              "id": "prior-complete",
+              "criterion": "alphaとbetaをparameterとして宣言し、尺度を検討した事前分布を置く"
+            },
+            {
+              "id": "logit-likelihood",
+              "criterion": "y ~ bernoulli_logit(alpha + beta * x)としてlogit尺度の線形予測子を直接渡す"
+            },
+            {
+              "id": "inverse-link",
+              "criterion": "betaはlog odds尺度であり、具体的なxとparameter drawをinv_logitへ通して確率尺度へ戻すと説明する"
+            }
+          ],
+          "modelAnswer": "data { int<lower=1> N; vector[N] x; array[N] int<lower=0, upper=1> y; } parameters { real alpha; real beta; } model { alpha ~ normal(0, 2); beta ~ normal(0, 1); y ~ bernoulli_logit(alpha + beta * x); }とする。生成過程はeta_n = alpha + beta x_n、p_n = inv_logit(eta_n)、y_n ~ Bernoulli(p_n)である。bernoulli_logitには確率ではなくetaを渡す。betaはlog odds尺度なので、確率差は具体的なxでinv_logitを計算して比較する。事前分布の尺度は文脈に合わせて再検討する。",
+          "retryHint": "0/1の観測尺度、0から1の確率尺度、制約のないlogit尺度の3層を順に対応付けます。"
+        }
+      ]
     }
   ]
 }

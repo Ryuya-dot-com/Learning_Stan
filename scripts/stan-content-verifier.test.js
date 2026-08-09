@@ -70,7 +70,27 @@ describe("Stan教材パック", () => {
     assessments.designRules.learnerAnswersAreNotPerformanceEvidence = false;
     expect(
       validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
-    ).toContain("L34–L35理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
+    ).toContain("L34–L36理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
+  });
+
+  it("L36原稿から非正規化密度の説明を削ると検出する", () => {
+    const manuscripts = structuredClone(content.lessonManuscripts);
+    manuscripts.l36 = manuscripts.l36.replaceAll("normal_lupdf", "normal_density");
+    expect(
+      validateFoundationLessons(content.curriculum, content.foundationAssessments, manuscripts)
+    ).toContain("l36: 必須説明「normal_lupdf」がありません");
+  });
+
+  it("L36のリンク尺度を評価対象から外すと検出する", () => {
+    const assessments = structuredClone(content.foundationAssessments);
+    const questions = assessments.lessons.find((lesson) => lesson.lessonId === "l36").questions;
+    questions.find((question) => question.id === "stan-l36-q5-transfer-logit").targetDimensions = [
+      "generative-translation",
+      "transfer",
+    ];
+    expect(
+      validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
+    ).toContain("l36: 到達目標次元link-scaleを測る理解問題がありません");
   });
 
   it("原稿と実行用Stanコードのずれを検出する", () => {

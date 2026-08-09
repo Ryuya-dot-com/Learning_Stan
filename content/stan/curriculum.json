@@ -5,7 +5,7 @@
   "releasePolicy": "Foundation Gate通過後に、前段階の評価結果を反映して1レッスンずつ公開する",
   "lessonDelivery": {
     "status": "draft-unpublished",
-    "authoredLessonIds": ["l34", "l35"],
+    "authoredLessonIds": ["l34", "l35", "l36"],
     "assessmentArtifact": "foundation-assessments.json",
     "requiredSections": [
       "このレッスンのゴール",
@@ -243,14 +243,33 @@
     {
       "id": "l36",
       "title": "生成過程を対数密度へ翻訳する",
+      "manuscript": "lessons/l36-generative-process-target.md",
       "prerequisites": ["l35"],
-      "outcome": "単回帰の生成過程を事前分布と尤度へ分解し、distribution statementがtargetへ何を加えるか説明できる",
+      "outcome": "単回帰の生成過程を事前分布と尤度へ分解し、distribution statementと明示的な対数密度加算の違いを説明して、二値応答へリンク尺度を移せる",
+      "outcomeDimensions": ["generative-translation", "target-semantics", "vectorized-likelihood", "prior-role", "link-scale", "transfer"],
+      "assessmentIds": [
+        "stan-l36-q1-target-semantics",
+        "stan-l36-q2-vectorized-equivalence",
+        "stan-l36-q3-translate-regression",
+        "stan-l36-q4-missing-prior",
+        "stan-l36-q5-transfer-logit"
+      ],
       "concepts": ["generative model", "prior", "hyperparameter", "likelihood", "target", "vectorization", "link function", "inverse link", "prior sensitivity"],
       "directEvidence": [
         {
-          "artifact": "単回帰Stanプログラム",
-          "method": "code-construction",
-          "criterion": "alpha・beta・sigmaの事前分布と、ベクトル化した正規尤度を自力で完成する"
+          "artifact": "生成過程・数式・Stanコードの対応表",
+          "method": "constructed-response",
+          "criterion": "単回帰を決定論的変換、事前分布、尤度へ分け、各パラメータの単位とコード上の対応を説明する"
+        },
+        {
+          "artifact": "コンパイル可能な事前分布欠落のレビュー記録",
+          "method": "debugging-task",
+          "criterion": "betaの事前分布がない初回コードについて、構文確認の範囲、統計的問題、修正版、尺度の根拠を残す"
+        },
+        {
+          "artifact": "二値応答のBernoulli-logitモデル",
+          "method": "transfer-task",
+          "criterion": "0/1応答の型、線形予測子、bernoulli_logit尤度、inv_logitによる応答尺度への変換を見本なしで実装・説明する"
         }
       ]
     },
