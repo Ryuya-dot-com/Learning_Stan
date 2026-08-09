@@ -70,7 +70,7 @@ describe("Stan教材パック", () => {
     assessments.designRules.learnerAnswersAreNotPerformanceEvidence = false;
     expect(
       validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
-    ).toContain("L34–L40理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
+    ).toContain("L34–L41理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
   });
 
   it("L36原稿から非正規化密度の説明を削ると検出する", () => {
@@ -181,6 +181,30 @@ describe("Stan教材パック", () => {
     expect(
       validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
     ).toContain("l40: 到達目標次元parameterization-equivalenceを測る理解問題がありません");
+  });
+
+  it("L41原稿からclaim・証拠・限界の対応を削ると検出する", () => {
+    const manuscripts = structuredClone(content.lessonManuscripts);
+    manuscripts.l41 = manuscripts.l41.replaceAll(
+      "claim–evidence–limit",
+      "結果要約"
+    );
+    expect(
+      validateFoundationLessons(content.curriculum, content.foundationAssessments, manuscripts)
+    ).toContain("l41: 必須説明「claim–evidence–limit」がありません");
+  });
+
+  it("L41の成果物追跡性を評価対象から外すと検出する", () => {
+    const assessments = structuredClone(content.foundationAssessments);
+    const questions = assessments.lessons.find((lesson) => lesson.lessonId === "l41").questions;
+    for (const question of questions) {
+      question.targetDimensions = question.targetDimensions.filter(
+        (dimension) => dimension !== "evidence-traceability"
+      );
+    }
+    expect(
+      validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
+    ).toContain("l41: 到達目標次元evidence-traceabilityを測る理解問題がありません");
   });
 
   it("原稿と実行用Stanコードのずれを検出する", () => {

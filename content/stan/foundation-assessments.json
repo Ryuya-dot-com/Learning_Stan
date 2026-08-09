@@ -1355,6 +1355,218 @@
           "retryHint": "群効果の相関、予測子の単位、データ情報量、計算診断、観測モデルの5層へ分けて計画します。"
         }
       ]
+    },
+    {
+      "lessonId": "l41",
+      "outcomeDimensions": [
+        "question-target",
+        "workflow-integration",
+        "evidence-traceability",
+        "diagnostic-stop-rule",
+        "sensitivity-analysis",
+        "reporting-boundary",
+        "transfer"
+      ],
+      "questions": [
+        {
+          "id": "stan-l41-q1-prior-predictive-gate",
+          "kind": "selected-response",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "workflow-integration",
+            "diagnostic-stop-rule",
+            "evidence-traceability"
+          ],
+          "prompt": "二値反応モデルのprior predictive checkで、研究領域では群別成功率が通常0.10〜0.90なのに、複製群の45%が0.001未満または0.999超になりました。Stanコードは構文確認済みです。正式なdata fit前の行動として最も適切なものはどれですか。",
+          "choices": [
+            {
+              "id": "stop-revise-record",
+              "text": "正式fitを止め、予測子尺度・intercept基準・prior根拠を見直し、初回PPCと変更理由を残して再度prior predictive checkする",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "fit-overwrites-prior",
+              "text": "データがpriorを上書きするので、初回PPCを削除してそのまま正式fitへ進む",
+              "diagnostic": "不自然な生成含意と結果依存の変更履歴を隠し、sampling前gateを無効化している"
+            },
+            {
+              "id": "syntax-proves-prior",
+              "text": "構文成功はpriorの妥当性も保証するため、PPCの不一致は無視する",
+              "diagnostic": "stanc3の構文・型検査を研究領域でのprior妥当性へ格上げしている"
+            },
+            {
+              "id": "clip-replicates",
+              "text": "極端な複製値だけを0.10〜0.90へ切り詰め、同じpriorから生成した結果として報告する",
+              "diagnostic": "モデルの生成含意を検査せず、出力だけを都合のよい範囲へ改変している"
+            }
+          ],
+          "correctChoiceId": "stop-revise-record",
+          "correctFeedback": "prior predictive checkは観測データで条件付ける前の生成含意を検査します。研究上明らかに不可能な値が多いなら正式fitを止め、尺度・基準・priorを根拠付きで修正して初回と再検査を両方保存します。",
+          "retryHint": "構文検査が確認したことと、観測前の生成データが研究領域で妥当かという問いを分けます。"
+        },
+        {
+          "id": "stan-l41-q2-evidence-ladder",
+          "kind": "output-prediction",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "evidence-traceability",
+            "diagnostic-stop-rule",
+            "reporting-boundary"
+          ],
+          "prompt": "同じ観測集合のモデルA・Bから次の成果物が得られました。現時点で報告できる結論として最も適切なものはどれですか。",
+          "code": "# 両モデル: 構文・sampling成功、divergence=0、R-hat<1.01、ESSとMCSEは目的を満たす\n# PPC: 両モデルとも上位tailの観測数をほとんど再現しない\n# loo_compare: B - A のelpd差 = 6、se_diff = 2\n# モデルB: 現行Pareto k確認線を超える観測が3件",
+          "choices": [
+            {
+              "id": "stop-ranking-investigate",
+              "text": "指定targetの計算には明らかな警告がないが、両モデルのtail不一致とBのPSIS不安定性があるため、適合・順位の断定を止めて尤度、影響観測、refitやK-foldを調べる",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "b-true",
+              "text": "ELPD差がse_diffの3倍なので、Bが真でありtailも正しく表すと確定する",
+              "diagnostic": "PSIS診断と両モデル共通のPPC不一致を順位で打ち消している"
+            },
+            {
+              "id": "all-valid",
+              "text": "R-hatとESSが良好なので、A・Bとも統計モデルとして妥当である",
+              "diagnostic": "指定targetの探索と観測分布のtail妥当性を混同している"
+            },
+            {
+              "id": "delete-k-observations",
+              "text": "Pareto kの高い3観測を理由なく削除し、BのELPD順位だけを正式報告する",
+              "diagnostic": "影響観測をデータ誤りと決め付け、モデルの予測失敗を隠している"
+            }
+          ],
+          "correctChoiceId": "stop-ranking-investigate",
+          "correctFeedback": "良好なHMC・R-hat・ESS・MCSEは計算の証拠です。PPCは両候補のtail誤指定を示し得て、高Pareto kはBのLOO近似を不安定にし得るため、モデル適合と順位の断定を止めます。",
+          "retryHint": "計算診断、絶対的な予測適合、相対比較、比較近似の信頼性を4つの列に分けます。"
+        },
+        {
+          "id": "stan-l41-q3-claim-evidence-limit",
+          "kind": "constructed-response",
+          "cognitiveProcess": "create",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "question-target",
+            "evidence-traceability",
+            "reporting-boundary"
+          ],
+          "prompt": "同じ学生が条件A・Bを無作為順で各20試行行う研究について、『条件Bで成功率が高いか』をStanで分析します。研究質問をestimandとprediction taskへ分け、claim–evidence–limitの1行と、それを支えるartifactを設計してください。",
+          "rubric": [
+            {
+              "id": "estimand-defined",
+              "criterion": "対象母集団と意味のある共変量値におけるB−Aの平均成功確率差など、応答尺度のestimandを定義する"
+            },
+            {
+              "id": "prediction-task-separated",
+              "criterion": "既存学生の次試行か新規学生かを選び、estimandの問いと予測評価を区別する"
+            },
+            {
+              "id": "evidence-chain",
+              "criterion": "Stan source・input hash・run metadata・診断・MCSE・posterior要約・条件付きy_repをclaim IDへ対応付ける"
+            },
+            {
+              "id": "limit-stated",
+              "criterion": "標本、モデル、測定、対象母集団への一般化を限定し、sampling診断だけで因果性や外的妥当性を保証しない"
+            },
+            {
+              "id": "decision-language",
+              "criterion": "区間や確率を研究上の量として報告し、二値の有意・非有意だけへ縮約しない"
+            }
+          ],
+          "modelAnswer": "estimandを、募集基準を満たす学生について基準共変量での条件B−Aの平均成功確率差と定義する。予測課題は例えば新規学生の試行予測とし、学生全体をholdoutする評価が必要だと分ける。claimは『この標本と階層Bernoulli-logitモデルのもとで、B−Aの平均成功確率差は正方向に集中した』とする。evidenceはdata contract、source・input hash、CSV metadata、HMC・R-hat・ESS、差のposteriorとMCSE、学生別条件差のy_rep PPCを同じrun IDへ対応付ける。limitには新規学生予測を未評価ならその点、募集範囲外への一般化、測定誤差、モデル仮定を挙げる。無作為順は条件比較の設計根拠になるが、diagnosticだけで一般的な因果主張を保証したとは書かない。",
+          "retryHint": "知りたい応答尺度の量、未観測とみなす対象、直接の計算・予測証拠、越えてはいけない主張を順に書きます。"
+        },
+        {
+          "id": "stan-l41-q4-sensitivity-classification",
+          "kind": "selected-response",
+          "cognitiveProcess": "analyze",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "workflow-integration",
+            "sensitivity-analysis",
+            "evidence-traceability"
+          ],
+          "prompt": "primary runに対し、(1) seedとdraw数だけを変更、(2)同じ階層分布をnon-centered化、(3)tau priorを変更、(4)Normal尤度をStudent-tへ変更、(5)除外基準を変えて対象行を変更、の5 runを作りました。分類として正しいものはどれですか。",
+          "choices": [
+            {
+              "id": "classify-computation-substance",
+              "text": "1・2は同じモデルの計算上の整合性確認、3はprior、4はlikelihood、5はdata/target sensitivityとして別々に報告する",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "all-same-model",
+              "text": "5 runはすべて同じモデルなので、posteriorが違っても最も好ましい結果だけを採用する",
+              "diagnostic": "prior・尤度・分析対象の変更が生成モデルやestimandを変え得ることを無視している"
+            },
+            {
+              "id": "all-computational",
+              "text": "Stanを再実行したものはすべて計算上の確認であり、実質的仮定は一切変わらない",
+              "diagnostic": "run操作と統計モデル・対象集合の変更を混同している"
+            },
+            {
+              "id": "noncentered-prior",
+              "text": "non-centered化だけがprior sensitivityで、tau prior変更はparameter名が同じなので同じモデルである",
+              "diagnostic": "同値な座標変更と分布仮定の変更を逆に分類している"
+            }
+          ],
+          "correctChoiceId": "classify-computation-substance",
+          "correctFeedback": "seed・draw数と同値なparameterizationはmodel-scaleの整合性を確認する計算比較です。prior、likelihood、分析対象の変更は結論が依存する実質的仮定を変えるため、種類と変更理由を分けて報告します。",
+          "retryHint": "各runで、データ、密度、支持範囲、implied parameter分布、estimandのどれが変わったかを確認します。"
+        },
+        {
+          "id": "stan-l41-q5-transfer-capstone",
+          "kind": "transfer-task",
+          "responseMode": "constructed",
+          "cognitiveProcess": "transfer",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "question-target",
+            "workflow-integration",
+            "evidence-traceability",
+            "diagnostic-stop-rule",
+            "sensitivity-analysis",
+            "reporting-boundary",
+            "transfer"
+          ],
+          "scenario": "12施設について月ごとの機器故障件数と稼働時間があります。施設ごとに観測月数と稼働時間が異なります。目的は、既存施設の次月予測と新規施設の年間故障数予測を分け、保守方式との関連を報告することです。",
+          "prompt": "データ契約、生成過程、prior predictive、Stan実装、停止規則、PPC、予測評価、感度分析、artifact manifest、限定付き報告を含む卒業制作を設計してください。",
+          "rubric": [
+            {
+              "id": "count-exposure-contract",
+              "criterion": "故障件数を非負整数、稼働時間を正、施設・月IDを有効範囲とし、log(exposure) offsetを使う件数生成過程を設計する"
+            },
+            {
+              "id": "two-prediction-tasks",
+              "criterion": "既存施設の次月と新規施設の年間予測で、学習側に残せる施設情報とholdout単位を分ける"
+            },
+            {
+              "id": "pre-fit-gates",
+              "criterion": "現実的な件数・zero・施設差のprior predictive統計量と、data・HMC・R-hat・ESS・MCSEの停止規則を事前指定する"
+            },
+            {
+              "id": "predictive-criticism",
+              "criterion": "総件数だけでなく稼働時間帯・施設別zero・分散・最大値をy_repと比較し、overdispersion等の候補仮定へ戻す"
+            },
+            {
+              "id": "sensitivity-separated",
+              "criterion": "prior感度、Poisson対overdispersed likelihood、parameterizationの計算確認を一度に混ぜず別runとして扱う"
+            },
+            {
+              "id": "traceable-artifacts",
+              "criterion": "source・input・metadata・CSV・診断・PPC・予測比較・reportをrun IDとhashでmanifestへ対応付ける"
+            },
+            {
+              "id": "association-boundary",
+              "criterion": "保守方式との関連を、交絡・施設選択・未観測共変量を越えた因果効果と断定しない"
+            }
+          ],
+          "modelAnswer": "N、J、month、site、非負整数failures、正のexposure、保守方式を契約化し、log(expected failures)=log(exposure)+施設効果+保守方式効果とする階層Poisson-logをprimary候補にする。prior predictiveで月別件数、zero率、最大値、施設間差を確認し、不可能な生成なら正式fit前に止める。複数chain実行後はdivergence、E-BFMI、treedepth、R-hat、bulk/tail ESS、報告量MCSEを先に判定する。PPCでは稼働時間帯別平均だけでなくzero率、variance/mean、最大値、施設別分布を比べる。既存施設の次月予測では施設情報を残せるが、新規施設では施設全体をholdoutし、年間稼働時間も定義する。prior変更、negative binomial等のoverdispersion候補、同値なnon-centeringを別runへ分離する。source、入力JSON、CSV metadata、診断、PPC、holdout結果、claim–evidence–limit表をmanifestで結ぶ。保守方式係数は観測された施設・共変量とモデルに条件付く関連として報告し、割付と交絡の根拠なしに因果効果と呼ばない。",
+          "retryHint": "件数と曝露、施設階層、2つの予測対象、停止規則、絶対適合、感度、主張限界の順に設計します。"
+        }
+      ]
     }
   ]
 }
