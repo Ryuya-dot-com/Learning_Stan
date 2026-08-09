@@ -1149,6 +1149,212 @@
           "retryHint": "1行を外したとき、同じ参加者の情報が学習側に残るかを2つの予測目的で追います。"
         }
       ]
+    },
+    {
+      "lessonId": "l40",
+      "outcomeDimensions": [
+        "hierarchical-geometry",
+        "parameterization-equivalence",
+        "diagnostic-comparison",
+        "data-information",
+        "scale-model-boundary",
+        "model-preservation",
+        "transfer"
+      ],
+      "questions": [
+        {
+          "id": "stan-l40-q1-weak-groups",
+          "kind": "selected-response",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "hierarchical-geometry",
+            "diagnostic-comparison",
+            "data-information"
+          ],
+          "prompt": "群当たり1〜2観測で観測ノイズが大きい階層正規モデルをcentered表現で実行すると、tauが0に近い領域へdivergenceが集中し、E-BFMIとtauのESSも低い結果でした。最初の修正として最も適切なものはどれですか。",
+          "choices": [
+            {
+              "id": "noncenter-and-compare",
+              "text": "同じprior・likelihoodを保ってnon-centered化し、複数chainで診断、MCSE、ESS/sec、model-scaleの事後要約を比較する",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "centered-always-invalid",
+              "text": "centered表現はすべて数学的に誤っていると結論し、元コードを保存せず削除する",
+              "diagnostic": "データ条件に依存する計算表現の選択を、生成モデルの正誤へ格上げしている"
+            },
+            {
+              "id": "raise-adapt-only",
+              "text": "原因を調べずadapt_deltaを最大にし、警告が消えたかだけを報告する",
+              "diagnostic": "step size変更をfunnelの原因説明と同一視し、効率と同値性の比較を省いている"
+            },
+            {
+              "id": "truncate-tau",
+              "text": "tauが小さいことが原因なのでtauに十分大きい下限を付け、同じモデルの再パラメータ化と呼ぶ",
+              "diagnostic": "posterior geometryを避けるためにparameter支持範囲とpriorを変え、別モデルにしている"
+            }
+          ],
+          "correctChoiceId": "noncenter-and-compare",
+          "correctFeedback": "弱い群情報ではcentered座標がfunnelを作りやすいため、生成モデルを保ったnon-centeringが有力です。診断だけでなくmodel-scaleのposteriorと予測がMCSE内で整合するかも確認します。",
+          "retryHint": "警告を消す操作、生成モデルを変える操作、同じモデルの探索座標を変える操作を分けます。"
+        },
+        {
+          "id": "stan-l40-q2-implied-distribution",
+          "kind": "output-prediction",
+          "cognitiveProcess": "analyze",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "parameterization-equivalence",
+            "model-preservation"
+          ],
+          "prompt": "muと正のtauを固定し、次のnon-centeredコードを使います。theta[j]の条件付き分布と、元のcentered表現との関係として正しいものはどれですか。",
+          "code": "parameters {\n  vector[J] z;\n}\ntransformed parameters {\n  vector[J] theta = mu + tau * z;\n}\nmodel {\n  z ~ std_normal();\n}",
+          "choices": [
+            {
+              "id": "same-normal",
+              "text": "theta[j] | mu, tau はNormal(mu, tau)となり、mu・tauのpriorとlikelihoodも保てばcentered表現と同じ階層モデルを表す",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "standard-theta",
+              "text": "theta[j]は常に標準正規で、muとtauは分布に影響しない",
+              "diagnostic": "標準正規なのはzであり、thetaへ位置と尺度の変換が入ることを落としている"
+            },
+            {
+              "id": "variance-tau",
+              "text": "theta[j] | mu, tau はNormal(mu, sqrt(tau))となる",
+              "diagnostic": "Stanのnormal第2引数tauを分散と誤読している"
+            },
+            {
+              "id": "must-add-jacobian",
+              "text": "同じ分布にするには、この生成的なコードへ必ずtarget += log(tau)を追加する",
+              "diagnostic": "primitive parameter zに密度を置いてthetaを導出するnon-centeringと、theta尺度の密度を変換する一般のJacobian調整を混同している"
+            }
+          ],
+          "correctChoiceId": "same-normal",
+          "correctFeedback": "標準正規zをmu + tau * zへ変換すると、theta | mu, tauは平均mu・標準偏差tauの正規分布になります。この生成的構成へmanual Jacobianは追加しません。",
+          "retryHint": "標準正規変数へ位置muを足し、正の尺度tauを掛けたときの平均と標準偏差を求めます。"
+        },
+        {
+          "id": "stan-l40-q3-rewrite-noncentered",
+          "kind": "constructed-response",
+          "cognitiveProcess": "debug",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "parameterization-equivalence",
+            "scale-model-boundary",
+            "model-preservation"
+          ],
+          "prompt": "parametersにmu、tau、vector[J] thetaを置き、modelでtheta ~ normal(mu, tau)、y ~ normal(theta[group], sigma_y)としたcenteredモデルをnon-centeredへ書き換えてください。保つべきprior・likelihoodと、manual Jacobianを追加しない理由も説明してください。",
+          "rubric": [
+            {
+              "id": "primitive-z",
+              "criterion": "thetaの代わりにvector[J] zをparametersへ置き、z ~ std_normal()を指定する"
+            },
+            {
+              "id": "derived-theta",
+              "criterion": "transformed parameters等でtheta = mu + tau * zを作り、元のlikelihoodへ同じthetaを渡す"
+            },
+            {
+              "id": "preserve-hyperpriors",
+              "criterion": "mu・tau・sigma_yのpriorと支持範囲を元モデルから勝手に変えない"
+            },
+            {
+              "id": "jacobian-boundary",
+              "criterion": "zへ標準正規密度を置きthetaを導出する生成的構成にはmanual Jacobianを加えず、一般の密度変換とは区別する"
+            },
+            {
+              "id": "equivalence-check",
+              "criterion": "impliedなtheta | mu, tauとmodel-scaleのposterior・予測をMCSE込みで照合する"
+            }
+          ],
+          "modelAnswer": "parametersのthetaをvector[J] zへ置き、transformed parametersでvector[J] theta = mu + tau * zとする。modelではmu、tau、sigma_yの元のpriorを保ち、z ~ std_normal()、y ~ normal(theta[group], sigma_y)と書く。zをprimitive parameterとして標準正規から生成しthetaを導くため、この構成へmanual Jacobianは足さない。theta | mu, tauがNormal(mu, tau)になることを数式で確認し、両表現のmu・tau・theta・予測要約がMCSE内で整合するか調べる。",
+          "retryHint": "探索する標準化効果、そこから作るmodel-scale効果、元の観測モデルの3か所に分けて書きます。"
+        },
+        {
+          "id": "stan-l40-q4-strong-groups",
+          "kind": "selected-response",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "diagnostic-comparison",
+            "data-information",
+            "model-preservation"
+          ],
+          "prompt": "群当たり100観測で各群平均がよく識別される仮想ケースです。centeredとnon-centeredはともにdivergence・最大treedepth到達0、E-BFMI 0.7以上、R-hat 1.01未満で、posterior要約はMCSE内で整合しました。centeredのtau ESS/secは64、non-centeredは28でした。最も適切な判断はどれですか。",
+          "choices": [
+            {
+              "id": "choose-centered-locally",
+              "text": "この強い群情報・同じ計算環境の範囲ではcenteredが効率的と判断するが、別データへの普遍則にはしない",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "always-noncentered",
+              "text": "non-centeredは新しい表現なので、ESS/secに関係なく必ず採用する",
+              "diagnostic": "parameterizationの選択をデータ情報量と実測効率から切り離している"
+            },
+            {
+              "id": "different-models",
+              "text": "ESS/secが違うので、2つは異なる確率モデルを推定したと結論する",
+              "diagnostic": "同じtargetを異なる座標で探索したときの自己相関・実行効率の差をモデル差と混同している"
+            },
+            {
+              "id": "probability-centered",
+              "text": "64対28なのでcenteredが真である確率は64/(64+28)である",
+              "diagnostic": "計算効率をモデル確率へ読み替えている"
+            }
+          ],
+          "correctChoiceId": "choose-centered-locally",
+          "correctFeedback": "強い群情報ではcenteredが有利なことがあります。両表現の同値性と診断を確認したうえで、ESS/secの差をこのデータ・環境に限定した計算上の選択へ使います。",
+          "retryHint": "生成モデルの正しさ、探索の警告、単位時間当たりの効率を別々に判断します。"
+        },
+        {
+          "id": "stan-l40-q5-transfer-varying-slope",
+          "kind": "transfer-task",
+          "responseMode": "constructed",
+          "cognitiveProcess": "transfer",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "hierarchical-geometry",
+            "diagnostic-comparison",
+            "data-information",
+            "scale-model-boundary",
+            "model-preservation",
+            "transfer"
+          ],
+          "scenario": "30名の反応時間を課題難易度xで説明します。参加者ごとのinterceptとslopeには相関を許します。xは100〜10000の大きな尺度で、参加者ごとの観測数は2件の条件と80件の条件を比較できます。",
+          "prompt": "centered/non-centeredとxの標準化を比較する計画を設計してください。同じモデルを保つ照合、弱い・強い群情報、診断、効率、元尺度の報告、観測モデルを変える場合の境界を含めてください。",
+          "rubric": [
+            {
+              "id": "correlated-effects",
+              "criterion": "標準正規ベクトルと群間尺度・相関構造からinterceptとslopeの群効果を構成するnon-centered候補を示す"
+            },
+            {
+              "id": "two-information-regimes",
+              "criterion": "参加者当たり2件と80件を弱い群情報・強い群情報として、表現ごとに同じ固定データを比較する"
+            },
+            {
+              "id": "standardization-contract",
+              "criterion": "xの中心・尺度を保存し、slope priorとposteriorを元尺度へ対応付けてprior predictive checkも行う"
+            },
+            {
+              "id": "full-diagnostics",
+              "criterion": "divergence、E-BFMI、treedepth、R-hat、bulk/tail ESS、MCSE、時間、ESS/secを比較する"
+            },
+            {
+              "id": "same-model-check",
+              "criterion": "群効果、相関、likelihood、prior、posterior予測が同じ意味を保つかをmodel-scaleで照合する"
+            },
+            {
+              "id": "model-change-boundary",
+              "criterion": "反応時間分布、切断・打ち切り、priorを変える提案は再パラメータ化とは別モデルとして評価する"
+            }
+          ],
+          "modelAnswer": "xの平均と標準偏差を固定・保存して標準化し、interceptとslopeの標準正規ベクトルを群間尺度とCholesky相関因子でmodel-scaleの群効果へ変換するnon-centered候補を作る。centered候補とprior、相関構造、likelihoodをそろえ、参加者当たり2件と80件の固定データを各表現で複数chain実行する。divergence、E-BFMI、treedepth、R-hat、bulk/tail ESS、MCSE、時間、ESS/secを比較し、群効果・相関・予測がMCSE内で整合するか確認する。標準化に合わせてslope priorを設計し、係数と予測を元尺度へ戻す。反応時間の尤度や切断・打ち切り、prior自体を変える案は、純粋な再パラメータ化とは分けてPPCと感度分析を行う。",
+          "retryHint": "群効果の相関、予測子の単位、データ情報量、計算診断、観測モデルの5層へ分けて計画します。"
+        }
+      ]
     }
   ]
 }

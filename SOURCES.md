@@ -115,6 +115,10 @@ rstan が同梱する Stan はこれより古い世代であるため、本教�
 | PSISの主要なPareto k診断線はposterior sample size Sに依存する | [loo package glossary](https://mc-stan.org/loo/reference/loo-glossary.html) | `min(1 - 1/log10(S), 0.7)`を使い、固定0.7の暗記ではなくrunごとの閾値と影響観測を確認する |
 | `loo_compare()`の`elpd_diff`は最良モデルを0とする差で、`se_diff`は点別差から作るpairedな標準誤差である | [loo: Model comparison](https://mc-stan.org/loo/reference/loo_compare.html) | Pareto k、`diag_diff`、PPCを確認してから差と不確実性を一緒に読み、順位を真実性へ格上げしない |
 | stackingは候補のLOO予測分布を組み合わせる重みを最適化する | [loo: Model averaging and weighting](https://mc-stan.org/loo/reference/loo_model_weights.html) | stacking weightをposterior model probabilityと呼ばず、候補集合と予測課題に依存する予測上の重みとして扱う |
+| 階層尺度が変わるfunnelはHMCに難しい幾何を作り、non-centered表現は標準正規の座標から同じ階層分布を構成できる | [Stan User's Guide: Reparameterization and Change of Variables](https://mc-stan.org/docs/stan-users-guide/reparameterization.html) | L40で`z ~ std_normal()`、`theta = mu + tau * z`へ書き換え、生成的構成と一般のJacobian調整を区別する |
+| centeredとnon-centeredの効率はデータ情報量に依存し、データが少ない場合はnon-centered、多い場合はcenteredが有利になり得る | [Stan User's Guide: Reparameterization and Change of Variables](https://mc-stan.org/docs/stan-users-guide/reparameterization.html) | 一方を常時正解にせず、弱い群情報と強い群情報で診断・MCSE・ESS/secを比較する |
+| 予測子・応答の標準化は計算効率を改善し得るが、prior尺度と元尺度への逆変換を対応させる必要がある | [Stan User's Guide: Standardizing Predictors and Outputs](https://mc-stan.org/docs/stan-users-guide/efficiency-tuning.html#standardizing-predictors-and-outputs) | 中心・尺度を保存し、prior predictive checkと元尺度での係数・予測報告までをL40の契約に含める |
+| 強く変化する曲率では数値積分誤差によるdivergenceや小さいstep sizeによる長いtrajectoryが生じ得る | [Stan Reference Manual: Hamiltonian Monte Carlo](https://mc-stan.org/docs/reference-manual/mcmc.html) | `adapt_delta`だけを原因説明にせず、funnel、尺度、divergent位置、treedepth、効率を診断する |
 
 Stan教材パックの一次資料は`mc-stan.org`に限定し、最終確認日は2026-08-09とする。静的検証の成功はStanコンパイラでの構文確認やMCMC診断の代替ではない。
 

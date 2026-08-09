@@ -5,7 +5,7 @@
   "releasePolicy": "Foundation Gate通過後に、前段階の評価結果を反映して1レッスンずつ公開する",
   "lessonDelivery": {
     "status": "draft-unpublished",
-    "authoredLessonIds": ["l34", "l35", "l36", "l37", "l38", "l39"],
+    "authoredLessonIds": ["l34", "l35", "l36", "l37", "l38", "l39", "l40"],
     "assessmentArtifact": "foundation-assessments.json",
     "requiredSections": [
       "このレッスンのゴール",
@@ -375,14 +375,33 @@
     {
       "id": "l40",
       "title": "悪い幾何をモデル側から直す",
+      "manuscript": "lessons/l40-reparameterization-geometry.md",
       "prerequisites": ["l39"],
-      "outcome": "階層モデルのfunnelとdivergenceの関係を説明し、centered表現をnon-centered表現へ書き換えられる",
+      "outcome": "階層モデルのfunnelとdivergenceの関係を説明し、生成モデルを保ってcentered表現をnon-centered表現へ書き換え、群情報量ごとの診断・Monte Carlo精度・計算効率から表現を選べる",
+      "outcomeDimensions": ["hierarchical-geometry", "parameterization-equivalence", "diagnostic-comparison", "data-information", "scale-model-boundary", "model-preservation", "transfer"],
+      "assessmentIds": [
+        "stan-l40-q1-weak-groups",
+        "stan-l40-q2-implied-distribution",
+        "stan-l40-q3-rewrite-noncentered",
+        "stan-l40-q4-strong-groups",
+        "stan-l40-q5-transfer-varying-slope"
+      ],
       "concepts": ["hierarchical model", "funnel", "centered", "non-centered", "standardization", "constraint・truncation・censoring"],
       "directEvidence": [
         {
-          "artifact": "再パラメータ化前後のコードと診断比較",
+          "artifact": "funnelとparameterization同値性の説明",
+          "method": "constructed-response",
+          "criterion": "tauが小さい領域の曲率を説明し、zの標準正規分布とthetaの変換から元の条件付き階層分布を導く"
+        },
+        {
+          "artifact": "centered・non-centeredのコードと診断比較",
           "method": "debugging-task",
-          "criterion": "adapt_deltaだけで警告を隠さず、モデル幾何とデータ尺度に基づく修正を比較する"
+          "criterion": "adapt_deltaだけで警告を隠さず、弱い群情報と強い群情報で同じ生成モデルの幾何、診断、MCSE、ESS/secを比較する"
+        },
+        {
+          "artifact": "varying-slope階層モデルの転移レビュー",
+          "method": "transfer-task",
+          "criterion": "相関構造、標準化、prior、元尺度への逆変換を保ち、群情報量ごとのparameterization比較を未見モデルへ移す"
         }
       ]
     },
