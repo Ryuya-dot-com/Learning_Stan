@@ -210,6 +210,7 @@ noncentered_diagnostics <- noncentered_fit$diagnostic_summary()
 ```
 
 この断片は比較項目の設計例であり、下の仮想診断の数値を生成した実行コードではありません。
+実測に使った完全なコードは`examples/run-reparameterization-comparison.R`で、固定入力、全chainのCSV、3回の時間計測、モデル尺度の同値性表、2図を一つの出力先へ保存します。
 
 ## 8. 仮想診断を正しく読む
 
@@ -237,14 +238,20 @@ noncentered_diagnostics <- noncentered_fit$diagnostic_summary()
 
 `model-review/mr03-centered.candidate.stan`と`model-review/mr03-noncentered.reference.stan`は、固定版stanc3 2.39.0、`--warn-pedantic`で構文成功・警告0件です。ソースのSHA-256も`model-review-validation.json`へ保存されています。
 
-この証拠から直接言えるのは、両ソースがその固定コンパイラの構文・型・意味解析を通り、取得時点のソースと一致することです。次はまだ言えません。
+2026-08-09には、R 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0、Darwin arm64、Apple clang 21.0.0で両表現を実測しました。弱情報は8群・各1観測・真の`tau=0.1`、強情報は8群・各30観測・真の`tau=1`です。両条件・両表現へ同じ`adapt_delta=0.9`、warmup 1,000、sampling 1,000、4 chainを適用し、実行順を交互にした3反復を行いました。
 
-- どちらの表現も4 chainで正しく探索できた。
-- 弱い群情報でnon-centeredのdivergenceが少なかった。
-- 強い群情報でcenteredのESS/secが高かった。
-- 2表現のposterior要約やPPCがMCSE内で一致した。
+| 条件 | 表現 | divergence合計 | 最大treedepth合計 | E-BFMI最小 | R-hat最大 | bulk ESS最小 | `tau` bulk ESS/sec中央値 |
+|---|---|---:|---:|---:|---:|---:|---:|
+| 弱情報 | centered | 235 | 0 | 0.173 | 1.088 | 41 | 341 |
+| 弱情報 | non-centered | 0 | 0 | 0.823 | 1.003 | 2,288 | 16,233 |
+| 強情報 | centered | 0 | 0 | 0.941 | 1.003 | 3,699 | 27,624 |
+| 強情報 | non-centered | 0 | 0 | 0.625 | 1.014 | 604 | 3,500 |
 
-したがって、前節の表はすべて仮想診断です。L40の直接評価Bで実際に比較するまでは、`model-review-validation.json`へ推定性能を追記しません。構文成功を、計算効率やモデル妥当性の証拠へ格上げしません。
+診断値は性能runの3反復・計48 chain行をすべて集約し、E-BFMI・ESSには最小、R-hatには最大を使っています。弱情報ではnon-centeredがdivergenceを235から0へ減らし、`tau`のESS/sec中央値は約48倍でした。強情報ではcenteredが全反復で主要診断を通り、`tau`のESS/sec中央値は約8倍でした。強情報non-centeredのR-hat最大1.014も、表現をデータ条件から選ぶ理由の一部です。短い小規模モデルの時間はマシン負荷に依存するため、倍率を一般的な定数とはみなしません。
+
+さらに、同じ固定データで`adapt_delta=0.99`、4 chain、sampling 2,000の同値性runを別に実行しました。`mu`、`tau`、`theta[1:8]`の20比較はすべて平均差が4 combined MCSE以内で、最大は0.886 MCSEでした。ただし弱情報centeredにはなお146 divergenceが残りました。したがって、平均の近さだけでcenteredの探索を正当化せず、数式上の同値性と診断良好なnon-centered runを合わせて判断します。
+
+機械可読な結果、source hash、入力hash、環境、12成果物、限界は`reparameterization-validation.json`に保存しています。再実行入口は`examples/run-reparameterization-comparison.R`、空の一時ディレクトリからの検証入口は`scripts/verify-stan-reparameterization-runtime.R`です。前節のケースA・Bは引き続き判断練習用の仮想診断であり、この実測表とは混ぜません。実測は固定した小規模正規random-interceptモデル1種の教材校正で、varying slope、相関構造、未知の観測誤差や別環境へ一般化する証拠ではありません。
 
 ## 10. 標準化はpriorと報告尺度まで含めて設計する
 
@@ -365,10 +372,10 @@ L41後、random interceptとvarying slopeを持つ未見モデルへ移します
    parameterの内部変換と観測過程の尤度は別です。
 
 9. **構文成功を推定性能の証拠とする**
-   現在のmr03証拠は構文成功・警告0件までで、複数chainの比較は未実測です。
+   `model-review-validation.json`は構文証拠、`reparameterization-validation.json`は固定2条件の複数chain実測です。証拠の役割と適用範囲を分けます。
 
 10. **仮想診断を実測値として引用する**
-    教材内のケースA・Bは判断練習用です。保存runの証拠とは明示的に分けます。
+    教材内のケースA・Bは判断練習用です。第9節の保存runと明示的に分けます。
 
 ## 内容理解問題
 
@@ -427,4 +434,4 @@ centeredとnon-centeredのコードを並べ、`tau`が小さいときの`theta`
 - [CmdStan Guide: Diagnose utility](https://mc-stan.org/docs/cmdstan-guide/diagnose_utility.html)
 - [Stan Reference Manual: Posterior Analysis](https://mc-stan.org/docs/reference-manual/analysis.html)
 
-L40の原稿、理解問題、centered/non-centeredの構文証拠はGitHub上でレビュー可能ですが、学習アプリへはまだ公開しません。現時点では両表現の複数chain比較を実測していないため、仮想診断を性能証拠として公開判定へ使いません。
+L40の原稿、理解問題、構文証拠、弱・強情報の複数chain比較はGitHub上でレビュー可能ですが、学習アプリへはまだ公開しません。ローカル実測はStan Release GateのSRG05を満たす証拠になりますが、対象commitのクリーンCI、独立専門レビュー、初学者観察、遅延保持など別ゲートを代替しません。

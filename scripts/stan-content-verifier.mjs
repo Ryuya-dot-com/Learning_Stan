@@ -1129,6 +1129,133 @@ export function validateLinkComparisonEvidence(evidence, sources) {
   return errors;
 }
 
+export function validateReparameterizationRunner(source) {
+  const errors = [];
+  for (const [pattern, message] of [
+    [/run_reparameterization_comparison\s*<-\s*function/, "L40比較が再利用可能な関数ではありません"],
+    [/weak\s*=\s*list\(seed\s*=\s*202608091L[^\n]*observations_per_group\s*=\s*1L/, "弱情報シナリオの固定条件がありません"],
+    [/strong\s*=\s*list\(seed\s*=\s*202608092L[^\n]*observations_per_group\s*=\s*30L/, "強情報シナリオの固定条件がありません"],
+    [/chains\s*=\s*4L/, "L40比較の既定chain数が4ではありません"],
+    [/iter_warmup\s*=\s*1000L/, "L40比較の既定warmupが1000ではありません"],
+    [/iter_sampling\s*=\s*1000L/, "L40比較の既定samplingが1000ではありません"],
+    [/repetitions\s*=\s*3L/, "L40比較の既定反復数が3ではありません"],
+    [/equivalence_iter_sampling\s*=\s*2000L/, "L40同値性runのsampling数が2000ではありません"],
+    [/adapt_delta\s*=\s*0\.9,/, "L40性能比較が共通adapt_delta 0.9を使っていません"],
+    [/equivalence_adapt_delta\s*=\s*0\.99/, "L40同値性runのadapt_deltaが0.99ではありません"],
+    [/fit\$diagnostic_summary\s*\(/, "L40比較にchain別診断の抽出がありません"],
+    [/fit\$time\s*\(\)/, "L40比較に実行時間の抽出がありません"],
+    [/tau_bulk_ess_per_second/, "L40比較にtauのESS/sec計算がありません"],
+    [/performance_diagnostics\s*<-\s*do\.call\(rbind,\s*lapply\(performance_results/s, "L40比較が全性能反復の診断を保存していません"],
+    [/combined_mcse\s*<-\s*sqrt\(/, "L40同値性比較にcombined MCSEがありません"],
+    [/within_four_mcse/, "L40同値性比較に4 MCSE判定がありません"],
+    [/write_stan_json\s*\(/, "L40比較が固定入力JSONを保存していません"],
+    [/efficiency-comparison\.csv/, "L40比較が効率要約を保存していません"],
+    [/posterior-equivalence\.csv/, "L40比較が事後分布同値性を保存していません"],
+  ]) requiresMatch(errors, source, pattern, message);
+  return errors;
+}
+
+export function validateReparameterizationEvidence(evidence, sources) {
+  const errors = [];
+  if (evidence?.schemaVersion !== 1) {
+    errors.push("reparameterization-validation.schemaVersionは1である必要があります");
+  }
+  if (evidence?.status !== "PASS") {
+    errors.push("L40再パラメータ化実行証拠はPASSである必要があります");
+  }
+  for (const [name, source] of Object.entries(sources)) {
+    if (evidence?.sourceHashes?.[name] !== sha256(source)) {
+      errors.push(`${name}がL40再パラメータ化実行証拠取得後に変更されています`);
+    }
+  }
+  for (const [name, expected] of [["r", "4.6.1"], ["cmdstanr", "0.9.0"], ["cmdstan", "2.39.0"]]) {
+    if (evidence?.environment?.[name] !== expected) {
+      errors.push(`L40再パラメータ化実行証拠の${name}版は${expected}である必要があります`);
+    }
+  }
+  if (evidence?.environment?.architecture !== "aarch64" ||
+      evidence?.environment?.compiler !== "Apple clang 21.0.0") {
+    errors.push("L40再パラメータ化実行証拠の実測環境が固定契約と一致しません");
+  }
+  for (const check of [
+    "scenarioGeneration", "syntax", "compile", "weakCenteredSampling",
+    "weakNoncenteredSampling", "strongCenteredSampling", "strongNoncenteredSampling",
+    "diagnosticSummary", "repeatedTiming", "posteriorEquivalence", "visualInspection",
+  ]) {
+    if (evidence?.checks?.[check] !== "PASS") {
+      errors.push(`L40再パラメータ化実行証拠の${check}がPASSではありません`);
+    }
+  }
+
+  const weak = evidence?.scenarios?.weak || {};
+  const strong = evidence?.scenarios?.strong || {};
+  if (weak.seed !== 202608091 || weak.groups !== 8 || weak.observationsPerGroup !== 1 ||
+      weak.observations !== 8 || weak.trueMu !== 0.5 || weak.trueTau !== 0.1 ||
+      weak.observationSigma !== 1 || strong.seed !== 202608092 || strong.groups !== 8 ||
+      strong.observationsPerGroup !== 30 || strong.observations !== 240 ||
+      strong.trueMu !== 0.5 || strong.trueTau !== 1 || strong.observationSigma !== 1) {
+    errors.push("L40再パラメータ化実行証拠の弱・強情報シナリオが固定条件と一致しません");
+  }
+  if (weak.inputSha256 !== evidence?.inputHashes?.["weak-input.json"] ||
+      strong.inputSha256 !== evidence?.inputHashes?.["strong-input.json"]) {
+    errors.push("L40再パラメータ化実行証拠の入力ハッシュがシナリオ記録と一致しません");
+  }
+  const sample = evidence?.sample || {};
+  if (sample.chains !== 4 || sample.parallelChains !== 4 || sample.iterWarmup !== 1000 ||
+      sample.iterSampling !== 1000 || sample.repetitions !== 3 || sample.initialization !== 0 ||
+      sample.adaptDelta !== 0.9 || sample.maxTreedepth !== 10 ||
+      sample.equivalenceIterSampling !== 2000 || sample.equivalenceAdaptDelta !== 0.99 ||
+      sample.equivalenceMaxTreedepth !== 15) {
+    errors.push("L40再パラメータ化実行証拠のサンプリング条件が教材コードと一致しません");
+  }
+
+  const weakCentered = evidence?.performance?.weak?.centered || {};
+  const weakNoncentered = evidence?.performance?.weak?.noncentered || {};
+  const strongCentered = evidence?.performance?.strong?.centered || {};
+  const strongNoncentered = evidence?.performance?.strong?.noncentered || {};
+  if (!(weakCentered.divergentTotal > 0 && weakCentered.ebfmiMin < 0.3 &&
+        weakCentered.reportedRhatMax > 1.01 && weakCentered.reportedEssBulkMin < 400 &&
+        weakCentered.reportedEssTailMin < 400 && weakNoncentered.divergentTotal === 0 &&
+        weakNoncentered.maxTreedepthTotal === 0 && weakNoncentered.ebfmiMin >= 0.3 &&
+        weakNoncentered.reportedRhatMax <= 1.01 && weakNoncentered.reportedEssBulkMin >= 400 &&
+        weakNoncentered.reportedEssTailMin >= 400 && evidence?.performance?.weak?.preferred === "noncentered")) {
+    errors.push("L40弱情報実測がcenteredの幾何問題とnon-centeredの修復を示していません");
+  }
+  if (!(strongCentered.divergentTotal === 0 && strongCentered.maxTreedepthTotal === 0 &&
+        strongCentered.ebfmiMin >= 0.3 && strongCentered.reportedRhatMax <= 1.01 &&
+        strongCentered.reportedEssBulkMin >= 400 && strongCentered.reportedEssTailMin >= 400 &&
+        strongNoncentered.divergentTotal === 0 && strongNoncentered.ebfmiMin >= 0.3 &&
+        strongNoncentered.reportedEssBulkMin >= 400 && strongNoncentered.reportedEssTailMin >= 400 &&
+        evidence?.performance?.strong?.preferred === "centered")) {
+    errors.push("L40強情報実測がcenteredを選ぶ診断根拠を示していません");
+  }
+  if (!(weakNoncentered.tauBulkEssPerSecondMedian > 5 * weakCentered.tauBulkEssPerSecondMedian &&
+        strongCentered.tauBulkEssPerSecondMedian > 2 * strongNoncentered.tauBulkEssPerSecondMedian)) {
+    errors.push("L40の反復ESS/sec比較が情報量依存の効率差を示していません");
+  }
+  const equivalence = evidence?.posteriorEquivalence || {};
+  if (equivalence.parametersPerScenario !== 10 || equivalence.comparisons !== 20 ||
+      equivalence.combinedMcseMultiplier !== 4 || equivalence.allWithinTolerance !== true ||
+      !Number.isFinite(equivalence.maximumAbsoluteMcseZ) || equivalence.maximumAbsoluteMcseZ > 4 ||
+      equivalence.weakCenteredDivergences <= 0 || equivalence.weakNoncenteredDivergences !== 0 ||
+      equivalence.strongCenteredDivergences !== 0 || equivalence.strongNoncenteredDivergences !== 0) {
+    errors.push("L40のモデル尺度における事後分布同値性証拠が固定基準を満たしません");
+  }
+  const expectedArtifacts = [
+    "scenario-data.csv", "scenario-metadata.csv", "weak-input.json", "strong-input.json",
+    "diagnostics.csv", "posterior-summary.csv", "timing-repetitions.csv",
+    "efficiency-comparison.csv", "posterior-equivalence.csv", "run-environment.csv",
+    "01-parameterization-efficiency.png", "02-posterior-agreement.png",
+  ];
+  if ([...(evidence?.artifacts || [])].sort().join("|") !== [...expectedArtifacts].sort().join("|")) {
+    errors.push("L40再パラメータ化実行証拠の成果物契約が12点と一致しません");
+  }
+  if (!Array.isArray(evidence?.limitations) || evidence.limitations.length < 7) {
+    errors.push("L40再パラメータ化実行証拠の限界が十分に記録されていません");
+  }
+  return errors;
+}
+
 export function validateCurriculum(curriculum) {
   const errors = [];
   if (curriculum?.schemaVersion !== 1) errors.push("curriculum.schemaVersionは1である必要があります");
@@ -1254,6 +1381,30 @@ export function validateCurriculum(curriculum) {
     if (!Array.isArray(linkCase.models) || linkCase.models.length !== 3 ||
         linkCase.artifactCount !== 13) {
       errors.push("リンク関数・LOOケースは3モデル・13成果物の契約である必要があります");
+    }
+  }
+
+  const reparameterizationCase = curriculum?.caseStudies?.find(
+    (item) => item.id === "stan-case-reparameterization-01"
+  );
+  if (!reparameterizationCase) {
+    errors.push("中心化・非中心化の実行ケーススタディがカリキュラムにありません");
+  } else {
+    if (reparameterizationCase.status !== "draft-unpublished") {
+      errors.push("再パラメータ化ケースは公開ゲート通過まで非公開である必要があります");
+    }
+    if (reparameterizationCase.manuscript !== "lessons/l40-reparameterization-geometry.md" ||
+        reparameterizationCase.runner !== "examples/run-reparameterization-comparison.R" ||
+        reparameterizationCase.evidence !== "reparameterization-validation.json") {
+      errors.push("再パラメータ化ケースの原稿・実行コード・証拠への導線が一致しません");
+    }
+    if (reparameterizationCase.prerequisiteUnits?.join("|") !== "g06" ||
+        reparameterizationCase.lessonMap?.join("|") !== "l38|l40|l41") {
+      errors.push("再パラメータ化ケースの文法前提・レッスン対応が教材設計と一致しません");
+    }
+    if (!Array.isArray(reparameterizationCase.models) || reparameterizationCase.models.length !== 2 ||
+        reparameterizationCase.artifactCount !== 12) {
+      errors.push("再パラメータ化ケースは2モデル・12成果物の契約である必要があります");
     }
   }
 
@@ -1457,10 +1608,16 @@ export function loadStanContent(root = process.cwd()) {
     linkComparisonRunner: normalizeLineEndings(
       readFileSync(resolve(base, "examples", "run-link-model-comparison.R"), "utf8")
     ),
+    reparameterizationRunner: normalizeLineEndings(
+      readFileSync(resolve(base, "examples", "run-reparameterization-comparison.R"), "utf8")
+    ),
     runtimeEvidence: JSON.parse(readFileSync(resolve(base, "validation.json"), "utf8")),
     scenarioEvidence: JSON.parse(readFileSync(resolve(base, "scenario-validation.json"), "utf8")),
     linkComparisonEvidence: JSON.parse(
       readFileSync(resolve(base, "link-comparison-validation.json"), "utf8")
+    ),
+    reparameterizationEvidence: JSON.parse(
+      readFileSync(resolve(base, "reparameterization-validation.json"), "utf8")
     ),
   };
 }
@@ -1514,6 +1671,7 @@ export function validateStanContent(content) {
       content.binaryLogitQuadraticStan,
       content.poissonLogExposureStan
     ),
+    ...validateReparameterizationRunner(content.reparameterizationRunner),
     ...validateRuntimeEvidence(content.runtimeEvidence, content.stanSource, content.runnerSource),
     ...validateScenarioEvidence(content.scenarioEvidence, {
       "prior-predictive.stan": content.priorPredictiveStan,
@@ -1527,6 +1685,15 @@ export function validateStanContent(content) {
       "poisson-log-exposure.stan": content.poissonLogExposureStan,
       "simulate-link-functions.R": content.linkSimulationRunner,
       "run-link-model-comparison.R": content.linkComparisonRunner,
+    }),
+    ...validateReparameterizationEvidence(content.reparameterizationEvidence, {
+      "mr03-centered.candidate.stan": content.modelReviewSources[
+        "model-review/mr03-centered.candidate.stan"
+      ],
+      "mr03-noncentered.reference.stan": content.modelReviewSources[
+        "model-review/mr03-noncentered.reference.stan"
+      ],
+      "run-reparameterization-comparison.R": content.reparameterizationRunner,
     }),
   ];
 }
@@ -1556,7 +1723,7 @@ function runCli() {
     `${content.syntaxErrorCorpus.cases.length} compiler-error pairs, ` +
     `${content.modelReviewCorpus.cases.length} compile-success review pairs, ` +
     `${content.syntaxRetentionAssessments.tasks.length} retention tasks, ` +
-    `7 executable Stan examples, 2 runtime-verified comparison scenarios)`
+    `8 executable Stan examples, 3 runtime-verified comparison scenarios)`
   );
   console.log(
     `Compiler/runtime evidence: PASS (R ${content.runtimeEvidence.environment.r}, ` +

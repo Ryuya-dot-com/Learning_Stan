@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "verifiedAt": "2026-08-09T23:37:35+09:00",
+  "sourceHashes": {
+    "mr03-centered.candidate.stan": "5b7d42ab9565d1d76bfaad5a8d0f9c76c0468336bd0d80a65d6d7cf312034cc6",
+    "mr03-noncentered.reference.stan": "d29a79cd4b771657ba7500afba85f78065175875f832f502315cfb85a0d73ff4",
+    "run-reparameterization-comparison.R": "36d20c213c4bc006655c88f0f53a88387d489542d312d9dac963ad8d51fc62b5"
+  },
+  "inputHashes": {
+    "weak-input.json": "9ae953166961ca490a87cd072e7d17cb20e4f55f807015540432ba16f5aaddb6",
+    "strong-input.json": "9656500e44b7c37a4163b43fe5db90d1494bf89933d8edee06ee628cae14a5e6"
+  },
+  "environment": {
+    "os": "Darwin 25.5.0",
+    "architecture": "aarch64",
+    "r": "4.6.1",
+    "cmdstanr": "0.9.0",
+    "cmdstan": "2.39.0",
+    "compiler": "Apple clang 21.0.0"
+  },
+  "checks": {
+    "scenarioGeneration": "PASS",
+    "syntax": "PASS",
+    "compile": "PASS",
+    "weakCenteredSampling": "PASS",
+    "weakNoncenteredSampling": "PASS",
+    "strongCenteredSampling": "PASS",
+    "strongNoncenteredSampling": "PASS",
+    "diagnosticSummary": "PASS",
+    "repeatedTiming": "PASS",
+    "posteriorEquivalence": "PASS",
+    "visualInspection": "PASS"
+  },
+  "scenarios": {
+    "weak": {
+      "seed": 202608091,
+      "groups": 8,
+      "observationsPerGroup": 1,
+      "observations": 8,
+      "trueMu": 0.5,
+      "trueTau": 0.1,
+      "observationSigma": 1,
+      "inputSha256": "9ae953166961ca490a87cd072e7d17cb20e4f55f807015540432ba16f5aaddb6"
+    },
+    "strong": {
+      "seed": 202608092,
+      "groups": 8,
+      "observationsPerGroup": 30,
+      "observations": 240,
+      "trueMu": 0.5,
+      "trueTau": 1,
+      "observationSigma": 1,
+      "inputSha256": "9656500e44b7c37a4163b43fe5db90d1494bf89933d8edee06ee628cae14a5e6"
+    }
+  },
+  "sample": {
+    "chains": 4,
+    "parallelChains": 4,
+    "iterWarmup": 1000,
+    "iterSampling": 1000,
+    "repetitions": 3,
+    "initialization": 0,
+    "adaptDelta": 0.9,
+    "maxTreedepth": 10,
+    "equivalenceIterSampling": 2000,
+    "equivalenceAdaptDelta": 0.99,
+    "equivalenceMaxTreedepth": 15
+  },
+  "performance": {
+    "weak": {
+      "centered": {
+        "divergentTotal": 235,
+        "maxTreedepthTotal": 0,
+        "ebfmiMin": 0.1728845,
+        "reportedRhatMax": 1.087654,
+        "reportedEssBulkMin": 40.9213,
+        "reportedEssTailMin": 39.0257,
+        "tauMeanMedian": 0.4323763,
+        "tauMcseMeanMax": 0.0269592,
+        "elapsedSecondsMedian": 0.1403539,
+        "tauBulkEssPerSecondMedian": 341.3758
+      },
+      "noncentered": {
+        "divergentTotal": 0,
+        "maxTreedepthTotal": 0,
+        "ebfmiMin": 0.8229953,
+        "reportedRhatMax": 1.0025557,
+        "reportedEssBulkMin": 2288.0436,
+        "reportedEssTailMin": 1909.1319,
+        "tauMeanMedian": 0.3748992,
+        "tauMcseMeanMax": 0.0055641,
+        "elapsedSecondsMedian": 0.1409471,
+        "tauBulkEssPerSecondMedian": 16233.3494
+      },
+      "preferred": "noncentered",
+      "reason": "3反復合計でcenteredは235 divergence・低E-BFMI・R-hat悪化を示し、non-centeredは同じ固定データをdivergenceなしで探索した"
+    },
+    "strong": {
+      "centered": {
+        "divergentTotal": 0,
+        "maxTreedepthTotal": 0,
+        "ebfmiMin": 0.9408436,
+        "reportedRhatMax": 1.0034532,
+        "reportedEssBulkMin": 3698.6237,
+        "reportedEssTailMin": 2238.1455,
+        "tauMeanMedian": 0.801621,
+        "tauMcseMeanMax": 0.0041456,
+        "elapsedSecondsMedian": 0.142756,
+        "tauBulkEssPerSecondMedian": 27623.5572
+      },
+      "noncentered": {
+        "divergentTotal": 0,
+        "maxTreedepthTotal": 0,
+        "ebfmiMin": 0.624509,
+        "reportedRhatMax": 1.0142632,
+        "reportedEssBulkMin": 604.1545,
+        "reportedEssTailMin": 817.8532,
+        "tauMeanMedian": 0.7984887,
+        "tauMcseMeanMax": 0.0102876,
+        "elapsedSecondsMedian": 0.241349,
+        "tauBulkEssPerSecondMedian": 3500.2908
+      },
+      "preferred": "centered",
+      "reason": "centeredは3反復すべてで主要診断を通過し、tau bulk ESS/sec中央値がnon-centeredの約7.9倍だった。non-centeredの最悪R-hatは1.014だった"
+    }
+  },
+  "posteriorEquivalence": {
+    "parametersPerScenario": 10,
+    "comparisons": 20,
+    "combinedMcseMultiplier": 4,
+    "allWithinTolerance": true,
+    "maximumAbsoluteMcseZ": 0.8858795,
+    "weakCenteredDivergences": 146,
+    "weakNoncenteredDivergences": 0,
+    "strongCenteredDivergences": 0,
+    "strongNoncenteredDivergences": 0,
+    "interpretation": "mu・tau・theta[1:8]の平均はすべて4 combined MCSE以内で整合した。ただし弱情報centeredの高adapt_delta runにもdivergenceが残るため、代数的同値性とnon-centeredの良好な探索を併せて判断する"
+  },
+  "artifacts": [
+    "scenario-data.csv",
+    "scenario-metadata.csv",
+    "weak-input.json",
+    "strong-input.json",
+    "diagnostics.csv",
+    "posterior-summary.csv",
+    "timing-repetitions.csv",
+    "efficiency-comparison.csv",
+    "posterior-equivalence.csv",
+    "run-environment.csv",
+    "01-parameterization-efficiency.png",
+    "02-posterior-agreement.png"
+  ],
+  "limitations": [
+    "固定seedの合成正規階層モデルによる教材校正であり、別モデル・別データの最適なparameterizationを保証しない",
+    "観測誤差sigmaを1へ固定したrandom-interceptモデルだけを比較し、varying slope・相関構造・未知sigmaは検証していない",
+    "performance runは両表現に同じadapt_delta 0.9を適用して幾何差を比較し、弱情報centeredのposterior要約は信頼できる推定結果として使用しない",
+    "performance runの診断は3反復・計48チェーン行をすべて集約し、R-hat・ESS・E-BFMIには最悪値を使用した",
+    "高精度の同値性runでも弱情報centeredにはdivergenceが残り、平均の整合だけで探索の妥当性を主張しない",
+    "sampling時間が短い小規模モデルのため、3回の中央値を使ってもESS/secはマシン負荷と並列実行条件に依存する",
+    "Darwin arm64とApple clang 21.0.0での単一環境実測であり、クリーンCIでの再実行を別途必要とする",
+    "Stan・統計レビュー者による独立確認と初学者観察は未実施であり、Stan編の公開判定はBLOCKEDのままである"
+  ]
+}

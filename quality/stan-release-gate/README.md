@@ -30,7 +30,7 @@ npm run gate:stan-release:require-pass
 | SRG09 | 公開範囲監査 | secret、個人情報、アプリ公開範囲を対象commitで確認 |
 | SRG10 | 最終判断 | 全証拠、問題、限界を参照する判断票に署名 |
 
-`SRG05`では弱情報だけ、強情報だけ、単一chain、構文成功だけを実測比較として扱いません。両StanソースのSHA-256とR・CmdStanR・CmdStan版を固定します。divergence、最大treedepth、E-BFMI、R-hat、bulk / tail ESS、MCSE、時間を確認し、同じモデルを表す条件では事後分布の実質的同値性も確認します。数値は実行前に記入しません。
+`SRG05`では弱情報だけ、強情報だけ、単一chain、構文成功だけを実測比較として扱いません。両StanソースのSHA-256とR・CmdStanR・CmdStan版を固定します。divergence、最大treedepth、E-BFMI、R-hat、bulk / tail ESS、MCSE、時間を確認し、同じモデルを表す条件では事後分布の実質的同値性も確認します。2026-08-09に弱・強情報の両条件を各表現4 chain・3反復で実測し、`content/stan/reparameterization-validation.json`を正本として`SRG05`は`PASS`になりました。
 
 ## 状態
 
@@ -38,7 +38,7 @@ npm run gate:stan-release:require-pass
 - `FAIL`: 証拠または監査が失敗した、Foundation Gateが失敗した、またはP0・P1が未解決
 - `BLOCKED`: 未実施、外部の実行環境・レビュー・参加者待ち、または証拠不足
 
-現在は`BLOCKED`です。主な理由はFoundation Gate、L40の複数chain実測、独立専門レビュー、初学者3名以上の観察、7〜14日後の遅延保持が未完了であることです。`status.json`の`decision`だけを`PASS`へ書き換えても、判定器は構造化された証拠不足を拒否します。
+現在は`BLOCKED`です。L40の複数chain実測は完了しましたが、Foundation Gate、対象commitのクリーンCI、独立専門レビュー、初学者3名以上の観察、7〜14日後の遅延保持などが未完了です。`status.json`の`decision`だけを`PASS`へ書き換えても、判定器は構造化された証拠不足を拒否します。
 
 ## 証拠の保存と公開範囲
 

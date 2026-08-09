@@ -1,7 +1,7 @@
 # 典拠一覧
 
 この教材は一次情報（公式ドキュメント・CRAN・パッケージ同梱のヘルプ）に依拠して書いています。
-本文中の事実主張の裏づけをここにまとめます。**最終確認日: 2026-08-01**
+本文中の事実主張の裏づけをここにまとめます。**最終確認日: 2026-08-09**
 
 バージョン番号や配布ページの構成は変わります。ここに書かれた確認日より後にご覧の方は、
 リンク先の現物を優先してください。
@@ -87,6 +87,8 @@ CRAN の DESCRIPTION で確認した版。
 
 Stan本体は [stan-dev/stan](https://github.com/stan-dev/stan/releases) の v2.39.0（2026-05-19）が最新。
 rstan が同梱する Stan はこれより古い世代であるため、本教材は `backend = "cmdstanr"` を標準とします。
+
+CmdStanRは[公式インストール案内](https://mc-stan.org/cmdstanr/)に従ってStan公式r-universeから導入し、CmdStan本体は[`install_cmdstan()`](https://mc-stan.org/cmdstanr/reference/install_cmdstan.html)で2.39.0を構築した。L40実測ではCmdStanR 0.9.0、CmdStan 2.39.0、Apple clang 21.0.0を環境証拠へ固定している。
 
 ## Stan教材原稿
 
