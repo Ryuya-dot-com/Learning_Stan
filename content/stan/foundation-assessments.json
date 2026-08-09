@@ -954,6 +954,201 @@
           "retryHint": "サンプラーが解いた計算問題と、研究者が指定すべき観測モデルを別の問いとして書きます。"
         }
       ]
+    },
+    {
+      "lessonId": "l39",
+      "outcomeDimensions": [
+        "generated-quantities-semantics",
+        "predictive-replication",
+        "prediction-unit",
+        "psis-diagnostics",
+        "elpd-uncertainty",
+        "model-validity",
+        "transfer"
+      ],
+      "questions": [
+        {
+          "id": "stan-l39-q1-generated-roles",
+          "kind": "selected-response",
+          "cognitiveProcess": "analyze",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "generated-quantities-semantics",
+            "predictive-replication"
+          ],
+          "prompt": "generated quantities内のlog_lik[n]とy_rep[n]の役割を最も正確に説明しているものはどれですか。",
+          "choices": [
+            {
+              "id": "roles-separated",
+              "text": "log_lik[n]は観測済みy[n]の対数密度、y_rep[n]は各posterior drawのparameterから生成した複製観測で、どちらもsampling済みparameterを変更しない",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "both-random",
+              "text": "log_lik[n]とy_rep[n]はどちらも同じ乱数を返し、用途も同じである",
+              "diagnostic": "密度評価関数と乱数生成関数を区別していない"
+            },
+            {
+              "id": "rep-enters-target",
+              "text": "y_rep[n]はmodelブロックの尤度へ自動的に戻り、posteriorを更新する",
+              "diagnostic": "draw後に実行されるgenerated quantitiesから前段のtargetを変更できると誤解している"
+            },
+            {
+              "id": "plugin-only",
+              "text": "y_rep[n]はposterior平均parameterだけを使うplug-in予測で、parameter不確実性を含まない",
+              "diagnostic": "各posterior drawで観測過程を再実行する複製と、平均parameterの単一予測を混同している"
+            }
+          ],
+          "correctChoiceId": "roles-separated",
+          "correctFeedback": "log_likは観測済み応答のpointwise対数密度、y_repは各posterior drawからの複製観測です。generated quantitiesはdraw後に実行され、sampling済みparameterを再重み付けしません。",
+          "retryHint": "各行について、観測yを入力するか、_rngを使うか、戻り値が密度か観測値かを分けます。"
+        },
+        {
+          "id": "stan-l39-q2-case-evidence",
+          "kind": "output-prediction",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "psis-diagnostics",
+            "elpd-uncertainty",
+            "model-validity"
+          ],
+          "prompt": "同じ400件の二値応答へ当てた線形・二次logitモデルから次の結果を得ました。最も適切な結論はどれですか。",
+          "code": "# 両モデル: divergence=0, R-hat<1.01\n# 合成校正図: 線形の予測確率は既知の生成曲線を外し、二次は曲率を概ね表す\n# Pareto k閾値超過: 両モデル0\n# loo_compare: quadratic elpd_diff=0; linear elpd_diff=-19.134, se_diff=5.601\n# stacking: quadratic=0.9999997, linear=0.0000003",
+          "choices": [
+            {
+              "id": "quadratic-true",
+              "text": "二次モデルが真であるposterior probabilityは99.99997%である",
+              "diagnostic": "stacking weightをposterior model probabilityと誤読している"
+            },
+            {
+              "id": "quadratic-limited",
+              "text": "この固定データ、1観測LOO、2候補の範囲では、明らかなsampling・PSIS警告なしに二次モデルの予測優位が観察された",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "diagnostics-only",
+              "text": "sampling診断が良いので、PPCとLOOを見なくても両モデルは同程度に正しい",
+              "diagnostic": "計算上の探索と観測パターンの再現・相対予測性能を混同している"
+            },
+            {
+              "id": "linear-by-simplicity",
+              "text": "線形モデルの方が単純なので、ELPD差とPPCを無視して必ず採用する",
+              "diagnostic": "単純さを無条件の採用規則にし、定義済み予測課題の証拠を捨てている"
+            }
+          ],
+          "correctChoiceId": "quadratic-limited",
+          "correctFeedback": "既知の生成曲線との合成校正、Pareto k、elpd_diffとse_diffは、この観測集合・除外単位・候補集合における二次モデルの予測優位を支えます。真実性、因果性、別データへの一般化やモデル確率は支えず、y_repによるPPCも別に必要です。",
+          "retryHint": "結果が直接評価したデータ、予測単位、候補集合を文頭に置き、そこから外れる主張を除きます。"
+        },
+        {
+          "id": "stan-l39-q3-repair-pointwise",
+          "kind": "constructed-response",
+          "cognitiveProcess": "debug",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "generated-quantities-semantics",
+            "prediction-unit"
+          ],
+          "prompt": "次のコードはコンパイルできますが、1観測を外すPSIS-LOO用として誤っています。原因、修正版、修正後に確認する対応関係を説明してください。\n\ngenerated quantities {\n  array[N] real log_lik;\n  for (n in 1:N) {\n    log_lik[n] = bernoulli_logit_lpmf(y | eta);\n  }\n}",
+          "rubric": [
+            {
+              "id": "semantic-bug",
+              "criterion": "各log_lik[n]へ全N観測の対数尤度を複製しており、配列長Nでもpointwiseではないと特定する"
+            },
+            {
+              "id": "pointwise-repair",
+              "criterion": "bernoulli_logit_lpmf(y[n] | eta[n])へ修正する"
+            },
+            {
+              "id": "observation-map",
+              "criterion": "列nと観測ID・応答・予測子の順序がモデル間で一致することを確認する"
+            },
+            {
+              "id": "sum-boundary",
+              "criterion": "総和が正規化された観測尤度の総和になることと、priorやJacobianを含むtarget全体とは別であることを説明する"
+            }
+          ],
+          "modelAnswer": "このloopはnを進めても右辺が全ベクトルyとetaのままなので、同じ全データ対数尤度をN回複製している。コンパイル成功とLOOの予測単位は別である。右辺をbernoulli_logit_lpmf(y[n] | eta[n])へ直し、列nが同じ観測ID、y[n]、x[n]へ対応することをモデル間で検査する。修正後のsum(log_lik)は正規化された観測尤度の総和に対応するが、priorやJacobianを含むStanのtarget全体とは同じではない。",
+          "retryHint": "配列の長さではなく、loopの各回で右辺のどの要素が変わるかを追います。"
+        },
+        {
+          "id": "stan-l39-q4-pareto-before-rank",
+          "kind": "selected-response",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "psis-diagnostics",
+            "elpd-uncertainty",
+            "model-validity"
+          ],
+          "prompt": "posterior draw数S=3000の2モデル比較で、モデルBのELPDはAより12大きく、se_diffは3でした。しかしBにはPareto kが0.7を超える観測が4件あります。最初の判断として最も適切なものはどれですか。",
+          "choices": [
+            {
+              "id": "rank-now",
+              "text": "差がse_diffの4倍なので、Pareto kを無視してBの勝利を確定する",
+              "diagnostic": "近似の信頼性診断より先にELPD差を確定値として解釈している"
+            },
+            {
+              "id": "inspect-stabilize",
+              "text": "順位の断定を止め、該当観測・モデル誤指定を調べ、moment matching、厳密refit、K-foldなどで近似を再評価する",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "delete-observations",
+              "text": "4観測を理由なく削除して、警告が消えた結果だけを報告する",
+              "diagnostic": "影響観測をデータ誤りと決め付け、モデル側の予測失敗を隠している"
+            },
+            {
+              "id": "raise-threshold",
+              "text": "このrunだけ閾値を1.1へ上げ、全観測を良好と再分類する",
+              "diagnostic": "標本数依存の診断線を結果に合わせて恣意的に変更している"
+            }
+          ],
+          "correctChoiceId": "inspect-stabilize",
+          "correctFeedback": "高Pareto kは、該当観測を外したposteriorを全データposteriorから安定に近似できていない可能性を示します。ELPD差が大きく見えても、近似を診断・改善してから順位を判断します。",
+          "retryHint": "スコアの大きさと、そのスコアを作った近似の信頼性を別々に読みます。"
+        },
+        {
+          "id": "stan-l39-q5-transfer-grouped",
+          "kind": "transfer-task",
+          "responseMode": "constructed",
+          "cognitiveProcess": "transfer",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "predictive-replication",
+            "prediction-unit",
+            "model-validity",
+            "transfer"
+          ],
+          "scenario": "30名が各20試行を行う二値反応データへ、random interceptを持つモデルAと、random interceptに条件別傾きを加えたモデルBを当てます。研究目的には、既存参加者の次試行予測と、新しい参加者の予測の両方があります。1行LOOではBが上位でstacking weightは0.90ですが、両モデルのPPCは一部参加者の極端な成功率を再現できません。",
+          "prompt": "2つの予測目的について、PPC統計量、holdout単位、LOO・stackingから言える範囲、次の行動を分けて設計してください。",
+          "rubric": [
+            {
+              "id": "two-prediction-tasks",
+              "criterion": "既存参加者の次試行では参加者情報を学習側へ残せる一方、新規参加者では参加者全体を外す必要があると区別する"
+            },
+            {
+              "id": "conditional-ppc",
+              "criterion": "全体成功率だけでなく参加者別成功率、条件差、極端値などgroup構造に敏感な統計量を観測値とy_repへ適用する"
+            },
+            {
+              "id": "group-holdout",
+              "criterion": "新規参加者の予測にはparticipant単位K-foldなど、同一参加者の別行を学習側へ残さない分割を提案する"
+            },
+            {
+              "id": "weight-boundary",
+              "criterion": "1行LOOのstacking weight 0.90を新規参加者予測の証拠やモデルBの真実確率と呼ばない"
+            },
+            {
+              "id": "shared-misspecification",
+              "criterion": "両候補がPPCで外す特徴を、順位やstackingで解消済みとせず、尤度・group分布・追加構造を見直す"
+            }
+          ],
+          "modelAnswer": "既存参加者の次試行では同じ参加者の過去データを条件として残す課題を設計できるが、新規参加者ではparticipant全体をholdoutする。PPCは全体成功率だけでなく参加者別成功率の分布、条件差、0や1に近い参加者数を観測値とy_repで比較する。1行LOOでBが上位でも、それは同じ参加者の別試行を学習した予測課題の結果で、新規参加者性能にはparticipant単位K-fold等が必要である。stacking 0.90は候補予測分布の組み合わせ重みで真実確率ではない。両モデルが極端な参加者を外すため、尤度の過分散、random-effect分布、mixtureなどを見直し、PPCとgroup holdoutを再実行する。",
+          "retryHint": "1行を外したとき、同じ参加者の情報が学習側に残るかを2つの予測目的で追います。"
+        }
+      ]
     }
   ]
 }

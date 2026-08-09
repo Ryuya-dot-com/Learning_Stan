@@ -109,6 +109,12 @@ rstan が同梱する Stan はこれより古い世代であるため、本教�
 | rank-normalized split R-hatの一般推奨は1.01未満で、収束は全parameterについて調べる | [Stan Reference Manual: Posterior Analysis](https://mc-stan.org/docs/reference-manual/analysis.html) | 表示上の1.00だけで収束を証明したとせず、全parameter・重要生成量・HMC診断を合わせて確認する |
 | ESSはbulkとtailを報告し、概ね各chain 100以上を確認する | [RStan: R-hat and effective sample size](https://mc-stan.org/rstan/reference/Rhat.html) | 4 chainでは400を一般確認線とするが、研究目的に必要な精度を保証する万能値とはしない |
 | CmdStanRの要約はposteriorの要約関数を追加でき、平均・SD・分位点には対応するMCSEがある | [CmdStanR: Compute summary estimates and diagnostics](https://mc-stan.org/cmdstanr/reference/fit-method-summary.html)、[posterior: MCMC diagnostics](https://mc-stan.org/posterior/reference/diagnostics.html)、[posterior: Quantile MCSE](https://mc-stan.org/posterior/reference/mcse_quantile.html) | posterior SDとMonte Carlo近似誤差を分け、MCSEを実際に報告する量と研究上必要な精度に照らして判断する |
+| `generated quantities`は各sample後に実行され、そこで作る量はsampling済みparameterへ影響しない | [Stan Reference Manual: Program Blocks](https://mc-stan.org/docs/reference-manual/blocks.html) | L39で`log_lik`と`y_rep`をdraw後の保存量として実装し、sampling中の`target`定義と分離する |
+| 事後予測チェックは同じ観測設計の複製データを生成し、観測値と複製へ同じ統計量を適用する | [Stan User's Guide: Posterior and Prior Predictive Checks](https://mc-stan.org/docs/2_39/stan-users-guide/posterior-predictive-checks.html) | 全体平均だけでなくSD・最大値・予測子区間別統計量を比較し、合否検定ではなく再現できない特徴を探すモデル批判として扱う |
+| `loo()`へ渡すpointwise対数尤度はdraw×観測、またはiteration×chain×観測である | [loo: Efficient approximate leave-one-out cross-validation](https://mc-stan.org/loo/reference/loo.html) | `log_lik[n]`を観測nの寄与へ対応付け、モデル間で観測集合・ID・順序・除外単位をそろえる |
+| PSISの主要なPareto k診断線はposterior sample size Sに依存する | [loo package glossary](https://mc-stan.org/loo/reference/loo-glossary.html) | `min(1 - 1/log10(S), 0.7)`を使い、固定0.7の暗記ではなくrunごとの閾値と影響観測を確認する |
+| `loo_compare()`の`elpd_diff`は最良モデルを0とする差で、`se_diff`は点別差から作るpairedな標準誤差である | [loo: Model comparison](https://mc-stan.org/loo/reference/loo_compare.html) | Pareto k、`diag_diff`、PPCを確認してから差と不確実性を一緒に読み、順位を真実性へ格上げしない |
+| stackingは候補のLOO予測分布を組み合わせる重みを最適化する | [loo: Model averaging and weighting](https://mc-stan.org/loo/reference/loo_model_weights.html) | stacking weightをposterior model probabilityと呼ばず、候補集合と予測課題に依存する予測上の重みとして扱う |
 
 Stan教材パックの一次資料は`mc-stan.org`に限定し、最終確認日は2026-08-09とする。静的検証の成功はStanコンパイラでの構文確認やMCMC診断の代替ではない。
 
