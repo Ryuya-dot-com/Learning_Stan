@@ -104,7 +104,11 @@ rstan が同梱する Stan はこれより古い世代であるため、本教�
 | 複数chainへ単一seedを渡すとchain IDで乱数列が分けられ、`chains`と`parallel_chains`は生成本数と同時実行数を別々に指定する | [CmdStanR: Run Stan's MCMC algorithms](https://mc-stan.org/cmdstanr/reference/model-method-sample.html) | L37でseed、chain ID、並列数、warmup・sampling回数を別の再現性項目として記録する |
 | `output_dir = NULL`のCmdStan CSVは一時領域に置かれ、fit破棄時に削除され得る | [CmdStanR: Run Stan's MCMC algorithms](https://mc-stan.org/cmdstanr/reference/model-method-sample.html)、[CmdStanR: Save output and data files](https://mc-stan.org/cmdstanr/reference/fit-method-save_output_files.html) | L37で`save_output_files()`または永続`output_dir`を必須の保存判断として扱う |
 | fitのmetadataはCSVに記録されたStan版・seed・chain ID・設定を含み、`save_object()`は遅延読込されるdrawと診断を保存前に確実に読む | [CmdStanR: Extract metadata](https://mc-stan.org/cmdstanr/reference/fit-method-metadata.html)、[CmdStanR: Save fitted model object](https://mc-stan.org/cmdstanr/reference/fit-method-save_object.html) | L37でスクリプト上の予定値と実出力metadataを照合し、CSV・入力JSON・fit・実行記録を同じrunへ結ぶ |
-| 診断はdivergence、treedepth、E-BFMI、ESS、R-hatを含む | [CmdStan diagnose utility](https://mc-stan.org/docs/2_39/cmdstan-guide/diagnose_utility.html) | 推定値の解釈前に計算上の問題を確認する構成とした |
+| warmup後のdivergenceは推定の偏りにつながり得るため原因を調べ、最大treedepth到達とは重大度を分ける | [CmdStan Guide: Diagnose utility](https://mc-stan.org/docs/cmdstan-guide/diagnose_utility.html) | L38ではdivergenceがあれば実質的解釈を止める。最大treedepth到達は主に効率問題として、尺度・相関・ESS・計算時間を調べる |
+| E-BFMI 0.30未満はエネルギー探索を調べる名目的な警告線 | [CmdStan Guide: Diagnose utility](https://mc-stan.org/docs/cmdstan-guide/diagnose_utility.html) | 合否の自然法則ではなく、chain、heavy tail、尺度、parameterizationを調べ始める目安として扱う |
+| rank-normalized split R-hatの一般推奨は1.01未満で、収束は全parameterについて調べる | [Stan Reference Manual: Posterior Analysis](https://mc-stan.org/docs/reference-manual/analysis.html) | 表示上の1.00だけで収束を証明したとせず、全parameter・重要生成量・HMC診断を合わせて確認する |
+| ESSはbulkとtailを報告し、概ね各chain 100以上を確認する | [RStan: R-hat and effective sample size](https://mc-stan.org/rstan/reference/Rhat.html) | 4 chainでは400を一般確認線とするが、研究目的に必要な精度を保証する万能値とはしない |
+| CmdStanRの要約はposteriorの要約関数を追加でき、平均・SD・分位点には対応するMCSEがある | [CmdStanR: Compute summary estimates and diagnostics](https://mc-stan.org/cmdstanr/reference/fit-method-summary.html)、[posterior: MCMC diagnostics](https://mc-stan.org/posterior/reference/diagnostics.html)、[posterior: Quantile MCSE](https://mc-stan.org/posterior/reference/mcse_quantile.html) | posterior SDとMonte Carlo近似誤差を分け、MCSEを実際に報告する量と研究上必要な精度に照らして判断する |
 
 Stan教材パックの一次資料は`mc-stan.org`に限定し、最終確認日は2026-08-09とする。静的検証の成功はStanコンパイラでの構文確認やMCMC診断の代替ではない。
 
