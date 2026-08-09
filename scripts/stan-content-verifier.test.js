@@ -70,7 +70,7 @@ describe("Stan教材パック", () => {
     assessments.designRules.learnerAnswersAreNotPerformanceEvidence = false;
     expect(
       validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
-    ).toContain("L34–L38理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
+    ).toContain("L34–L39理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
   });
 
   it("L36原稿から非正規化密度の説明を削ると検出する", () => {
@@ -133,6 +133,30 @@ describe("Stan教材パック", () => {
     expect(
       validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
     ).toContain("l38: 到達目標次元monte-carlo-precisionを測る理解問題がありません");
+  });
+
+  it("L39原稿からPSIS前のPareto k判断順序を削ると検出する", () => {
+    const manuscripts = structuredClone(content.lessonManuscripts);
+    manuscripts.l39 = manuscripts.l39.replaceAll(
+      "Pareto kをELPDより先に読む",
+      "予測比較の診断を読む"
+    );
+    expect(
+      validateFoundationLessons(content.curriculum, content.foundationAssessments, manuscripts)
+    ).toContain("l39: 必須説明「Pareto kをELPDより先に読む」がありません");
+  });
+
+  it("L39の予測単位を評価対象から外すと検出する", () => {
+    const assessments = structuredClone(content.foundationAssessments);
+    const questions = assessments.lessons.find((lesson) => lesson.lessonId === "l39").questions;
+    for (const question of questions) {
+      question.targetDimensions = question.targetDimensions.filter(
+        (dimension) => dimension !== "prediction-unit"
+      );
+    }
+    expect(
+      validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
+    ).toContain("l39: 到達目標次元prediction-unitを測る理解問題がありません");
   });
 
   it("原稿と実行用Stanコードのずれを検出する", () => {

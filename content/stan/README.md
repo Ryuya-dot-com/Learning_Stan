@@ -10,7 +10,8 @@
 - `lessons/l36-generative-process-target.md`: 生成過程、事前分布、尤度、`target`、ベクトル化、リンク尺度を数式とStanコードの往復で扱う受講用原稿
 - `lessons/l37-reproducible-cmdstanr.md`: 環境・入力・sampling設定・chain ID・出力・診断を追跡可能にしてCmdStanRで再実行する受講用原稿
 - `lessons/l38-diagnostics-before-estimates.md`: HMC診断、R-hat、ESS、MCSEを順に確認し、推定値の解釈を続けるか止めるか判断する受講用原稿
-- `foundation-assessments.json`: L34–L38の目標次元、誤答診断、記述rubric、未見転移を持つ各5問・計25問
+- `lessons/l39-generated-quantities-predictive-checks.md`: `y_rep`による事後予測チェックとpointwise `log_lik`によるPSIS-LOOを、予測単位・Pareto k・ELPD差から判断する受講用原稿
+- `foundation-assessments.json`: L34–L39の目標次元、誤答診断、記述rubric、未見転移を持つ各5問・計30問
 - `linear-regression.md`: 単回帰モデルをRとの境界から診断・予測まで解説する縦切り原稿
 - `distribution-grammar-lab.md`: 分布文法、数式、ハイパーパラメータ感度、切断・打ち切りを結ぶ演習原稿
 - `link-functions-model-comparison.md`: inverse link、係数解釈、比較可能性、PSIS-LOO、Pareto k、stackingを結ぶ演習原稿
@@ -62,7 +63,7 @@ Stan構文はL35だけで完結させず、STEP 5でbrms生成コードを読む
 - L36: 生成過程を事前分布と尤度へ分け、distribution statement、`target`、ベクトル化、リンク尺度を往復する。
 - L37: 同じモデルを再現可能に実行し、型・次元・ブロック・分布関数のエラーを修正する。
 - L38: HMC診断、R-hat、ESS、MCSEを順に読み、推定値の解釈を続けるか止めるか判断する。
-- L39–L40: 計算診断と統計的誤指定を分け、generated quantities、変数変換、再パラメータ化を実装する。
+- L40: 計算診断とモデル幾何を結び、変数変換と再パラメータ化を実装する。
 - L41と修了後: 見本なしの統合実装、第三者コードのレビュー、1〜2週間後の未見転移を行う。
 
 構文確認・コンパイルの成功だけを合格としない。エラー原因の説明、数式とコードの往復、コンパイルは通る誤モデルの発見、未見応答型への転移、遅延後の再達成を別々に記録する。セルフチェックは形成的記録とし、保存コード、初回エラー、修正理由、転移成果物を実技証拠とする。
@@ -117,7 +118,7 @@ npm run run:stan-link-comparison
 npm run test:stan-model-comparison-runtime
 ```
 
-1つ目はL34–L38の受講用原稿5本・理解問題25問、8単元32課題、構文エラー8組、コンパイル成功レビュー6組、保持・転移10課題、7つの実行可能なStan例、2ケース、6つの実行証拠を原稿・コード・SHA-256まで同期検査します。2つ目は固定版stanc3 2.39.0で、壊れた8例が期待診断を伴って失敗し、修正版8例が成功することを一時ディレクトリで再検証します。3つ目はcandidate / reference 6組の両方が構文確認を通り、必須の意味差・警告数・証拠SHAと一致することを確認します。4つ目は3チェックポイント・10課題と未見lognormal参照モデルの構造・hash・構文成功を確認します。5つ目と6つ目は、分布文法およびリンク関数の可視化をStanコンパイルなしで検査します。7つ目と8つ目は切断ケースの通常実行と空の一時ディレクトリでの再実行です。9つ目と10つ目はリンク・LOOケースの通常実行と、2モデルの再コンパイル、4 chain、13成果物、ELPD差、Pareto k、stacking、入力不変の検査です。
+1つ目はL34–L39の受講用原稿6本・理解問題30問、8単元32課題、構文エラー8組、コンパイル成功レビュー6組、保持・転移10課題、7つの実行可能なStan例、2ケース、6つの実行証拠を原稿・コード・SHA-256まで同期検査します。2つ目は固定版stanc3 2.39.0で、壊れた8例が期待診断を伴って失敗し、修正版8例が成功することを一時ディレクトリで再検証します。3つ目はcandidate / reference 6組の両方が構文確認を通り、必須の意味差・警告数・証拠SHAと一致することを確認します。4つ目は3チェックポイント・10課題と未見lognormal参照モデルの構造・hash・構文成功を確認します。5つ目と6つ目は、分布文法およびリンク関数の可視化をStanコンパイルなしで検査します。7つ目と8つ目は切断ケースの通常実行と空の一時ディレクトリでの再実行です。9つ目と10つ目はリンク・LOOケースの通常実行と、2モデルの再コンパイル、4 chain、13成果物、ELPD差、Pareto k、stacking、入力不変の検査です。
 
 現行コードは2026-08-01にR 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0で構文確認・コンパイル・4 chainのサンプリングを実行済みです。divergenceと最大treedepth到達は全chainで0、報告R-hat最大1.00、bulk ESS最小1778、tail ESS最小1705でした。詳細と限界は`validation.json`に記録しています。
 

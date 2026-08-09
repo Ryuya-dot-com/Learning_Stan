@@ -36,7 +36,7 @@ const EXPECTED_SYNTAX_RELEASE_GATES = [
   "novel-response-transfer",
   "delayed-recall",
 ];
-const EXPECTED_AUTHORED_LESSON_IDS = ["l34", "l35", "l36", "l37", "l38"];
+const EXPECTED_AUTHORED_LESSON_IDS = ["l34", "l35", "l36", "l37", "l38", "l39"];
 const EXPECTED_FOUNDATION_ASSESSMENT_KINDS = [
   "selected-response",
   "output-prediction",
@@ -263,14 +263,14 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
   const delivery = curriculum?.lessonDelivery;
   if (delivery?.status !== "draft-unpublished" ||
       delivery?.assessmentArtifact !== "foundation-assessments.json") {
-    errors.push("L34–L38の受講用原稿と理解問題が非公開教材契約へ接続されていません");
+    errors.push("L34–L39の受講用原稿と理解問題が非公開教材契約へ接続されていません");
   }
   if (delivery?.authoredLessonIds?.join("|") !== EXPECTED_AUTHORED_LESSON_IDS.join("|")) {
-    errors.push("受講用原稿の完成範囲はL34–L38である必要があります");
+    errors.push("受講用原稿の完成範囲はL34–L39である必要があります");
   }
   if (!Array.isArray(delivery?.requiredSections) || delivery.requiredSections.length < 5 ||
       delivery?.practiceEncounters?.join("|") !== EXPECTED_SYNTAX_ENCOUNTERS.join("|")) {
-    errors.push("L34–L38の必須見出しまたは6接触設計が不足しています");
+    errors.push("L34–L39の必須見出しまたは6接触設計が不足しています");
   }
 
   if (assessments?.schemaVersion !== 1 || assessments?.status !== "draft-unpublished") {
@@ -281,18 +281,18 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
       designRules?.requiredKinds?.join("|") !== EXPECTED_FOUNDATION_ASSESSMENT_KINDS.join("|") ||
       designRules?.learnerAnswersAreNotPerformanceEvidence !== true ||
       designRules?.preserveFirstAttemptBeforeFeedback !== true) {
-    errors.push("L34–L38理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
+    errors.push("L34–L39理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
   }
 
   const assessmentLessons = assessments?.lessons || [];
   if (assessmentLessons.map((item) => item.lessonId).join("|") !== EXPECTED_AUTHORED_LESSON_IDS.join("|")) {
-    errors.push("foundation-assessmentsはL34–L38を順番どおり含む必要があります");
+    errors.push("foundation-assessmentsはL34–L39を順番どおり含む必要があります");
   }
   const allQuestionIds = assessmentLessons.flatMap((item) =>
     (item.questions || []).map((question) => question.id)
   );
   if (new Set(allQuestionIds).size !== allQuestionIds.length) {
-    errors.push("L34–L38理解問題のIDが重複しています");
+    errors.push("L34–L39理解問題のIDが重複しています");
   }
 
   for (const lessonId of EXPECTED_AUTHORED_LESSON_IDS) {
@@ -386,6 +386,7 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
     l36: ["distribution statement", "normal_lupdf", "target +=", "事前分布は飾りではない", "ベクトル化", "bernoulli_logit", "L37後"],
     l37: ["check_cmdstan_toolchain()", "cmdstan_version()", "write_stan_json()", "compile = FALSE", "check_syntax(pedantic = TRUE)", "chain_ids", "parallel_chains", "iter_warmup", "save_output_files", "save_object()", "diagnostic_summary()", "metadata()", "L40後"],
     l38: ["diagnostic_summary()", "mcse_mean", "mcse_quantile", "R-hat < 1.01", "100 × chain数", "divergenceが1件でも", "E-BFMI 0.30未満", "計算診断が良い誤答モデル", "L40後"],
+    l39: ["sampling済みparameterを変えない", "observed_stats", "replicated_by_bin", "pointwise `log_lik`", "予測単位", "relative_eff()", "pareto_k_table", "Pareto kをELPDより先に読む", "elpd_diff", "se_diff", "posterior model probability", "L41後"],
   };
   for (const [lessonId, phrases] of Object.entries(requiredPhrases)) {
     for (const phrase of phrases) {
