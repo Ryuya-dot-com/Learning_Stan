@@ -26,11 +26,17 @@ needs_minimum_install <- vapply(names(required_minimum), function(package) {
     packageVersion(package) < package_version(required_minimum[[package]])
 }, logical(1))
 
-if (any(needs_exact_install)) {
-  install.packages(names(required_exact)[needs_exact_install], repos = repositories)
+if (needs_exact_install[["loo"]]) {
+  install.packages("loo", repos = cran_repository)
 }
 if (any(needs_minimum_install)) {
-  install.packages(names(required_minimum)[needs_minimum_install], repos = repositories)
+  install.packages(
+    names(required_minimum)[needs_minimum_install],
+    repos = cran_repository
+  )
+}
+if (needs_exact_install[["cmdstanr"]]) {
+  install.packages("cmdstanr", repos = repositories)
 }
 
 exact_versions <- vapply(

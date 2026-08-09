@@ -8,6 +8,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const workflow = readFileSync(join(root, ".github", "workflows", "deploy.yml"), "utf8");
 const config = parse(workflow);
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+const stanInstaller = readFileSync(join(root, "scripts", "install-stan-ci.R"), "utf8");
 const nodeVersion = readFileSync(join(root, ".node-version"), "utf8").trim();
 
 describe("GitHub Pages workflow", () => {
@@ -127,6 +128,8 @@ describe("GitHub Pages workflow", () => {
     expect(configurePaths.run).toContain("LEARNING_STAN_CMDSTAN=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0");
     expect(configurePaths.run).toContain("LEARNING_STAN_STANC=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0/bin/stanc");
     expect(workflow).not.toContain("${{ runner.temp }}");
+    expect(stanInstaller).toContain('install.packages("loo", repos = cran_repository)');
+    expect(stanInstaller).toContain('install.packages("cmdstanr", repos = repositories)');
     expect(runs).toEqual(expect.arrayContaining([
       "Rscript scripts/install-stan-ci.R",
       "npm run test:stan-syntax-errors",
