@@ -70,7 +70,7 @@ describe("Stan教材パック", () => {
     assessments.designRules.learnerAnswersAreNotPerformanceEvidence = false;
     expect(
       validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
-    ).toContain("L34–L36理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
+    ).toContain("L34–L37理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
   });
 
   it("L36原稿から非正規化密度の説明を削ると検出する", () => {
@@ -91,6 +91,27 @@ describe("Stan教材パック", () => {
     expect(
       validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
     ).toContain("l36: 到達目標次元link-scaleを測る理解問題がありません");
+  });
+
+  it("L37原稿から一時出力の永続化手順を削ると検出する", () => {
+    const manuscripts = structuredClone(content.lessonManuscripts);
+    manuscripts.l37 = manuscripts.l37.replaceAll("save_output_files", "persist_csv_files");
+    expect(
+      validateFoundationLessons(content.curriculum, content.foundationAssessments, manuscripts)
+    ).toContain("l37: 必須説明「save_output_files」がありません");
+  });
+
+  it("L37の出力永続性を評価対象から外すと検出する", () => {
+    const assessments = structuredClone(content.foundationAssessments);
+    const questions = assessments.lessons.find((lesson) => lesson.lessonId === "l37").questions;
+    for (const question of questions) {
+      question.targetDimensions = question.targetDimensions.filter(
+        (dimension) => dimension !== "output-persistence"
+      );
+    }
+    expect(
+      validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
+    ).toContain("l37: 到達目標次元output-persistenceを測る理解問題がありません");
   });
 
   it("原稿と実行用Stanコードのずれを検出する", () => {

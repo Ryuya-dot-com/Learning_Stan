@@ -36,7 +36,7 @@ const EXPECTED_SYNTAX_RELEASE_GATES = [
   "novel-response-transfer",
   "delayed-recall",
 ];
-const EXPECTED_AUTHORED_LESSON_IDS = ["l34", "l35", "l36"];
+const EXPECTED_AUTHORED_LESSON_IDS = ["l34", "l35", "l36", "l37"];
 const EXPECTED_FOUNDATION_ASSESSMENT_KINDS = [
   "selected-response",
   "output-prediction",
@@ -263,14 +263,14 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
   const delivery = curriculum?.lessonDelivery;
   if (delivery?.status !== "draft-unpublished" ||
       delivery?.assessmentArtifact !== "foundation-assessments.json") {
-    errors.push("L34–L36の受講用原稿と理解問題が非公開教材契約へ接続されていません");
+    errors.push("L34–L37の受講用原稿と理解問題が非公開教材契約へ接続されていません");
   }
   if (delivery?.authoredLessonIds?.join("|") !== EXPECTED_AUTHORED_LESSON_IDS.join("|")) {
-    errors.push("受講用原稿の完成範囲はL34–L36である必要があります");
+    errors.push("受講用原稿の完成範囲はL34–L37である必要があります");
   }
   if (!Array.isArray(delivery?.requiredSections) || delivery.requiredSections.length < 5 ||
       delivery?.practiceEncounters?.join("|") !== EXPECTED_SYNTAX_ENCOUNTERS.join("|")) {
-    errors.push("L34–L36の必須見出しまたは6接触設計が不足しています");
+    errors.push("L34–L37の必須見出しまたは6接触設計が不足しています");
   }
 
   if (assessments?.schemaVersion !== 1 || assessments?.status !== "draft-unpublished") {
@@ -281,18 +281,18 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
       designRules?.requiredKinds?.join("|") !== EXPECTED_FOUNDATION_ASSESSMENT_KINDS.join("|") ||
       designRules?.learnerAnswersAreNotPerformanceEvidence !== true ||
       designRules?.preserveFirstAttemptBeforeFeedback !== true) {
-    errors.push("L34–L36理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
+    errors.push("L34–L37理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
   }
 
   const assessmentLessons = assessments?.lessons || [];
   if (assessmentLessons.map((item) => item.lessonId).join("|") !== EXPECTED_AUTHORED_LESSON_IDS.join("|")) {
-    errors.push("foundation-assessmentsはL34–L36を順番どおり含む必要があります");
+    errors.push("foundation-assessmentsはL34–L37を順番どおり含む必要があります");
   }
   const allQuestionIds = assessmentLessons.flatMap((item) =>
     (item.questions || []).map((question) => question.id)
   );
   if (new Set(allQuestionIds).size !== allQuestionIds.length) {
-    errors.push("L34–L36理解問題のIDが重複しています");
+    errors.push("L34–L37理解問題のIDが重複しています");
   }
 
   for (const lessonId of EXPECTED_AUTHORED_LESSON_IDS) {
@@ -384,6 +384,7 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
     l34: ["データ契約", "stanc3", "model$check_syntax()", "model$compile()", "model$sample(", "L37後"],
     l35: ["functions", "transformed data", "transformed parameters", "generated quantities", "制約は事前分布ではない", "array[N] int", "L37後"],
     l36: ["distribution statement", "normal_lupdf", "target +=", "事前分布は飾りではない", "ベクトル化", "bernoulli_logit", "L37後"],
+    l37: ["check_cmdstan_toolchain()", "cmdstan_version()", "write_stan_json()", "compile = FALSE", "check_syntax(pedantic = TRUE)", "chain_ids", "parallel_chains", "iter_warmup", "save_output_files", "save_object()", "diagnostic_summary()", "metadata()", "L40後"],
   };
   for (const [lessonId, phrases] of Object.entries(requiredPhrases)) {
     for (const phrase of phrases) {

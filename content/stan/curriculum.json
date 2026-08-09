@@ -5,7 +5,7 @@
   "releasePolicy": "Foundation Gate通過後に、前段階の評価結果を反映して1レッスンずつ公開する",
   "lessonDelivery": {
     "status": "draft-unpublished",
-    "authoredLessonIds": ["l34", "l35", "l36"],
+    "authoredLessonIds": ["l34", "l35", "l36", "l37"],
     "assessmentArtifact": "foundation-assessments.json",
     "requiredSections": [
       "このレッスンのゴール",
@@ -276,14 +276,33 @@
     {
       "id": "l37",
       "title": "CmdStanRで再現可能に実行する",
+      "manuscript": "lessons/l37-reproducible-cmdstanr.md",
       "prerequisites": ["l36"],
-      "outcome": "Stanプログラムを構文確認・コンパイルし、固定seedと複数chainでサンプリングして出力を保存できる",
+      "outcome": "Stanプログラムを構文確認・コンパイルし、環境・入力・seed・chain ID・iterationを固定した複数chainサンプリングを実行して、追跡可能な出力と診断を保存できる",
+      "outcomeDimensions": ["execution-stages", "environment-record", "sampling-contract", "output-persistence", "failure-localization", "transfer"],
+      "assessmentIds": [
+        "stan-l37-q1-execution-stages",
+        "stan-l37-q2-output-lifetime",
+        "stan-l37-q3-reproduction-record",
+        "stan-l37-q4-chains-parallelism",
+        "stan-l37-q5-transfer-logit-run"
+      ],
       "concepts": ["cmdstan_model", "check_syntax", "sample", "seed", "chains", "output files"],
       "directEvidence": [
         {
-          "artifact": "実行可能なRスクリプトとCmdStan出力",
-          "method": "performance-task",
-          "criterion": "対象ファイル・データ・seed・chain数を記録し、同じ手順で再実行できる"
+          "artifact": "単回帰の実行記録と永続成果物",
+          "method": "constructed-response",
+          "criterion": "R・CmdStanR・CmdStanの版、ソース・データ指紋、seed・chain ID・iteration、保存済みCSV・入力JSON・fitを対応付ける"
+        },
+        {
+          "artifact": "データ契約エラーの修正記録",
+          "method": "debugging-task",
+          "criterion": "長さ不一致について初回メッセージ、停止工程、原因、単一修正、同じ設定での再実行結果を残す"
+        },
+        {
+          "artifact": "Bernoulli-logitモデルの独立実行パック",
+          "method": "transfer-task",
+          "criterion": "0/1応答のデータ契約へ変更し、構文確認・コンパイル・4 chain実行・診断・永続保存の契約を別runへ移す"
         }
       ]
     },

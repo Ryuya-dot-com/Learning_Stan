@@ -563,6 +563,204 @@
           "retryHint": "0/1の観測尺度、0から1の確率尺度、制約のないlogit尺度の3層を順に対応付けます。"
         }
       ]
+    },
+    {
+      "lessonId": "l37",
+      "outcomeDimensions": [
+        "execution-stages",
+        "environment-record",
+        "sampling-contract",
+        "output-persistence",
+        "failure-localization",
+        "transfer"
+      ],
+      "questions": [
+        {
+          "id": "stan-l37-q1-execution-stages",
+          "kind": "selected-response",
+          "cognitiveProcess": "analyze",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "execution-stages",
+            "failure-localization"
+          ],
+          "prompt": "model$check_syntax(pedantic = TRUE)が成功し、警告もなかった直後に言えることはどれですか。",
+          "choices": [
+            {
+              "id": "stanc-valid",
+              "text": "このStanコードはstanc3の構文・型検査を通ったが、C++コンパイル、実データ読込、MCMC、研究上の妥当性はまだ別に確認する",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "compiled",
+              "text": "OS用の実行ファイルが作られ、C++ツールチェーンも成功した",
+              "diagnostic": "構文確認とC++コンパイルを同じ工程だと考えている"
+            },
+            {
+              "id": "data-valid",
+              "text": "これから渡すstan_dataの名前・型・長さ・値域もすべて検査済みである",
+              "diagnostic": "データをまだ渡していない工程で動的なデータ契約まで確認できると誤解している"
+            },
+            {
+              "id": "model-correct",
+              "text": "pedantic警告がないので生成過程と事前分布は研究目的に対して正しい",
+              "diagnostic": "pedantic modeを完全な統計モデル査読器として扱っている"
+            }
+          ],
+          "correctChoiceId": "stanc-valid",
+          "correctFeedback": "構文確認の成功はStanコードがstanc3の検査を通った証拠です。コンパイル、実行時データ、MCMC診断、統計的妥当性の証拠は後続工程で分けて集めます。",
+          "retryHint": "その時点までに実際に呼び出した関数と、まだ渡していない入力を列挙します。"
+        },
+        {
+          "id": "stan-l37-q2-output-lifetime",
+          "kind": "output-prediction",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "output-persistence",
+            "failure-localization"
+          ],
+          "prompt": "次のコードを実行した後、長期保存について最も正確な判断はどれですか。",
+          "code": "fit <- model$sample(data = stan_data, seed = 42, chains = 4)\npaths <- fit$output_files()\nsaveRDS(paths, \"output-paths.rds\")\nrm(fit)\ngc()",
+          "choices": [
+            {
+              "id": "paths-save-csv",
+              "text": "パス文字列をRDSへ保存したので、4つのCSV本体もRDS内へ保存された",
+              "diagnostic": "ファイルへの参照文字列とファイル内容を混同している"
+            },
+            {
+              "id": "temporary-risk",
+              "text": "既定CSVは一時領域にあり削除され得るため、fitがある間にsave_output_files()で移すかsample()へ永続output_dirを指定する必要がある",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "git-automatic",
+              "text": "CmdStanRがCSVを自動的にGitへ追加するため、保存処理は不要である",
+              "diagnostic": "CmdStanRのファイル生成とGitのバージョン管理を混同している"
+            },
+            {
+              "id": "console-is-output",
+              "text": "サンプリングの進捗がコンソールに表示されたため、draw CSVはなくても完全に復元できる",
+              "diagnostic": "進捗メッセージとdraw・metadataを含む成果物を混同している"
+            }
+          ],
+          "correctChoiceId": "temporary-risk",
+          "correctFeedback": "output_dirを指定しない既定ではCSVは一時ディレクトリに作られ、fitの破棄後に削除され得ます。パス文字列ではなくCSV本体を永続先へ保存します。",
+          "retryHint": "fit$output_files()が返すものはファイル内容か、現在位置を示す文字列かを区別します。"
+        },
+        {
+          "id": "stan-l37-q3-reproduction-record",
+          "kind": "constructed-response",
+          "cognitiveProcess": "construct",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "environment-record",
+            "sampling-contract",
+            "output-persistence"
+          ],
+          "prompt": "単回帰を別の人が追跡・再実行できるようにする実行記録を設計してください。seed以外に、実行前・実行設定・実行後の何を残すか、値の例と取得方法を示してください。",
+          "rubric": [
+            {
+              "id": "environment",
+              "criterion": "OS、R、CmdStanR、CmdStanの版とCmdStanパスを記録する"
+            },
+            {
+              "id": "input-identity",
+              "criterion": "Stanソースと実際に渡すJSONデータのパス・内容指紋を記録する"
+            },
+            {
+              "id": "sampler-settings",
+              "criterion": "seed、chains、chain_ids、parallel_chains、iter_warmup、iter_samplingを分けて記録する"
+            },
+            {
+              "id": "persistent-results",
+              "criterion": "保存済みCSV、入力JSON、fit、metadata、summary・diagnostic_summaryの位置または指紋を記録する"
+            },
+            {
+              "id": "scope-of-reproduction",
+              "criterion": "異なる環境でのbit単位一致を無条件に保証せず、版差と診断も照合すると説明する"
+            }
+          ],
+          "modelAnswer": "実行前にR.version.string、packageVersion(\"cmdstanr\")、cmdstan_version()、cmdstan_path()、OSを記録し、.stanとwrite_stan_json()で作った入力JSONのMD5を取る。設定はseed=20260801、chains=4、chain_ids=1:4、parallel_chains、iter_warmup=1000、iter_sampling=1000を別列にする。実行後はsave_output_files()とsave_data_file()で永続先へ移し、save_object()でfitを保存する。保存CSVの名前・MD5、fit$metadata()、fit$summary()、fit$diagnostic_summary()をrun IDへ対応付ける。固定seedだけで異なるOS・版のbit単位一致を保証せず、条件と診断を含めて再実行結果を比較する。",
+          "retryHint": "誰が見ても、入力、実行環境、アルゴリズム設定、得られたファイルを1つのrunへ結べるか確認します。"
+        },
+        {
+          "id": "stan-l37-q4-chains-parallelism",
+          "kind": "selected-response",
+          "cognitiveProcess": "apply",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "sampling-contract"
+          ],
+          "prompt": "seed = 123、chains = 4、chain_ids = 1:4、parallel_chains = 2、iter_sampling = 1000、thinは既定、という設定の説明として正しいものはどれですか。",
+          "choices": [
+            {
+              "id": "four-two-at-time",
+              "text": "4 chainを2本ずつ並列実行し、単一seedはchain IDで乱数列が分けられ、warmup後drawは合計4000になる",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "two-chains",
+              "text": "parallel_chainsが2なので、実際に生成されるchainも2本だけである",
+              "diagnostic": "生成するchain数と同時実行数を混同している"
+            },
+            {
+              "id": "same-stream",
+              "text": "seedが1個なので4 chainは同じ乱数列を完全に繰り返す",
+              "diagnostic": "複数chainではseedがchain IDによって分けられることを見落としている"
+            },
+            {
+              "id": "two-thousand",
+              "text": "同時実行が2本なので、保存されるwarmup後drawの合計は2000である",
+              "diagnostic": "並列スケジュールがchainごとの保存draw数を減らすと誤解している"
+            }
+          ],
+          "correctChoiceId": "four-two-at-time",
+          "correctFeedback": "chainsは4本、parallel_chainsは同時実行を最大2本にする指定です。各chainで1000 drawを保存するので合計4000です。単一seedはchain IDと組み合わせて使われます。",
+          "retryHint": "本数、同時実行数、chainごとの保存回数を別々に計算します。"
+        },
+        {
+          "id": "stan-l37-q5-transfer-logit-run",
+          "kind": "transfer-task",
+          "responseMode": "constructed",
+          "cognitiveProcess": "transfer",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "execution-stages",
+            "environment-record",
+            "sampling-contract",
+            "output-persistence",
+            "failure-localization",
+            "transfer"
+          ],
+          "scenario": "単回帰の完成スクリプトを閉じ、L36で作ったBernoulli-logitモデルを別runとして実行します。N人の実数予測子xと0/1応答yがあり、Stan側はarray[N] int<lower=0, upper=1> yを要求します。",
+          "prompt": "環境確認、入力作成、構文確認、コンパイル、4 chainの実行、診断、永続保存までのR側手順を書いてください。誤ってyへ2を含めた場合の停止工程と修正記録も説明してください。",
+          "rubric": [
+            {
+              "id": "binary-data-json",
+              "criterion": "N・x・0/1整数yの名前付きlistを検査し、指紋付きJSONへ書き出す"
+            },
+            {
+              "id": "separate-stages",
+              "criterion": "compile = FALSE、check_syntax、compile、sampleを別工程として実行する"
+            },
+            {
+              "id": "fixed-run-contract",
+              "criterion": "版、ソース・データ指紋、seed、4 chain、chain ID、並列数、warmup・sampling回数を記録する"
+            },
+            {
+              "id": "persistent-run",
+              "criterion": "単回帰と異なるrun IDへCSV、入力JSON、fit、metadata、診断を保存する"
+            },
+            {
+              "id": "runtime-bound-repair",
+              "criterion": "y=2をR側事前検査で最初に止め、検査を通さない場合はStanのデータ読込時のupper制約違反になると分類して、R側データだけを直す"
+            }
+          ],
+          "modelAnswer": "R・CmdStanR・CmdStanの版とパスを記録し、stopifnotでN、長さ、欠損、all(y %in% 0:1)を検査する。stan_dataをwrite_stan_json()で固有の一時JSONへ書き、StanソースとJSONのMD5を記録する。Bernoulliの.stanをcmdstan_model(..., compile=FALSE)で開き、check_syntax(pedantic=TRUE)、compile()、sample(data=JSONパス, seed固定, chains=4, chain_ids=1:4, parallel_chains=利用可能コア以内, iter_warmupとiter_samplingを明示)の順に進む。diagnostic_summary()、summary()、metadata()を確認し、単回帰とは別runへsave_output_files()、save_data_file()、save_object()で保存する。y=2はまずR側のall(y %in% 0:1)で止める。そこを通さずJSONを渡した場合もStanソースの構文ではなくdataのupper=1違反として読込時に止まる。初回ログを保存し、MCMC設定を変えずR側yを0/1へ修正する。",
+          "retryHint": "応答型の変更と、全モデルで維持する再現性契約を分け、各工程の入力がいつ初めて使われるかを追います。"
+        }
+      ]
     }
   ]
 }
