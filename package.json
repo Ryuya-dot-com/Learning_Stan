@@ -13,6 +13,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "audit:stan-public-scope": "node scripts/audit-stan-public-scope.mjs",
     "install:r-deps": "Rscript scripts/install-r-dependencies.R",
     "install:stan-ci": "Rscript scripts/install-stan-ci.R",
     "test:r-file-io": "Rscript scripts/verify-file-io.R",

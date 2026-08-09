@@ -20,6 +20,11 @@ export const REQUIRED_STAN_STATIC_COMMANDS = [
 
 export const REQUIRED_STAN_CI_JOBS = ["build", "r-verify", "stan-verify"];
 
+export const REQUIRED_STAN_PUBLIC_SCOPE_COMMANDS = [
+  "npm run build",
+  "npm run audit:stan-public-scope",
+];
+
 const DECISIONS = new Set(["PASS", "FAIL", "BLOCKED"]);
 const EVIDENCE_STATES = new Set(["NOT RUN", "PASS", "FAIL", "BLOCKED"]);
 const RUNTIME_STATES = new Set(["NOT RUN", "PASS", "FAIL", "BLOCKED"]);
@@ -168,7 +173,11 @@ function delayedRetentionComplete(status) {
 function hasPublicScopeReview(status) {
   const review = status?.publicScopeReview;
   return hasText(review?.reviewerCode) &&
+    review.reviewerCode !== status?.primaryImplementerCode &&
     isDate(review?.signedAt) &&
+    matchesTargetCommit(status, review?.commit) &&
+    Array.isArray(review?.commands) &&
+    REQUIRED_STAN_PUBLIC_SCOPE_COMMANDS.every((command) => review.commands.includes(command)) &&
     hasText(review?.artifact) &&
     review?.secretScan === "PASS" &&
     review?.personalDataScan === "PASS" &&
@@ -506,8 +515,21 @@ function validatePublicScopeReview(status, errors) {
   for (const key of ["secretScan", "personalDataScan", "appScopeConfirmed"]) {
     if (!AUDIT_STATES.has(review[key])) errors.push(`publicScopeReview.${key}が不正です`);
   }
+  if (review.commit !== null && !/^[0-9a-f]{40}$/.test(review.commit || "")) {
+    errors.push("publicScopeReview.commitは40桁SHAまたはnullです");
+  }
+  if (!Array.isArray(review.commands) || review.commands.some((command) => !hasText(command))) {
+    errors.push("publicScopeReview.commandsは文字列配列である必要があります");
+  } else if (new Set(review.commands).size !== review.commands.length) {
+    errors.push("publicScopeReview.commandsが重複しています");
+  }
+  for (const key of ["reviewerCode", "signedAt", "artifact"]) {
+    if (review[key] !== null && !hasText(review[key])) {
+      errors.push(`publicScopeReview.${key}はnullまたは文字列です`);
+    }
+  }
   if (evidenceById(status, "SRG09")?.status === "PASS" && !hasPublicScopeReview(status)) {
-    errors.push("SRG09のPASSには秘密情報・個人情報・アプリ公開範囲の監査記録が必要です");
+    errors.push("SRG09のPASSには対象commitの自動監査と主実装者以外による公開範囲監査記録が必要です");
   }
 }
 
