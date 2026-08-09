@@ -53,6 +53,7 @@ npm install
 npm run dev      # 開発サーバ(http://localhost:5173/Learning_Stan/ で開きます)
 npm test         # レッスンデータ・配色・ハイライトの検証
 npm run install:r-deps  # STEP 1・非公開STEP 2・Stanリンク比較の検証に必要なRパッケージを導入
+npm run install:stan-ci # CI用の固定CmdStanR 0.9.0・CmdStan 2.39.0環境をLEARNING_STAN_CMDSTAN_ROOT配下へ導入
 npm run generate:excel-samples  # 固定したExcelJSでExcel教材3件を再生成
 npm run test:excel-samples      # Excelのシート・型・行分割・書式契約を検査
 npm run generate:step1-bundle   # STEP 1のProject用スターターZIPを再生成
@@ -99,7 +100,7 @@ npm run build && npm run preview  # 公開と同条件での確認
 
 dev・preview とも `vite.config.js` の `base`(`/Learning_Stan/`)配下で配信されます。ルートを開くとそこへ転送されます。
 
-`main` に push すると GitHub Actions がテスト → ビルド → GitHub Pages への公開を自動で行います。
+すべてのpull requestでNode・R・Stanの独立jobを実行します。`workflow_dispatch`は検証専用です。GitHub Pagesへのupload・deployは`main`へのpush時だけ行います。
 
 ## コード例の方針
 
