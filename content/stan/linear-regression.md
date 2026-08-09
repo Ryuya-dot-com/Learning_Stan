@@ -94,7 +94,7 @@ generated quantities {
 - `beta`: xが1増えたときのyの期待変化
 - `sigma`: 観測が回帰直線からどれくらい散らばるかを表す正の尺度
 
-`real<lower=0> sigma;`の制約は、Stanが正の領域と無制約な内部表現を変換することを意味します。しかし、この宣言だけで`片側一様事前分布`が自動的に設定される、と考えてはいけません。モデルで使う事前分布は`model`ブロックに明示します。
+`real<lower=0> sigma;`の制約は、Stanが正の領域と無制約な内部表現を変換することを意味します。この宣言だけではproperな事前分布は決まりません。`model`で密度項を加えなければ、正の支持範囲上の暗黙の不適切一様事前分布として解釈されます。この教材では`model`ブロックにproperな事前分布を明示します。
 
 ### `transformed parameters`: パラメータから導く保存対象
 
@@ -116,10 +116,10 @@ y ~ normal(mu, sigma);
 重要なのは、`alpha ~ normal(0, 2)`が`alpha`へ乱数を代入する命令ではないことです。概念的には、現在の`alpha`における正規分布の対数密度を`target`へ加えます。
 
 ```stan
-target += normal_lpdf(alpha | 0, 2);
+target += normal_lupdf(alpha | 0, 2);
 ```
 
-distribution statementの`~`は、パラメータ探索中に何度も評価される対数密度の定義です。旧版資料ではsampling statementと呼ばれます。乱数生成には`normal_rng`のような`_rng`関数を使い、原則として`generated quantities`など許可された場所に書きます。
+distribution statementの`~`は、パラメータ探索中に何度も評価される非正規化対数密度の定義です。`target += normal_lpdf(alpha | 0, 2)`と書く場合は正規化定数も含むため、通常は同じ事後推論になりますが、`target()`の数値は定数だけ違い得ます。旧版資料ではsampling statementと呼ばれます。乱数生成には`normal_rng`のような`_rng`関数を使い、原則として`generated quantities`など許可された場所に書きます。
 
 `y ~ normal(mu, sigma)`はベクトル化されています。意味は次のloopと同じです。
 
@@ -255,4 +255,4 @@ R側で`N = 8`、`x = 1:7`を渡したとき、どの契約に違反するかを
 - [CmdStanR: Getting started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html)
 - [CmdStan diagnose utility](https://mc-stan.org/docs/2_39/cmdstan-guide/diagnose_utility.html)
 
-最終確認日: 2026-08-01。
+最終確認日: 2026-08-09。
