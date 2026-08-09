@@ -11,7 +11,8 @@
 - `lessons/l37-reproducible-cmdstanr.md`: 環境・入力・sampling設定・chain ID・出力・診断を追跡可能にしてCmdStanRで再実行する受講用原稿
 - `lessons/l38-diagnostics-before-estimates.md`: HMC診断、R-hat、ESS、MCSEを順に確認し、推定値の解釈を続けるか止めるか判断する受講用原稿
 - `lessons/l39-generated-quantities-predictive-checks.md`: `y_rep`による事後予測チェックとpointwise `log_lik`によるPSIS-LOOを、予測単位・Pareto k・ELPD差から判断する受講用原稿
-- `foundation-assessments.json`: L34–L39の目標次元、誤答診断、記述rubric、未見転移を持つ各5問・計30問
+- `lessons/l40-reparameterization-geometry.md`: 階層モデルのfunnelをcentered/non-centered、群情報量、診断、標準化、モデル同値性から修正する受講用原稿
+- `foundation-assessments.json`: L34–L40の目標次元、誤答診断、記述rubric、未見転移を持つ各5問・計35問
 - `linear-regression.md`: 単回帰モデルをRとの境界から診断・予測まで解説する縦切り原稿
 - `distribution-grammar-lab.md`: 分布文法、数式、ハイパーパラメータ感度、切断・打ち切りを結ぶ演習原稿
 - `link-functions-model-comparison.md`: inverse link、係数解釈、比較可能性、PSIS-LOO、Pareto k、stackingを結ぶ演習原稿
@@ -118,7 +119,7 @@ npm run run:stan-link-comparison
 npm run test:stan-model-comparison-runtime
 ```
 
-1つ目はL34–L39の受講用原稿6本・理解問題30問、8単元32課題、構文エラー8組、コンパイル成功レビュー6組、保持・転移10課題、7つの実行可能なStan例、2ケース、6つの実行証拠を原稿・コード・SHA-256まで同期検査します。2つ目は固定版stanc3 2.39.0で、壊れた8例が期待診断を伴って失敗し、修正版8例が成功することを一時ディレクトリで再検証します。3つ目はcandidate / reference 6組の両方が構文確認を通り、必須の意味差・警告数・証拠SHAと一致することを確認します。4つ目は3チェックポイント・10課題と未見lognormal参照モデルの構造・hash・構文成功を確認します。5つ目と6つ目は、分布文法およびリンク関数の可視化をStanコンパイルなしで検査します。7つ目と8つ目は切断ケースの通常実行と空の一時ディレクトリでの再実行です。9つ目と10つ目はリンク・LOOケースの通常実行と、2モデルの再コンパイル、4 chain、13成果物、ELPD差、Pareto k、stacking、入力不変の検査です。
+1つ目はL34–L40の受講用原稿7本・理解問題35問、8単元32課題、構文エラー8組、コンパイル成功レビュー6組、保持・転移10課題、7つの実行可能なStan例、2ケース、6つの実行証拠を原稿・コード・SHA-256まで同期検査します。2つ目は固定版stanc3 2.39.0で、壊れた8例が期待診断を伴って失敗し、修正版8例が成功することを一時ディレクトリで再検証します。3つ目はcandidate / reference 6組の両方が構文確認を通り、必須の意味差・警告数・証拠SHAと一致することを確認します。4つ目は3チェックポイント・10課題と未見lognormal参照モデルの構造・hash・構文成功を確認します。5つ目と6つ目は、分布文法およびリンク関数の可視化をStanコンパイルなしで検査します。7つ目と8つ目は切断ケースの通常実行と空の一時ディレクトリでの再実行です。9つ目と10つ目はリンク・LOOケースの通常実行と、2モデルの再コンパイル、4 chain、13成果物、ELPD差、Pareto k、stacking、入力不変の検査です。
 
 現行コードは2026-08-01にR 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0で構文確認・コンパイル・4 chainのサンプリングを実行済みです。divergenceと最大treedepth到達は全chainで0、報告R-hat最大1.00、bulk ESS最小1778、tail ESS最小1705でした。詳細と限界は`validation.json`に記録しています。
 
