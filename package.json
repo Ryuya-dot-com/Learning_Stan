@@ -14,6 +14,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "install:r-deps": "Rscript scripts/install-r-dependencies.R",
+    "install:stan-ci": "Rscript scripts/install-stan-ci.R",
     "test:r-file-io": "Rscript scripts/verify-file-io.R",
     "test:nb1": "Rscript scripts/verify-notebook.R",
     "test:step1-analysis": "Rscript scripts/verify-step1-analysis.R",

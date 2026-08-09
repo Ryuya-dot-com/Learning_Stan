@@ -34,6 +34,8 @@ npm run gate:stan-release:require-pass
 
 `SRG04`は2026-08-10にDarwin arm64、R 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0、loo 2.10.1で再検証しました。単回帰、切断、リンク/LOOのcanonical source hash、全chain診断、教材上の統計的結論、合計22成果物を`content/stan/runtime-revalidation.json`へ保存しています。切断モデルは1,000 samplingで境界的なR-hatが観測されたため、閾値を緩めず各chain 2,000 samplingで再検証しました。
 
+`SRG03`用のworkflowはbase branchを問わずpull requestを検証し、Node・一般R・固定版CmdStanの3 jobを分離します。手動dispatchは検証だけを行い、Pagesへのupload・deployは`main`へのpushに限定します。jobを実装しただけでは`PASS`にせず、対象commitに結び付くGitHub上の成功run URLを待ちます。
+
 ## 状態
 
 - `PASS`: 10証拠と構造化された付帯条件がすべて揃った

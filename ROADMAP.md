@@ -151,7 +151,7 @@ M1の事実訂正だけは、D-001の最終決定を待たずに着手できる�
 
 目的: 人手レビューだけに依存せず、誤りの再発を止める。
 
-状態: **進行中**。React UIテスト、分類付きR実行検証器、workflow構文テスト、PR時のtest/build/R検証、job単位の権限分離、ActionsのSHA固定、Node 22.23.1 / npm 10.9.8固定は実装済み。GitHub上の成功run確認は未完了。
+状態: **進行中**。React UIテスト、分類付きR実行検証器、workflow構文テスト、base branchを問わないPR時のtest/build/R/Stan検証、job単位の権限分離、ActionsのSHA固定、Node 22.23.1 / npm 10.9.8固定は実装済み。Pages公開は`main`へのpushだけに限定した。GitHub上の成功run確認は未完了。
 
 作業:
 

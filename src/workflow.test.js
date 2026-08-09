@@ -12,7 +12,7 @@ const nodeVersion = readFileSync(join(root, ".node-version"), "utf8").trim();
 
 describe("GitHub Pages workflow", () => {
   it("pull requestでもtestとbuildを実行する", () => {
-    expect(config.on.pull_request.branches).toContain("main");
+    expect(config.on.pull_request).toEqual({});
     expect(config.jobs.build.steps.map((step) => step.run).filter(Boolean)).toEqual(
       expect.arrayContaining([
         "npm test",
@@ -90,7 +90,7 @@ describe("GitHub Pages workflow", () => {
     expect(packageJson.engines.node).toBe(nodeVersion);
     expect(packageJson.packageManager).toBe(`npm@${packageJson.engines.npm}`);
 
-    for (const jobName of ["build", "r-verify"]) {
+    for (const jobName of ["build", "r-verify", "stan-verify"]) {
       const setupNode = config.jobs[jobName].steps.find((step) =>
         step.uses?.startsWith("actions/setup-node@")
       );
@@ -114,6 +114,28 @@ describe("GitHub Pages workflow", () => {
     expect(config.jobs.deploy.needs).toEqual(expect.arrayContaining(["build", "r-verify"]));
   });
 
+  it("Stan検証を固定版の独立jobで実行し、成功するまでdeployしない", () => {
+    const stanJob = config.jobs["stan-verify"];
+    const runs = stanJob.steps.map((step) => step.run).filter(Boolean);
+
+    expect(packageJson.scripts["install:stan-ci"]).toBe("Rscript scripts/install-stan-ci.R");
+    expect(stanJob.permissions).toEqual({ contents: "read" });
+    expect(stanJob["timeout-minutes"]).toBe(30);
+    expect(stanJob.env.LEARNING_STAN_CMDSTAN).toContain("cmdstan-2.39.0");
+    expect(stanJob.env.LEARNING_STAN_STANC).toContain("cmdstan-2.39.0/bin/stanc");
+    expect(runs).toEqual(expect.arrayContaining([
+      "Rscript scripts/install-stan-ci.R",
+      "npm run test:stan-syntax-errors",
+      "npm run test:stan-model-review",
+      "npm run test:stan-retention",
+      "npm run test:stan-existing-runtime",
+      "npm run test:stan-reparameterization-runtime",
+    ]));
+    expect(config.jobs.deploy.needs).toEqual(
+      expect.arrayContaining(["build", "r-verify", "stan-verify"])
+    );
+  });
+
   it("独立転移の観察用ZIPをRで展開し、初回提出後の採点動線をリハーサルする", () => {
     expect(packageJson.scripts["test:step1-transfer-observation-rehearsal"]).toBe(
       "Rscript scripts/verify-step1-transfer-observation-rehearsal.R"
@@ -123,8 +145,15 @@ describe("GitHub Pages workflow", () => {
     );
   });
 
-  it("Pages権限とOIDC権限をdeployだけに限定し、PRではdeployしない", () => {
-    expect(config.jobs.deploy.if).toBe("github.event_name != 'pull_request'");
+  it("Pages権限とOIDC権限をdeployだけに限定し、mainへのpush以外ではdeployしない", () => {
+    const deployCondition = "github.event_name == 'push' && github.ref == 'refs/heads/main'";
+    const upload = config.jobs.build.steps.find((step) =>
+      step.uses?.startsWith("actions/upload-pages-artifact@")
+    );
+
+    expect(config.on).toHaveProperty("workflow_dispatch");
+    expect(upload.if).toBe(deployCondition);
+    expect(config.jobs.deploy.if).toBe(deployCondition);
     expect(config.jobs.deploy.permissions).toEqual({
       contents: "read",
       pages: "write",
