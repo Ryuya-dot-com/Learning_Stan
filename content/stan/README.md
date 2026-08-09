@@ -5,10 +5,23 @@
 ## 含まれるもの
 
 - `curriculum.json`: L34–L41の到達目標、依存関係、直接評価証拠
+- `lessons/l34-execution-data-contract.md`: R・CmdStanR・stanc3・CmdStanの責務と、名前・型・大きさ・値域を持つデータ契約を扱う受講用原稿
+- `lessons/l35-blocks-types-constraints.md`: 7ブロック、スコープ、型・次元、制約、分布関数の接尾辞をエラー修正まで扱う受講用原稿
+- `foundation-assessments.json`: L34–L35の目標次元、誤答診断、記述rubric、未見転移を持つ各5問・計10問
 - `linear-regression.md`: 単回帰モデルをRとの境界から診断・予測まで解説する縦切り原稿
 - `distribution-grammar-lab.md`: 分布文法、数式、ハイパーパラメータ感度、切断・打ち切りを結ぶ演習原稿
 - `link-functions-model-comparison.md`: inverse link、係数解釈、比較可能性、PSIS-LOO、Pareto k、stackingを結ぶ演習原稿
-- `grammar-drills.json`: 8単元×4段階（写経・変更・白紙再現・転移）の32課題
+- `grammar-drills.json`: Syntax Spineの現行コアとなる8単元×4段階（写経・変更・白紙再現・転移）の32課題
+- `syntax-error-corpus.json`: 構文・型・形状・添字・スコープ・許可ブロック・関数・分布シグネチャの壊れた例／修正版8組と転移課題
+- `errors/`: 1組につき主原因を1つに限定した`.bad.stan`と、同じ到達目標を保った`.fixed.stan`
+- `syntax-error-validation.json`: 固定版stanc3による終了コードと16ソースのSHA-256証拠
+- `model-review-corpus.json`: 両方ともコンパイルできるcandidate / reference 6組と、密度・尺度・予測単位・幾何に基づくレビュー課題
+- `model-review/`: Jacobian、Bernoulli-logit、centered / non-centered、Poisson offset、pointwise `log_lik`の比較ソース10件
+- `model-review-validation.json`: 既存切断モデル2件を含む12ソースの構文成功・pedantic警告数・SHA-256証拠
+- `syntax-retention-plan.json`: L37後・L40後・L41後の3チェックポイント、暫定間隔、匿名証拠記録、公開要件
+- `syntax-retention-assessments.json`: 構文実行・エラー説明・数式往復・モデルレビュー・転移・遅延保持を測る10課題と0〜2の証拠rubric
+- `retention/facilitator/positive-duration-reference.stan`: L41後7〜14日の未見lognormal転移課題に対する非配布参照モデル
+- `syntax-retention-validation.json`: 保持計画・課題・参照モデルのSHA-256と固定版stanc3構文成功証拠
 - `truncation-case-study.md`: 採用範囲のある測定器を題材に、診断が良い誤答と正しい切断モデルを比較するケース
 - `examples/linear-regression.stan`: 6ブロックを使う教材用Stanプログラム
 - `examples/prior-predictive.stan`: `_rng`とfixed-parameter samplerで使う事前予測プログラム
@@ -27,10 +40,70 @@
 - `link-comparison-validation.json`: 3リンク・Poisson offset・2つのlogitモデル・LOO比較のSHA-256と実測結果
 - `scripts/stan-content-verifier.mjs`: 原稿・コード・カリキュラムの同期と必須構造を検査する静的検証器
 
+## Stan Syntax Spine
+
+Stan構文はL35だけで完結させず、STEP 5でbrms生成コードを読む段階から、L41後に未見の応答型へ転移する段階まで反復する。`curriculum.json`の`syntaxSpine`を正本とし、次の三層を分離して設計する。
+
+| 層 | 主な内容 |
+|---|---|
+| Stan言語の文法 | ブロック、実行順、スコープ、型、array・vector・row_vector・matrix、次元、添字、制御構文、ユーザー定義関数 |
+| 確率モデルの文法 | distribution statement、`target`、分布関数の接尾辞、支持範囲、リンク、制約・切断・打ち切り |
+| 計算の文法 | generated quantities、乱数生成、変数変換とJacobian、non-centered parameterization、数値安定性、ベクトル化と計算量 |
+
+現行の32課題はこの系列の実行可能な核である。公開候補へ進める前に、各技能を`読む・予測する → 穴埋めする → 一部を変える → 意図的なエラーを直す → 見本なしで再現する → 時間を置いて別文脈へ移す`の6接触へ拡張する。後半3つは、完成例の記憶だけで通過しないための必須証拠とする。
+
+反復は次のように分散する。
+
+- STEP 5: `stancode()`を式・生成過程と対応付けて読む。白紙実装は要求しない。
+- L34–L35: 実行境界、ブロック、型、次元、スコープを読み、最小プログラムを構文確認する。
+- L36–L37: 生成過程を対数密度へ翻訳し、型・次元・ブロック・分布関数のエラーを修正する。
+- L38–L40: 構文エラー、計算診断、統計的誤指定を分類し、generated quantities、変数変換、再パラメータ化を実装する。
+- L41と修了後: 見本なしの統合実装、第三者コードのレビュー、1〜2週間後の未見転移を行う。
+
+構文確認・コンパイルの成功だけを合格としない。エラー原因の説明、数式とコードの往復、コンパイルは通る誤モデルの発見、未見応答型への転移、遅延後の再達成を別々に記録する。セルフチェックは形成的記録とし、保存コード、初回エラー、修正理由、転移成果物を実技証拠とする。
+
+### エラーコーパスの使い方
+
+各組は、壊れた例を実行する前に診断分類と停止位置を予測し、実際のstanc3診断から期待型・実際型・利用可能なシグネチャを読み、修正版を作ってから配布修正版と比較する。診断文の丸暗記や、エラー表示行だけの機械的置換を合格にしない。
+
+現行8組は、セミコロン、array / vector、matrix / vector演算、添字型、局所スコープ、`_rng`の許可ブロック、ユーザー定義関数、Bernoulli観測型を扱う。動的な次元不一致はstanc3の型検査を通る場合があるため、R側のデータ契約と実行時検査、STAN-009の「コンパイルは通る誤モデル」へ分離する。
+
+### コンパイル成功後のモデルレビュー
+
+`model-review-corpus.json`では、candidateとreferenceの両方が固定版stanc3を通る。その後に、次の六つをコードの見た目ではなく数式・生成過程・予測課題・計算診断から判断する。
+
+- 変換後の尺度へ密度を置くときのJacobian
+- `bernoulli(inv_logit(eta))`と融合された`bernoulli_logit(eta)`の同値性・数値安定性
+- centeredとnon-centeredのデータ条件に依存する計算幾何
+- Poisson-logモデルで乗法的曝露量を表す`log(exposure)` offset
+- PSIS-LOOへ渡す観測別`log_lik`
+- 入力制約だけの正規モデルと、正規化項を持つ切断尤度
+
+判断は`candidate-reject`、`prefer-reference`、`context-dependent`に分ける。centered表現を常に誤りと呼ばず、Bernoulliの二表現を別モデルと呼ばない。Jacobian参照版だけがpedanticの「2 priors」警告を出し、Jacobian欠落版は無警告だった実測も保存し、警告の有無を数学的正しさの代用にしない。
+
+現時点で複数chainの推定差まで実測済みなのは切断ケースである。Jacobian、極端な線形予測子、centered / non-centered、offset、pointwise `log_lik`は、構文成功とソース同期を確認済みだが、推定差・計算効率・数値極限の実測と独立レビューを公開前に追加する。
+
+### 累積復習・遅延想起・未見転移
+
+構文練習のチェックを入れたことと、時間を置いて自力で再現できることを分ける。`syntax-retention-plan.json`は次の3地点を定義する。
+
+- `sr37`: L37後。g01〜g03について、エラー修正、正規モデルの白紙再現、Bernoulli-logitへの近接転移を行う。
+- `sr40`: L40後。g04〜g07について、Jacobian・切断のレビュー、non-centeredへの書換え、Poisson offsetと予測生成を行う。
+- `sr41d`: L41後7〜14日。g01〜g08を、未見の「機器負荷と正の完了時間」lognormal回帰へ統合する。
+
+7〜14日はpilot前の暫定窓であり、学習効果を実測した値ではない。最初の適格な初学者3名について保持率、支援量、完遂時間を確認してから再検討する。rubricは0「未証拠」・1「部分証拠」・2「直接証拠」を定義するが、合格点はpilot前に固定しない。
+
+自己チェックは保持の証拠に数えない。コード前計画、初回コード、初回コンパイラ結果、修正版、修正理由、支援水準、成果物hashを別々に保存し、直後・間隔あり・遅延の記録を上書きしない。氏名、メール、所属、研究データは記録対象外とする。
+
+未見lognormal課題のfacilitator参照モデルはstanc3 2.39.0で構文確認済みだが、これは学習者の保持を示す証拠ではない。参照モデルは初回提出前に配布せず、同じ生成過程・pointwise `log_lik`・`y_rep`契約を満たす別実装も許容する。
+
 ## 検証レベル
 
 ```bash
 npm run test:stan-content
+npm run test:stan-syntax-errors
+npm run test:stan-model-review
+npm run test:stan-retention
 npm run test:stan-distributions
 npm run test:stan-links
 npm run run:stan-scenario
@@ -39,7 +112,7 @@ npm run run:stan-link-comparison
 npm run test:stan-model-comparison-runtime
 ```
 
-1つ目は8単元32課題、7つのStan例、2ケース、3つの実行証拠を原稿・コード・SHA-256まで同期検査します。2つ目と3つ目は、分布文法およびリンク関数の可視化をStanコンパイルなしで検査します。4つ目と5つ目は切断ケースの通常実行と空の一時ディレクトリでの再実行です。6つ目と7つ目はリンク・LOOケースの通常実行と、2モデルの再コンパイル、4 chain、13成果物、ELPD差、Pareto k、stacking、入力不変の検査です。
+1つ目はL34–L35の受講用原稿2本・理解問題10問、8単元32課題、構文エラー8組、コンパイル成功レビュー6組、保持・転移10課題、7つの実行可能なStan例、2ケース、6つの実行証拠を原稿・コード・SHA-256まで同期検査します。2つ目は固定版stanc3 2.39.0で、壊れた8例が期待診断を伴って失敗し、修正版8例が成功することを一時ディレクトリで再検証します。3つ目はcandidate / reference 6組の両方が構文確認を通り、必須の意味差・警告数・証拠SHAと一致することを確認します。4つ目は3チェックポイント・10課題と未見lognormal参照モデルの構造・hash・構文成功を確認します。5つ目と6つ目は、分布文法およびリンク関数の可視化をStanコンパイルなしで検査します。7つ目と8つ目は切断ケースの通常実行と空の一時ディレクトリでの再実行です。9つ目と10つ目はリンク・LOOケースの通常実行と、2モデルの再コンパイル、4 chain、13成果物、ELPD差、Pareto k、stacking、入力不変の検査です。
 
 現行コードは2026-08-01にR 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0で構文確認・コンパイル・4 chainのサンプリングを実行済みです。divergenceと最大treedepth到達は全chainで0、報告R-hat最大1.00、bulk ESS最小1778、tail ESS最小1705でした。詳細と限界は`validation.json`に記録しています。
 

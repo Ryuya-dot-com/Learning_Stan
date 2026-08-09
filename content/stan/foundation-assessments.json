@@ -1,0 +1,381 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-unpublished",
+  "designRules": {
+    "questionsPerLesson": 5,
+    "requiredKinds": [
+      "selected-response",
+      "output-prediction",
+      "constructed-response",
+      "transfer-task"
+    ],
+    "learnerAnswersAreNotPerformanceEvidence": true,
+    "preserveFirstAttemptBeforeFeedback": true,
+    "shuffleSelectedResponseChoices": true
+  },
+  "lessons": [
+    {
+      "lessonId": "l34",
+      "outcomeDimensions": [
+        "execution-responsibility",
+        "data-contract",
+        "pipeline-boundaries",
+        "transfer"
+      ],
+      "questions": [
+        {
+          "id": "stan-l34-q1-responsibility",
+          "kind": "selected-response",
+          "cognitiveProcess": "analyze",
+          "evidenceStrength": "supporting",
+          "targetDimensions": [
+            "execution-responsibility"
+          ],
+          "prompt": "Stanコードの構文と型を検査し、C++へ変換する担当を最も正確に説明しているものはどれですか。",
+          "choices": [
+            {
+              "id": "r-data-frame",
+              "text": "Rのdata.frame",
+              "diagnostic": "データを保持するRオブジェクトとコンパイラを混同している"
+            },
+            {
+              "id": "cmdstanr-interface",
+              "text": "CmdStanRだけ",
+              "diagnostic": "呼出し用インターフェースと、その背後で構文変換するstanc3を区別していない"
+            },
+            {
+              "id": "stanc3",
+              "text": "stanc3",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "sampler",
+              "text": "NUTSサンプラー",
+              "diagnostic": "推定アルゴリズムとStan-to-C++変換を混同している"
+            }
+          ],
+          "correctChoiceId": "stanc3",
+          "correctFeedback": "stanc3がStanコードを構文・型検査してC++へ変換します。CmdStanRはその工程をRから呼び出すインターフェースです。",
+          "retryHint": "Rから工程を呼ぶものと、Stanコードそのものを変換するものを分けます。"
+        },
+        {
+          "id": "stan-l34-q2-contract",
+          "kind": "output-prediction",
+          "cognitiveProcess": "apply",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "data-contract"
+          ],
+          "prompt": "Stan側がvector[N] xとvector[N] yを要求しているとき、次のlistで最初に確認すべき問題は何ですか。",
+          "code": "stan_data <- list(\n  N = 8L,\n  x = 1:7,\n  y = c(-0.7, 0.1, 0.4, 1.4, 2.1, 2.5, 3.4, 3.7)\n)",
+          "choices": [
+            {
+              "id": "x-length",
+              "text": "xの長さ7がN=8と一致しない",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "y-negative",
+              "text": "yに負値があるためvectorへ入れられない",
+              "diagnostic": "vectorは実数を保持でき、yには非負制約も宣言されていない"
+            },
+            {
+              "id": "n-integer",
+              "text": "Nが整数なのでvector長に使えない",
+              "diagnostic": "vectorの大きさには整数式を使うという規則を逆に理解している"
+            },
+            {
+              "id": "sampling-settings",
+              "text": "adapt_deltaを上げる必要がある",
+              "diagnostic": "データ契約違反をMCMC設定で解決しようとしている"
+            }
+          ],
+          "correctChoiceId": "x-length",
+          "correctFeedback": "vector[N] xはN個の実数を要求します。N、x、yを同じ正本データから作り直します。",
+          "retryHint": "各vector宣言の角括弧にある大きさと、R側の要素数を比較します。"
+        },
+        {
+          "id": "stan-l34-q3-repair-list",
+          "kind": "constructed-response",
+          "cognitiveProcess": "debug",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "data-contract",
+            "pipeline-boundaries"
+          ],
+          "prompt": "Stan側がN・x・yを要求しているのに、R側のlistがn・predictor・outcomeという名前になっています。修正版のlistと、なぜ尤度ではなく境界契約を直すのかを説明してください。",
+          "rubric": [
+            {
+              "id": "exact-names",
+              "criterion": "listのキーをN・x・yへ正確に対応付ける"
+            },
+            {
+              "id": "derived-length",
+              "criterion": "Nを手入力せず、同じdata.frameの行数またはベクトル長から作る"
+            },
+            {
+              "id": "boundary-location",
+              "criterion": "Stanが受け取る前の名前対応の問題であり、尤度やサンプラー設定の問題ではないと説明する"
+            }
+          ],
+          "modelAnswer": "stan_data <- list(N = nrow(study), x = study$predictor, y = study$outcome)とする。StanはR側の列名を推測せず、dataブロックと同じキーを要求するため、これはRとStanの境界契約の問題である。尤度やadapt_deltaを変えても名前不一致は解消しない。",
+          "retryHint": "Stanのdataブロックに書かれた3つの名前を、Rのどの値へ対応させるか明示します。"
+        },
+        {
+          "id": "stan-l34-q4-syntax-meaning",
+          "kind": "selected-response",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "pipeline-boundaries"
+          ],
+          "prompt": "model$check_syntax()が成功したとき、そこから直接言えることはどれですか。",
+          "choices": [
+            {
+              "id": "valid-model",
+              "text": "研究上の生成過程を正しく表している",
+              "diagnostic": "構文・型の成功を統計的妥当性へ格上げしている"
+            },
+            {
+              "id": "sampling-good",
+              "text": "divergenceなしで4 chainが完走する",
+              "diagnostic": "構文確認ではコンパイルもサンプリングも実行していない"
+            },
+            {
+              "id": "translatable",
+              "text": "現在のStanコードがstanc3の構文・型検査を通る",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "data-valid",
+              "text": "これから渡すすべてのデータが契約を満たす",
+              "diagnostic": "構文確認時点のコード検査と、実行時データ検査を混同している"
+            }
+          ],
+          "correctChoiceId": "translatable",
+          "correctFeedback": "構文確認はStanコードをstanc3で構文・型検査します。C++コンパイル、実行時データ、計算診断、モデル妥当性は別に確認します。",
+          "retryHint": "その工程で実際にまだ実行していないものを選択肢から除きます。"
+        },
+        {
+          "id": "stan-l34-q5-transfer-binomial",
+          "kind": "transfer-task",
+          "responseMode": "constructed",
+          "cognitiveProcess": "transfer",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "data-contract",
+            "transfer"
+          ],
+          "scenario": "50人について、20試行中の成功回数successesと、実施した試行回数trialsをStanへ渡します。欠測者は事前に除外済みです。",
+          "prompt": "R側listとStanのdataブロックについて、必要な名前・型・大きさ・値域を設計してください。successes <= trialsをどこで検査するかも説明してください。",
+          "rubric": [
+            {
+              "id": "integer-arrays",
+              "criterion": "Nを1以上のint、successesとtrialsを長さNのint配列として設計する"
+            },
+            {
+              "id": "bounds",
+              "criterion": "successesとtrialsを0以上とし、successes <= trialsが必要だと示す"
+            },
+            {
+              "id": "paired-length",
+              "criterion": "R側で2列の長さとNが一致し、欠損がないことを検査する"
+            },
+            {
+              "id": "cross-variable-check",
+              "criterion": "successes <= trialsをR側またはtransformed dataの明示的検査として扱い、単一変数のlower/upperだけで表せないと説明する"
+            }
+          ],
+          "modelAnswer": "dataではint<lower=1> N、array[N] int<lower=0> successes、array[N] int<lower=0> trialsを宣言する。Rでは同じ表からNと2列を作り、長さ、欠損、整数性、all(successes <= trials)を検査する。2変数間の大小関係は各変数の固定lower/upperだけでは十分に表せないため、境界で明示的に確認する。",
+          "retryHint": "連続量のvectorではなく、件数を保持する型と、1変数内の制約・2変数間の制約を分けます。"
+        }
+      ]
+    },
+    {
+      "lessonId": "l35",
+      "outcomeDimensions": [
+        "block-order",
+        "scope",
+        "type-shape",
+        "constraint-semantics",
+        "transfer"
+      ],
+      "questions": [
+        {
+          "id": "stan-l35-q1-block-order",
+          "kind": "selected-response",
+          "cognitiveProcess": "understand",
+          "evidenceStrength": "supporting",
+          "targetDimensions": [
+            "block-order"
+          ],
+          "prompt": "Stanのブロックについて正しい説明はどれですか。",
+          "choices": [
+            {
+              "id": "all-required",
+              "text": "7ブロックはすべて必須で、空でも必ず書く",
+              "diagnostic": "ブロックの順序制約と任意性を混同している"
+            },
+            {
+              "id": "optional-ordered",
+              "text": "各ブロックは任意だが、使うブロックは定められた順で書く",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "gq-before-model",
+              "text": "generated quantitiesはmodelより前に置く",
+              "diagnostic": "draw後の計算を対数密度定義より前へ置いている"
+            },
+            {
+              "id": "functions-last",
+              "text": "functionsは後続のコードを読んだ後に定義するので最後に置く",
+              "diagnostic": "ユーザー定義関数ブロックの位置を誤っている"
+            }
+          ],
+          "correctChoiceId": "optional-ordered",
+          "correctFeedback": "ブロックはすべて任意ですが、functionsからgenerated quantitiesまで、存在するブロックの順序は固定です。",
+          "retryHint": "『書く必要があるか』と『書くならどこか』を別の問いとして考えます。"
+        },
+        {
+          "id": "stan-l35-q2-scope",
+          "kind": "output-prediction",
+          "cognitiveProcess": "analyze",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "scope"
+          ],
+          "prompt": "次のコードでgenerated quantitiesから参照できない変数はどれですか。",
+          "code": "transformed data {\n  real x_mean = mean(x);\n}\nmodel {\n  real centered_first = x[1] - x_mean;\n  target += normal_lpdf(centered_first | 0, 1);\n}\ngenerated quantities {\n  real saved_mean = x_mean;\n}",
+          "choices": [
+            {
+              "id": "x",
+              "text": "x",
+              "diagnostic": "dataブロックの値は後続ブロックから参照できる"
+            },
+            {
+              "id": "x-mean",
+              "text": "x_mean",
+              "diagnostic": "transformed dataの値は後続ブロックから参照できる"
+            },
+            {
+              "id": "centered-first",
+              "text": "centered_first",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "saved-mean",
+              "text": "saved_mean",
+              "diagnostic": "generated quantities内で宣言された変数そのものを、参照不能な前段の値と混同している"
+            }
+          ],
+          "correctChoiceId": "centered-first",
+          "correctFeedback": "centered_firstはmodelブロック内のローカル変数です。modelの外、後続のgenerated quantitiesからも見えません。",
+          "retryHint": "宣言されたブロックだけでなく、そのブロック内のローカル変数かを確認します。"
+        },
+        {
+          "id": "stan-l35-q3-array-vector",
+          "kind": "constructed-response",
+          "cognitiveProcess": "debug",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "type-shape"
+          ],
+          "prompt": "array[N] real observationsをvector[N] copiedへ直接代入できない理由と、2通りの修正方針を説明してください。",
+          "rubric": [
+            {
+              "id": "distinct-types",
+              "criterion": "arrayとvectorは要素数が同じでも別の型で、直接代入できないと説明する"
+            },
+            {
+              "id": "change-declaration",
+              "criterion": "後続処理が配列でよいなら、両者の宣言をarrayへ揃える方針を示す"
+            },
+            {
+              "id": "explicit-conversion",
+              "criterion": "線形代数やベクトル化にvectorが必要なら、to_vector()などの明示的変換を使う方針を示す"
+            },
+            {
+              "id": "preserve-meaning",
+              "criterion": "変換後の型が後続の演算と観測の意味に合うか確認すると述べる"
+            }
+          ],
+          "modelAnswer": "array[N] realとvector[N]は、同じN個のrealを持っていても異なる型なので直接代入できない。配列として扱えばよい処理ならcopiedもarray[N] realにする。線形代数やvector化された演算へ渡す必要があるならcopied = to_vector(observations)と明示し、要素順と後続演算の意味を確認する。",
+          "retryHint": "要素数の一致と、型の一致を別々に確認します。"
+        },
+        {
+          "id": "stan-l35-q4-constraint-prior",
+          "kind": "selected-response",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "constraint-semantics"
+          ],
+          "prompt": "parametersでreal<lower=0> sigma;と宣言したことから直接言える内容はどれですか。",
+          "choices": [
+            {
+              "id": "exponential-prior",
+              "text": "sigmaには自動的にexponential(1)事前分布が置かれる",
+              "diagnostic": "parameter制約を特定の事前分布と混同している"
+            },
+            {
+              "id": "positive-transform",
+              "text": "sigmaは正の尺度で表され、サンプラーの内部表現との間で変換される",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "truncated-likelihood",
+              "text": "観測yの正規尤度が自動的に0で切断される",
+              "diagnostic": "parameter制約と観測尤度の切断を混同している"
+            },
+            {
+              "id": "data-cleaning",
+              "text": "R側の負の観測値が自動的に削除される",
+              "diagnostic": "parameter宣言をデータ前処理と混同している"
+            }
+          ],
+          "correctChoiceId": "positive-transform",
+          "correctFeedback": "parameter制約は宣言尺度と内部の無制約尺度を結びます。事前分布と観測尤度は別にmodelで定義します。",
+          "retryHint": "制約がかかっている対象がparameterかdataか観測尤度かを確認します。"
+        },
+        {
+          "id": "stan-l35-q5-transfer-binary",
+          "kind": "transfer-task",
+          "responseMode": "constructed",
+          "cognitiveProcess": "transfer",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "type-shape",
+            "constraint-semantics",
+            "transfer"
+          ],
+          "scenario": "連続応答yを扱う正規モデルを、0/1の正答を扱うBernoulliモデルへ変更します。各観測には1つの実数予測子xがあります。",
+          "prompt": "data・parameters・modelの最小構成を書き、連続モデルから変更した型、制約、分布関数を説明してください。",
+          "rubric": [
+            {
+              "id": "binary-data-type",
+              "criterion": "yをarray[N] int<lower=0, upper=1>として宣言する"
+            },
+            {
+              "id": "predictor-type",
+              "criterion": "xをvector[N]として、Nと長さを対応付ける"
+            },
+            {
+              "id": "parameters",
+              "criterion": "alphaとbetaをreal parameterとして宣言し、事前分布を置く"
+            },
+            {
+              "id": "stable-likelihood",
+              "criterion": "y ~ bernoulli_logit(alpha + beta * x)など、二値応答と線形予測子を結ぶ尤度を書く"
+            },
+            {
+              "id": "change-explanation",
+              "criterion": "real/vectorの連続応答からint配列へ変え、normal_lpdfではなく離散Bernoulliのlogit尺度を使うと説明する"
+            }
+          ],
+          "modelAnswer": "data { int<lower=1> N; vector[N] x; array[N] int<lower=0, upper=1> y; } parameters { real alpha; real beta; } model { alpha ~ normal(0, 2); beta ~ normal(0, 1); y ~ bernoulli_logit(alpha + beta * x); }とする。yは連続vectorではなく0/1のint配列で、正規密度ではなくBernoulliの離散確率をlogit線形予測子で定義する。",
+          "retryHint": "応答の支持範囲、Stanの型、連続・離散の分布関数、link尺度を順に対応付けます。"
+        }
+      ]
+    }
+  ]
+}

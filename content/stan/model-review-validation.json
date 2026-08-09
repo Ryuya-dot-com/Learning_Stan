@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "verifiedAt": "2026-08-05",
+  "environment": {
+    "compiler": "stanc3",
+    "version": "2.39.0",
+    "target": "Win32"
+  },
+  "flags": [
+    "--warn-pedantic"
+  ],
+  "corpusSha256": "e038a011e9013a5228c5a0c0cb2ef7e77202548db20d377a650ba016ae3650c1",
+  "cases": [
+    {
+      "id": "mr01",
+      "candidate": "mr01-jacobian-missing.candidate.stan",
+      "reference": "mr01-jacobian-adjusted.reference.stan",
+      "candidateSha256": "1aa4c1e242cfb5515bf939e44d583c97acf4eff492aae75d135525e18a27e68a",
+      "referenceSha256": "23419a2259f3e4f48223bdd8189437fbb545c7a76c1528b974d2955a17de5c40",
+      "candidateExitCode": 0,
+      "referenceExitCode": 0,
+      "candidateWarningCount": 0,
+      "referenceWarningCount": 1
+    },
+    {
+      "id": "mr02",
+      "candidate": "mr02-bernoulli-probability.candidate.stan",
+      "reference": "mr02-bernoulli-logit.reference.stan",
+      "candidateSha256": "2e5f15f15c549a68862ed3abab88bd5d72cd5952b16e8c752e3a5266e45b5c2e",
+      "referenceSha256": "06f182edeb7b316e0eeab6eeefd086def10f405508e16ede61a8984662cfdf55",
+      "candidateExitCode": 0,
+      "referenceExitCode": 0,
+      "candidateWarningCount": 0,
+      "referenceWarningCount": 0
+    },
+    {
+      "id": "mr03",
+      "candidate": "mr03-centered.candidate.stan",
+      "reference": "mr03-noncentered.reference.stan",
+      "candidateSha256": "5b7d42ab9565d1d76bfaad5a8d0f9c76c0468336bd0d80a65d6d7cf312034cc6",
+      "referenceSha256": "d29a79cd4b771657ba7500afba85f78065175875f832f502315cfb85a0d73ff4",
+      "candidateExitCode": 0,
+      "referenceExitCode": 0,
+      "candidateWarningCount": 0,
+      "referenceWarningCount": 0
+    },
+    {
+      "id": "mr04",
+      "candidate": "mr04-exposure-raw.candidate.stan",
+      "reference": "mr04-exposure-log.reference.stan",
+      "candidateSha256": "d9ff995ea2f9aa57a584f1b58a8132765817b9fe0342a836bedbb670883e4ff9",
+      "referenceSha256": "d4329bed207a2750cebe047812c881190d5ba8495793858c8af15f4291380559",
+      "candidateExitCode": 0,
+      "referenceExitCode": 0,
+      "candidateWarningCount": 0,
+      "referenceWarningCount": 0
+    },
+    {
+      "id": "mr05",
+      "candidate": "mr05-aggregate-log-lik.candidate.stan",
+      "reference": "mr05-pointwise-log-lik.reference.stan",
+      "candidateSha256": "757ed61fe1293bd091d4e21fcdad35ca94c85c8366038f8f6c22e8e8fdf01d3d",
+      "referenceSha256": "26b9d951f54bfde4b28af202a7ebdf54a794fe5ff9dfb904f7d2fb2d0a20500f",
+      "candidateExitCode": 0,
+      "referenceExitCode": 0,
+      "candidateWarningCount": 0,
+      "referenceWarningCount": 0
+    },
+    {
+      "id": "mr06",
+      "candidate": "wrong-naive-bounded-normal.stan",
+      "reference": "truncated-normal.stan",
+      "candidateSha256": "d177d3afb69ed76525ab683e6200f90cbdaa7dbe221b0ebd8ec0d3da0d9f5e07",
+      "referenceSha256": "85178554a760decaaec6081d55d74ac280c7b63b11342f918c448c116b1b870a",
+      "candidateExitCode": 0,
+      "referenceExitCode": 0,
+      "candidateWarningCount": 0,
+      "referenceWarningCount": 0
+    }
+  ],
+  "limitations": [
+    "全candidateとreferenceのstanc3構文・意味解析成功だけを確認し、構文成功をモデル妥当性の証拠には数えない",
+    "Jacobian、offset、pointwise log_likの判断は数式・生成過程・予測単位のレビューを必要とする",
+    "centeredとnon-centeredの比較はデータ条件ごとの複数chain実行・計算診断をSTAN-009の後続実測として残す",
+    "切断ケース以外の推定差・計算効率・数値極限はまだ実測証拠を取得していない"
+  ]
+}

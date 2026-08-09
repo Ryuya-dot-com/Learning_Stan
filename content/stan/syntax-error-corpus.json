@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-unpublished",
+  "compilerContract": {
+    "compiler": "stanc3",
+    "cmdstanVersion": "2.39.0",
+    "flags": ["--warn-pedantic"]
+  },
+  "rules": [
+    "1つの壊れた例では、学習対象となる主原因を1つだけ残す",
+    "診断文の暗記ではなく、位置情報、期待型、実際の型、利用可能なシグネチャから原因を説明する",
+    "修正版が構文確認を通ることと、統計モデルとして妥当であることを別々に判定する",
+    "動的な次元やデータ値に依存する不整合はstanc3だけでは検出できないため、実行時・モデルレビュー課題へ分離する"
+  ],
+  "cases": [
+    {
+      "id": "se01",
+      "title": "宣言末尾のセミコロン",
+      "layer": "language",
+      "category": "syntax",
+      "lessonPlacement": "l35",
+      "broken": "errors/se01-missing-semicolon.bad.stan",
+      "fixed": "errors/se01-missing-semicolon.fixed.stan",
+      "expectedDiagnosticFragments": ["Syntax error", "Expected \";\" after variable declaration."],
+      "cause": "Nの宣言がセミコロンで閉じられていないため、次のvector宣言を同じ宣言の続きとして解析しようとして停止する",
+      "repair": "int<lower=1> N; として宣言を閉じ、診断位置の直前の行も確認する",
+      "transferPrompt": "parametersブロックのreal宣言で同じ誤りを作り、診断位置と実際の欠落位置がずれる理由を説明する",
+      "successCriterion": "エラー表示行だけを直すのではなく、その直前の未完了宣言を特定できる"
+    },
+    {
+      "id": "se02",
+      "title": "arrayとvectorの代入不一致",
+      "layer": "language",
+      "category": "type-shape",
+      "lessonPlacement": "l35",
+      "broken": "errors/se02-array-vector-assignment.bad.stan",
+      "fixed": "errors/se02-array-vector-assignment.fixed.stan",
+      "expectedDiagnosticFragments": ["Semantic error", "type matching the destination (array[] real)", "Instead found type vector."],
+      "cause": "array[N] realとvector[N]は要素数が同じでも別の型であり、そのまま代入できない",
+      "repair": "後続のベクトル化計算に合わせてコピー先をvector[N]にする。arrayが必要なら要素ごとに明示的に変換する",
+      "transferPrompt": "array[N] intとvector[N]のどちらが二値観測、線形代数、要素別ループに適するかを用途別に選ぶ",
+      "successCriterion": "長さの一致と型の一致を別々に確認し、arrayとvectorを交換可能と説明しない"
+    },
+    {
+      "id": "se03",
+      "title": "matrixとvectorの演算子不一致",
+      "layer": "language",
+      "category": "type-shape",
+      "lessonPlacement": "l35",
+      "broken": "errors/se03-matrix-vector-operation.bad.stan",
+      "fixed": "errors/se03-matrix-vector-operation.fixed.stan",
+      "expectedDiagnosticFragments": ["Semantic error", "Ill-typed arguments supplied to infix operator +"],
+      "cause": "matrixとvectorの加算に対応する演算子シグネチャがなく、線形予測で必要な演算は行列と列ベクトルの乗算である",
+      "repair": "design * coefficientへ変更し、結果がvectorになる演算子シグネチャを選ぶ",
+      "transferPrompt": "row_vector * vector、matrix * vector、vector * row_vectorの結果型を予測して最小例で構文確認する",
+      "successCriterion": "記号だけを置換せず、左辺・右辺・結果の型と線形代数上の意味を説明できる"
+    },
+    {
+      "id": "se04",
+      "title": "実数による添字参照",
+      "layer": "language",
+      "category": "indexing",
+      "lessonPlacement": "l35",
+      "broken": "errors/se04-real-index.bad.stan",
+      "fixed": "errors/se04-real-index.fixed.stan",
+      "expectedDiagnosticFragments": ["Semantic error", "Index must be of type int", "Instead found type real."],
+      "cause": "Stanの単一要素添字にはintが必要だが、chosen_indexがrealとして宣言されている",
+      "repair": "chosen_indexをintとしてdataから受け、1以上N以下の制約でデータ契約も表す",
+      "transferPrompt": "array[N] intの複数添字と1:Nのrangeを使う例を作り、単一添字との型の違いを説明する",
+      "successCriterion": "整数への丸めで隠さず、入力時点で添字の型と範囲を契約できる"
+    },
+    {
+      "id": "se05",
+      "title": "局所変数のスコープ外参照",
+      "layer": "language",
+      "category": "scope",
+      "lessonPlacement": "l35",
+      "broken": "errors/se05-local-scope.bad.stan",
+      "fixed": "errors/se05-local-scope.fixed.stan",
+      "expectedDiagnosticFragments": ["Semantic error", "Identifier \"shifted_y\" not in scope."],
+      "cause": "内側の波括弧で宣言したshifted_yは、その波括弧を閉じた後には参照できない",
+      "repair": "shifted_yを使用する文と同じ外側のmodelスコープで宣言する",
+      "transferPrompt": "model内の局所変数とtransformed parametersで保存される変数を作り、drawに残るかを比較する",
+      "successCriterion": "宣言位置だけでなく、寿命、参照可能範囲、出力への保存有無を区別できる"
+    },
+    {
+      "id": "se06",
+      "title": "modelブロック内の乱数生成",
+      "layer": "computational",
+      "category": "block-permission",
+      "lessonPlacement": "l39",
+      "broken": "errors/se06-rng-in-model.bad.stan",
+      "fixed": "errors/se06-rng-in-model.fixed.stan",
+      "expectedDiagnosticFragments": ["Semantic error", "Random number generators are only allowed", "generated quantities block"],
+      "cause": "modelブロックはtargetへ対数密度を加える場所であり、通常の_rng呼び出しは許可されない",
+      "repair": "尤度はmodelへ残し、事後予測のnormal_rngをgenerated quantitiesへ移す",
+      "transferPrompt": "事前予測をtransformed dataまたはfixed_param用generated quantitiesで生成し、事後予測との実行時期を比較する",
+      "successCriterion": "_rngを尤度定義と呼ばず、許可ブロックと生成されるdrawの意味を説明できる"
+    },
+    {
+      "id": "se07",
+      "title": "ユーザー定義関数のシグネチャ不一致",
+      "layer": "language",
+      "category": "function-signature",
+      "lessonPlacement": "l36",
+      "broken": "errors/se07-user-function-signature.bad.stan",
+      "fixed": "errors/se07-user-function-signature.fixed.stan",
+      "expectedDiagnosticFragments": ["Semantic error", "Ill-typed arguments supplied to function \"add_shift\"", "first argument must be real but got vector"],
+      "cause": "add_shiftはrealを第1引数に取る定義だが、呼び出し側はvectorを渡している",
+      "repair": "vectorを受けてvectorを返すシグネチャへ変更し、rep_vectorでスカラーshiftを同じ長さへ展開する",
+      "transferPrompt": "real版とvector版を別名で定義し、各呼び出しの引数型と戻り値型を表にする",
+      "successCriterion": "関数名だけでなく、引数の順序・型・戻り値を診断のavailable signaturesと照合できる"
+    },
+    {
+      "id": "se08",
+      "title": "Bernoulli観測の型不一致",
+      "layer": "probabilistic",
+      "category": "distribution-signature",
+      "lessonPlacement": "l36",
+      "broken": "errors/se08-distribution-type.bad.stan",
+      "fixed": "errors/se08-distribution-type.fixed.stan",
+      "expectedDiagnosticFragments": ["Semantic error", "Ill-typed arguments supplied to function \"bernoulli\"", "first argument must be array[] int but got vector"],
+      "cause": "Bernoulliの観測値は0または1の離散値なのでarray[] intが必要だが、連続値用のvectorを渡している",
+      "repair": "yをarray[N] int<lower=0, upper=1>としてdata契約を修正する",
+      "transferPrompt": "正規、Bernoulli、Poissonの観測変量について、Stan型、支持範囲、対応する_lpdfまたは_lpmfを整理する",
+      "successCriterion": "分布名だけでなく、観測の支持範囲、Stan型、関数シグネチャを一体として選べる"
+    }
+  ],
+  "knownCompilerBoundary": {
+    "title": "動的な次元不一致は構文確認だけでは保証できない",
+    "example": "matrix[N, K] designとvector[J] coefficientのdesign * coefficientは、KとJが実行時データで異なる場合でもstanc3を通ることがある",
+    "handling": "R側のデータ契約検査、実行時エラー、コンパイルは通る誤モデルのレビューをSTAN-009で扱う"
+  }
+}

@@ -54,6 +54,19 @@ const JP =
 const MONO =
   'ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace';
 
+// レイアウト・質感は index.css で定義し、色と書体だけをここからCSS変数として渡す。
+// これにより、JSXへ視覚指定を増やさずにR/Stan固有の画面設計を育てられる。
+const THEME_CSS_VARS = {
+  ...Object.fromEntries(
+    Object.entries(C).map(([key, value]) => [
+      `--c-${key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`,
+      value,
+    ])
+  ),
+  "--font-jp": JP,
+  "--font-mono": MONO,
+};
+
 const GLOBAL_CSS = `
 @keyframes riseIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .rise { animation: riseIn 0.28s ease-out both; }
@@ -64,4 +77,4 @@ input::placeholder { color: ${C.sub}; opacity: 1; }
 :where(button, a, input, [tabindex]):focus-visible { outline: 3px solid ${C.accentDeep}; outline-offset: 2px; }
 `;
 
-export { C, JP, MONO, GLOBAL_CSS };
+export { C, JP, MONO, THEME_CSS_VARS, GLOBAL_CSS };

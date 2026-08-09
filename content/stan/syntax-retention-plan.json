@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-unpublished",
+  "scheduleStatus": "provisional-pilot-required",
+  "purpose": "Stan構文を直後の再生ではなく、累積想起、未見文脈への転移、一定期間後の再達成として評価する",
+  "assessmentArtifact": "syntax-retention-assessments.json",
+  "facilitatorReference": "retention/facilitator/positive-duration-reference.stan",
+  "validationEvidence": "syntax-retention-validation.json",
+  "runner": "scripts/verify-stan-retention.mjs",
+  "masteryPolicy": {
+    "selfRecordIsMasteryEvidence": false,
+    "immediateAndDelayedAreSeparate": true,
+    "initialSubmissionFrozen": true,
+    "thresholdStatus": "not-fixed-before-pilot",
+    "retryPolicy": "初回提出を保存した後は再挑戦を許可し、初回・修正版・支援内容を別々に記録する",
+    "referencePolicy": "公式リファレンスは利用可、完成コード・過去の解答・facilitatorReferenceは提出固定前に参照不可",
+    "privacyPolicy": "氏名・所属・研究データを収集せず、匿名コードと成果物hashだけを記録する"
+  },
+  "checkpoints": [
+    {
+      "id": "sr37",
+      "after": "l37",
+      "kind": "cumulative-immediate",
+      "schedule": {
+        "trigger": "L38へ進む前",
+        "spacing": "同一セッション実施可",
+        "provisional": true
+      },
+      "revisitUnits": ["g01", "g02", "g03"],
+      "taskIds": ["sr37-01", "sr37-02", "sr37-03"],
+      "requiredEvidence": ["planningNote", "firstStanSource", "firstCompilerResult", "revisedStanSource", "repairExplanation", "assistanceRecord"]
+    },
+    {
+      "id": "sr40",
+      "after": "l40",
+      "kind": "cumulative-spaced",
+      "schedule": {
+        "trigger": "L41へ進む前",
+        "spacing": "L37チェックとは別セッションを推奨",
+        "provisional": true
+      },
+      "revisitUnits": ["g04", "g05", "g06", "g07"],
+      "taskIds": ["sr40-01", "sr40-02", "sr40-03"],
+      "requiredEvidence": ["modelReviewNote", "firstStanSource", "firstCompilerResult", "diagnosticComparison", "revisedStanSource", "assistanceRecord"]
+    },
+    {
+      "id": "sr41d",
+      "after": "l41",
+      "kind": "delayed-transfer",
+      "schedule": {
+        "trigger": "L41修了後",
+        "minimumDays": 7,
+        "maximumDays": 14,
+        "provisional": true,
+        "reconsiderAfter": "最初の適格な初学者3名の保持率・支援量・完遂時間を確認したとき"
+      },
+      "revisitUnits": ["g01", "g02", "g03", "g04", "g05", "g06", "g07", "g08"],
+      "taskIds": ["sr41d-01", "sr41d-02", "sr41d-03", "sr41d-04"],
+      "unseenScenario": {
+        "id": "positive-duration-lognormal",
+        "responseType": "positive-continuous",
+        "distribution": "lognormal",
+        "context": "機器負荷と正の完了時間",
+        "notUsedByCurrentExamples": true
+      },
+      "requiredEvidence": ["preCodePlan", "firstStanSource", "firstCompilerResult", "firstModelReview", "revisedStanSource", "pointwiseLogLikCheck", "posteriorPredictionPlan", "assistanceRecord", "retentionReflection"]
+    }
+  ],
+  "recordSchema": {
+    "requiredFields": ["anonymousCode", "checkpointId", "contentVersion", "startedAt", "submittedAt", "attemptType", "assistanceLevel", "artifactHashes", "compilerExitCode", "reviewFlags", "revisionReason"],
+    "attemptTypes": ["immediate", "spaced", "delayed"],
+    "assistanceLevels": ["none", "official-reference", "neutral-prompt", "conceptual-hint", "code-level-help"],
+    "reviewFlags": ["syntax", "type-shape", "density", "support", "prediction-unit", "geometry", "numerical-stability"],
+    "forbiddenFields": ["name", "email", "institution", "researchData"]
+  },
+  "releaseRequirements": [
+    "全checkpointのparticipant向け課題とfacilitator向け判定基準を分離する",
+    "直後・間隔あり・遅延の結果を上書きせず別記録にする",
+    "適格な初学者3名以上で、初回提出、支援水準、自己修正、未見転移を観察する",
+    "合格閾値と7〜14日の間隔はpilot結果を確認してから固定する",
+    "独立レビューと未解決P0・P1ゼロを確認する"
+  ]
+}

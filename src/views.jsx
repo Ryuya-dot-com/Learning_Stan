@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { C, MONO } from "./theme.js";
 import { isCodey } from "./highlight.js";
 import { seededOrder } from "./shuffle.js";
-import { T, CodeBlock, TriDots, Btn, ResetButton, Feedback } from "./components.jsx";
+import { T, CodeBlock, LearningMark, Btn, ResetButton, Feedback } from "./components.jsx";
 import { LESSONS } from "./data/lessons/index.js";
 import { SECTIONS } from "./data/sections.js";
 import { CHEATS } from "./data/cheats.js";
@@ -485,7 +485,7 @@ function LessonView({
                 : doneLabel
         }
         key={idx}
-        className="rise rounded-2xl bg-white p-5 focus:outline-none sm:p-7"
+        className="lesson-card rise rounded-2xl bg-white p-5 focus:outline-none sm:p-7"
         style={{ border: "1px solid " + C.line, boxShadow: "0 1px 2px rgba(42,39,51,0.04)" }}
       >
         {idx === 0 && resources.length > 0 && (
@@ -742,7 +742,7 @@ function LessonView({
             {solvedCount === total ? (
               <div className="pop">
                 <div className="mb-4 flex justify-center">
-                  <TriDots filled={practiceComplete ? 3 : 2} size={14} />
+                  <LearningMark filled={practiceComplete ? 3 : 2} size={14} />
                 </div>
                 <h2 className="mb-2 text-2xl font-bold" style={{ color: C.ink }}>
                   {lesson.practice && practiceComplete ? `${lesson.title} 実践完了!` : doneLabel}
@@ -768,7 +768,7 @@ function LessonView({
               <div>
                 <div className="mb-4 flex justify-center">
                   {/* クリア数を3点満点に比例配分する。旧実装は 2/3 クリアでも1点だった(監査A13) */}
-                  <TriDots filled={Math.min(2, Math.floor((solvedCount / total) * 3))} size={14} />
+                  <LearningMark filled={Math.min(2, Math.floor((solvedCount / total) * 3))} size={14} />
                 </div>
                 <h2 className="mb-2 text-xl font-bold" style={{ color: C.ink }}>
                   おつかれさまでした
@@ -908,7 +908,7 @@ function FoundationCheck({ lesson, practiceSet, onPractice, onHome, onReviewSetu
       <div role="status" aria-live="polite" className="mt-5">
         {complete ? (
           <div className="pop rounded-2xl p-5 text-center" style={{ background: C.accentSoft, border: `1px solid ${C.accentLine}` }}>
-            <div className="mb-2 flex justify-center"><TriDots filled={3} size={14} /></div>
+            <div className="mb-2 flex justify-center"><LearningMark filled={3} size={14} /></div>
             <h2 className="text-xl font-bold" style={{ color: C.accentDeep }}>公開中のR基礎トラックを修了しました</h2>
             <p className="mt-2 text-sm leading-6" style={{ color: C.accentDeep }}>
               RStudioでコードを実行し、保存して、同じ結果を再現する土台ができました。
@@ -973,9 +973,9 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
   };
 
   return (
-    <div className="rise">
+    <div className="home-view rise">
       <div className="mb-4 flex items-center justify-between pt-1">
-        <TriDots filled={dotsFilled} size={13} />
+        <LearningMark filled={dotsFilled} size={13} />
         <button
           className="inline-flex min-h-11 items-center text-xs font-bold underline"
           style={{ color: C.accentDeep }}
@@ -992,7 +992,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         プログラミング未経験から、研究データをRで読み、整え、再現可能な成果物として保存するところまで進みます。ベイズ統計とStanは今後の公開予定です。
       </p>
 
-      <section aria-labelledby="orientation-title" className="mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
+      <section aria-labelledby="orientation-title" className="surface-card mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
         <h2 id="orientation-title" className="text-base font-bold" style={{ color: C.ink }}>最初に知っておくこと</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
@@ -1009,10 +1009,10 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         </div>
       </section>
 
-      <section aria-labelledby="next-action-title" className="mb-6 rounded-2xl p-5" style={{ background: journey.complete ? C.okSoft : C.accentSoft, border: `1px solid ${journey.complete ? C.okLine : C.accentLine}` }}>
+      <section aria-labelledby="next-action-title" className="action-card mb-6 rounded-2xl p-5" style={{ background: journey.complete ? C.okSoft : C.accentSoft, border: `1px solid ${journey.complete ? C.okLine : C.accentLine}` }}>
         {journey.complete ? (
           <>
-            <div className="mb-2 flex justify-center sm:justify-start"><TriDots filled={3} size={14} /></div>
+            <div className="mb-2 flex justify-center sm:justify-start"><LearningMark filled={3} size={14} /></div>
             <h2 id="next-action-title" className="text-xl font-bold" style={{ color: C.okText }}>公開中のSTEP 1まで修了しました</h2>
             <p className="mt-2 text-sm leading-6" style={{ color: C.okText }}>
               L11〜L16の理解問題と、再実行・成果物の自己確認を完了しました。演習ノートで一連の手順を復習できます。
@@ -1049,7 +1049,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         )}
       </section>
 
-      <section aria-labelledby="progress-title" className="mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
+      <section aria-labelledby="progress-title" className="surface-card mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
         <div className="mb-2 flex items-baseline justify-between">
           <h2 id="progress-title" className="text-sm font-bold" style={{ color: C.ink }}>公開中トラックの進みぐあい</h2>
           <span className="text-xs font-bold" style={{ color: C.sub, fontFamily: MONO }}>
@@ -1081,7 +1081,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
           {JOURNEY_STAGES.map((stage, index) => {
             const status = getStageStatus(stage, progress);
             return (
-              <li key={stage.id} className="flex gap-3 rounded-2xl bg-white p-4" style={{ border: `1px solid ${status === "current" ? C.accentLine : status === "done" ? C.okLine : C.line}` }}>
+              <li key={stage.id} className="journey-card flex gap-3 rounded-2xl bg-white p-4" style={{ border: `1px solid ${status === "current" ? C.accentLine : status === "done" ? C.okLine : C.line}` }}>
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ background: status === "done" ? C.okSoft : status === "current" ? C.accentSoft : C.track, color: status === "done" ? C.okText : status === "current" ? C.accentDeep : C.faint }}>
                   {status === "done" ? "✓" : index + 1}
                 </span>
@@ -1099,7 +1099,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         </ol>
       </section>
 
-      <details className="rounded-2xl bg-white" style={{ border: `1px solid ${C.line}` }}>
+      <details className="surface-card rounded-2xl bg-white" style={{ border: `1px solid ${C.line}` }}>
         <summary className="cursor-pointer p-4 text-sm font-bold" style={{ color: C.accentDeep }}>
           全{LESSONS.length}レッスンを見る
         </summary>
@@ -1216,7 +1216,7 @@ function Sidebar({ progress, currentId, viewName, onOpen, onFoundation, onCheat,
   return (
     <nav
       aria-label="レッスンの目次"
-      className="hidden w-60 shrink-0 lg:block"
+      className="lesson-sidebar hidden w-60 shrink-0 lg:block"
       style={{
         position: "sticky",
         top: 24,
@@ -1231,7 +1231,7 @@ function Sidebar({ progress, currentId, viewName, onOpen, onFoundation, onCheat,
         style={{ color: viewName === "home" ? C.accentDeep : C.ink }}
         aria-current={viewName === "home" ? "page" : undefined}
       >
-        <TriDots filled={3} size={8} />
+        <LearningMark filled={3} size={8} />
         はじめてのRとStan
       </button>
 
@@ -1331,7 +1331,7 @@ function CheatSheet({ onHome }) {
         >
           ← もどる
         </button>
-        <TriDots filled={3} size={10} />
+        <LearningMark filled={3} size={10} />
       </div>
       <h1 tabIndex={-1} className="mb-1 text-2xl font-bold tracking-tight focus:outline-none" style={{ color: C.ink }}>
         R チートシート
@@ -1341,7 +1341,7 @@ function CheatSheet({ onHome }) {
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         {CHEATS.map((sec, i) => (
-          <div key={i} className="rounded-2xl bg-white p-4" style={{ border: "1px solid " + C.line }}>
+          <div key={i} className="surface-card rounded-2xl bg-white p-4" style={{ border: "1px solid " + C.line }}>
             <h2 className="mb-3 text-sm font-bold" style={{ color: C.accent }}>
               {sec.title}
             </h2>

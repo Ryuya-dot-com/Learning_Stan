@@ -17,15 +17,20 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
-  background:var(--paper); color:var(--ink); font-family:var(--jp);
+  background:
+    radial-gradient(circle at 8% 2%, rgba(233,240,250,.9) 0 10rem, transparent 27rem),
+    radial-gradient(circle at 94% 10%, rgba(249,233,235,.65) 0 8rem, transparent 24rem),
+    var(--paper);
+  color:var(--ink); font-family:var(--jp);
   line-height:1.75; -webkit-font-smoothing:antialiased;
 }
-.bar-tri{
+.brand-ribbon{
   height:4px; width:100%;
   background:linear-gradient(90deg,
-    var(--rblue) 0%, var(--rblue) 33.4%,
-    var(--green) 33.4%, var(--green) 66.7%,
-    var(--stanred) 66.7%, var(--stanred) 100%);
+    var(--rblue) 0%, var(--rblue) 46%,
+    var(--green) 46%, var(--green) 51%,
+    var(--stanred) 51%, var(--stanred) 100%);
+  box-shadow:0 1px 0 rgba(42,39,51,.08);
 }
 .wrap{max-width:880px; margin:0 auto; padding:44px 22px 72px}
 
@@ -126,10 +131,17 @@ h1{
 .featured p{color:#B8B2C8; font-size:13.5px}
 .featured .chips code{background:#352E47; color:#D9CFE8}
 .code{margin:16px 0 12px; border:1px solid #3A3350; border-radius:12px; overflow:hidden}
-.codehead{display:flex; align-items:center; gap:6px; background:#1F1A2B; padding:10px 14px 0}
-.cd{width:8px; height:8px; border-radius:50%}
-.cd.b{background:var(--rblue)} .cd.p{background:var(--green)} .cd.r{background:var(--stanred)}
-.codehead span{margin-left:6px; font-family:var(--mono); font-size:10.5px; font-weight:700; color:#8F86A3; letter-spacing:.06em}
+.codehead{
+  display:flex; align-items:center; background:#1F1A2B; padding:9px 14px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.codehead span{
+  display:inline-flex; align-items:center; min-height:24px; padding:2px 10px;
+  border:1px solid #655D78; border-radius:999px;
+  font-family:var(--mono); font-size:10.5px; font-weight:700; color:#B8B2C8; letter-spacing:.06em;
+}
+.codehead .lang-r{border-color:#7DA9DC; color:#B8D5F5}
+.codehead .lang-stan{border-color:#C77E8B; color:#F0BBC5}
 .code pre{
   margin:0; background:#1F1A2B; padding:8px 16px 16px; overflow-x:auto;
   font-family:var(--mono); font-size:12.5px; line-height:1.9; color:#ECEAF2;
@@ -159,9 +171,11 @@ h1{
   margin-top:16px; background:var(--stanred-soft); border:1px solid #EBC7CD;
   border-radius:18px; padding:26px 26px 24px;
 }
-.dots{display:inline-flex; align-items:center; gap:7px}
-.dots i{display:inline-block; width:13px; height:13px; border-radius:50%}
-.dots .b{background:var(--rblue)} .dots .p{background:var(--green)} .dots .r{background:var(--stanred)}
+.track-mark{display:inline-flex; align-items:center; gap:4px}
+.track-mark i{display:inline-block; width:22px; height:7px; border-radius:999px}
+.track-mark .b{background:var(--rblue)}
+.track-mark .p{width:13px; background:var(--green)}
+.track-mark .r{background:var(--stanred)}
 .goal-card h2{margin:12px 0 6px; font-size:21px; color:var(--stanred-deep)}
 .goal-card p{margin:0; font-size:13.5px; color:#6E3540}
 
@@ -210,7 +224,7 @@ html.js .reveal.in{opacity:1; transform:none}
 <script>document.documentElement.classList.add("js");</script>
 </head>
 <body>
-<div class="bar-tri"></div>
+<div class="brand-ribbon" aria-hidden="true"></div>
 <main class="wrap">
 
   <header class="reveal">
@@ -419,7 +433,7 @@ html.js .reveal.in{opacity:1; transform:none}
           <h3>L23 モンテカルロ・シミュレーション</h3>
           <p>「n=20・効果量 d=0.5 の実験、何%有意になる?」——1万回の仮想実験で検定力分析を自作します。この「生成→検定→集計」の型が、ベイズ編の「生成→推定→復元」につながる背骨です。</p>
           <div class="code">
-            <div class="codehead"><i class="cd b" aria-hidden="true"></i><i class="cd p" aria-hidden="true"></i><i class="cd r" aria-hidden="true"></i><span>R</span></div>
+            <div class="codehead"><span class="lang-r">R</span></div>
             <pre>power_sim &lt;- <span class="kw">function</span>(n, d, nsim = <span class="num">10000</span>) {
   hits &lt;- replicate(nsim, {
     a &lt;- rnorm(n)              <span class="com"># 統制群</span>
@@ -548,7 +562,7 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
           <h3>生成過程を対数密度へ翻訳する</h3>
           <p>単回帰を、未知量、事前分布、尤度へ分解します。sampling statementの<code>~</code>は乱数代入ではなく、現在値の対数密度を<code>target</code>へ加える記法として理解します。</p>
           <div class="code">
-            <div class="codehead"><i class="cd b" aria-hidden="true"></i><i class="cd p" aria-hidden="true"></i><i class="cd r" aria-hidden="true"></i><span>Stan</span></div>
+            <div class="codehead"><span class="lang-stan">Stan</span></div>
             <pre><span class="kw">model</span> {
   alpha ~ normal(<span class="num">0</span>, <span class="num">2</span>);        <span class="com">// 事前分布</span>
   beta  ~ normal(<span class="num">0</span>, <span class="num">1</span>);
@@ -656,7 +670,7 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
     <section class="phase reveal" style="--pc:#2A2733; --ps:#EFEBE2;">
       <span class="node" aria-hidden="true"></span>
       <div class="goal-card">
-        <span class="dots" aria-hidden="true"><i class="b"></i><i class="p"></i><i class="r"></i></span>
+        <span class="track-mark" aria-hidden="true"><i class="b"></i><i class="p"></i><i class="r"></i></span>
         <h2>ゴール:自分のデータを、ベイズで語れるように。</h2>
         <p>どの回も「生成 → 推定 → 復元」の一本線。brmsで意味をつかみ、Stanで中身を開く二段構えです。アプリ(1画面1トピック・即時フィードバック)で読んで理解し、STEP 1〜6に1本ずつ用意するQuartoノートブック(計6本)の研究データ形式の演習で手を動かして仕上げます。</p>
       </div>
@@ -665,7 +679,7 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
   </div>
 
   <footer class="foot reveal">
-    <span class="dots" aria-hidden="true"><i class="b"></i><i class="p"></i><i class="r"></i></span>
+    <span class="track-mark" aria-hidden="true"><i class="b"></i><i class="p"></i><i class="r"></i></span>
     <p>はじめてのRとStan — 研究室のためのベイズ統計入門</p>
     <p class="provenance">記載のパッケージ・関数・既定値は、2026-08-01に公式ドキュメント・CRANで実在確認済み(R 4.6.1 / Stan 2.39.0 / brms 2.23.0 / bayestestR 0.18.1 / sjPlot 2.9.0 時点)。コード例の実行結果は実測値です。典拠の一覧は <a href="https://github.com/Ryuya-dot-com/Learning_Stan/blob/main/SOURCES.md">SOURCES.md</a> にまとめています。</p>
     <p class="backlink" style="margin-top:8px"><a href="./">← アプリにもどる</a></p>

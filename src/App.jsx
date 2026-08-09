@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { C, JP, GLOBAL_CSS } from "./theme.js";
+import { C, THEME_CSS_VARS, GLOBAL_CSS } from "./theme.js";
 import { LessonView, FoundationCheck, Home, CheatSheet, Sidebar } from "./views.jsx";
 import { LESSONS } from "./data/lessons/index.js";
 import {
@@ -269,19 +269,10 @@ export default function RStanLearningApp() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: C.paper, fontFamily: JP, color: C.ink }}>
+    <div className="app-shell min-h-screen" style={THEME_CSS_VARS}>
       <style>{GLOBAL_CSS}</style>
-      <div
-        className="h-1 w-full"
-        style={{
-          background:
-            "linear-gradient(90deg, " +
-            C.accent + " 0%, " + C.accent + " 33.4%, " +
-            C.ok + " 33.4%, " + C.ok + " 66.7%, " +
-            C.stan + " 66.7%, " + C.stan + " 100%)",
-        }}
-      />
-      <div className="mx-auto flex w-full max-w-5xl justify-center gap-10 px-4 py-6 sm:py-10">
+      <div className="brand-ribbon" aria-hidden="true" />
+      <div className="app-layout mx-auto flex w-full max-w-5xl justify-center gap-10 px-4 py-6 sm:py-10">
         <Sidebar
           progress={progress}
           viewName={view.name}
@@ -294,7 +285,7 @@ export default function RStanLearningApp() {
         <main
           ref={mainRef}
           tabIndex={-1}
-          className="w-full min-w-0 max-w-2xl focus:outline-none"
+          className="content-column w-full min-w-0 max-w-2xl focus:outline-none"
         >
           {body}
         </main>

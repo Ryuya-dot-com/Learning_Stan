@@ -50,13 +50,17 @@ function CodeBlock({ code, output, error, lang }) {
   // "Stan" で Stan 用の色分け、それ以外（"ターミナル" など）はキーワード着色なし
   const lines = code.split("\n");
   return (
-    <div className="my-4 overflow-hidden rounded-xl" style={{ border: "1px solid " + C.line }}>
-      <div className="flex items-center gap-1.5 px-4 pt-3" style={{ background: C.night }}>
-        <span className="h-2 w-2 rounded-full" style={{ background: C.accent }} />
-        <span className="h-2 w-2 rounded-full" style={{ background: C.ok }} />
-        <span className="h-2 w-2 rounded-full" style={{ background: C.stan }} />
-        <span className="ml-2 text-xs font-semibold tracking-wide" style={{ color: C.dim }}>
+    <div className="code-shell my-4 overflow-hidden rounded-xl" style={{ border: "1px solid " + C.line }}>
+      <div className="code-toolbar flex items-center px-4 py-2.5" style={{ background: C.night }}>
+        <span
+          className="code-language text-xs font-bold tracking-wide"
+          data-language={(lang || "R").toLowerCase()}
+          style={{ color: C.dim }}
+        >
           {lang || "R"}
+        </span>
+        <span className="code-caption ml-auto text-[10px] font-semibold tracking-widest" style={{ color: C.dim }}>
+          SOURCE
         </span>
       </div>
       <pre
@@ -95,20 +99,21 @@ function CodeBlock({ code, output, error, lang }) {
   );
 }
 
-// R/Stanの3色ドット(進捗のシグネチャ)
-function TriDots({ filled = 3, size = 12 }) {
+// R → 検証 → Stan の学習経路を表すセグメントマーク。
+// Julia版由来の3色ドットを、教材固有の「つながる工程」へ置き換える。
+function LearningMark({ filled = 3, size = 12 }) {
   const cols = [C.accent, C.ok, C.stan];
   return (
-    <span className="inline-flex items-center" style={{ gap: size / 2 }}>
+    <span className="learning-mark inline-flex items-center" aria-hidden="true" style={{ gap: Math.max(2, size / 4) }}>
       {cols.map((col, i) => (
         <span
           key={i}
-          className="rounded-full"
+          className="learning-mark__segment rounded-full"
           style={{
-            width: size,
-            height: size,
+            width: i === 1 ? size : size * 1.75,
+            height: Math.max(4, size / 2),
             background: i < filled ? col : "transparent",
-            border: "2px solid " + col,
+            border: "1.5px solid " + col,
             opacity: i < filled ? 1 : 0.4,
             transition: "background 0.3s, opacity 0.3s",
           }}
@@ -120,7 +125,7 @@ function TriDots({ filled = 3, size = 12 }) {
 
 function Btn({ kind = "primary", className = "", style = {}, ...props }) {
   const base =
-    "inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold transition-opacity hover:opacity-85 active:opacity-70 disabled:cursor-not-allowed disabled:opacity-40";
+    "ui-button inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-40";
   const kinds = {
     primary: { background: C.accent, color: "#FFFFFF" },
     ghost: { background: "transparent", color: C.accent, border: "1.5px solid " + C.accent },
@@ -211,4 +216,4 @@ function Feedback({ status, why, hint, showHint, onHint }) {
     </div>
   );
 }
-export { T, CodeBlock, TriDots, Btn, ResetButton, Feedback };
+export { T, CodeBlock, LearningMark, Btn, ResetButton, Feedback };
