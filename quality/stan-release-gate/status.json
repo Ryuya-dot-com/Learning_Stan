@@ -12,6 +12,23 @@
     "decision": "BLOCKED",
     "artifact": "quality/foundation-gate/status.json"
   },
+  "staticVerification": {
+    "status": "NOT RUN",
+    "commit": null,
+    "commands": [],
+    "artifact": null
+  },
+  "cleanCi": {
+    "status": "NOT RUN",
+    "commit": null,
+    "runUrl": null,
+    "event": null,
+    "jobs": {
+      "build": "NOT RUN",
+      "r-verify": "NOT RUN",
+      "stan-verify": "NOT RUN"
+    }
+  },
   "runtimeComparison": {
     "weakInformation": {
       "status": "PASS",

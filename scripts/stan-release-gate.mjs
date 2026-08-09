@@ -13,12 +13,20 @@ export const REQUIRED_REVIEW_SCOPES = [
   "learner-material",
 ];
 
+export const REQUIRED_STAN_STATIC_COMMANDS = [
+  "npm test",
+  "npm run test:stan-content",
+];
+
+export const REQUIRED_STAN_CI_JOBS = ["build", "r-verify", "stan-verify"];
+
 const DECISIONS = new Set(["PASS", "FAIL", "BLOCKED"]);
 const EVIDENCE_STATES = new Set(["NOT RUN", "PASS", "FAIL", "BLOCKED"]);
 const RUNTIME_STATES = new Set(["NOT RUN", "PASS", "FAIL", "BLOCKED"]);
 const ISSUE_SEVERITIES = new Set(["P0", "P1", "P2", "P3"]);
 const ISSUE_STATES = new Set(["OPEN", "CLOSED"]);
 const AUDIT_STATES = new Set(["NOT RUN", "PASS", "FAIL"]);
+const CI_EVENTS = new Set(["pull_request", "push", "workflow_dispatch"]);
 
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -43,6 +51,28 @@ function hasFinalTarget(status) {
 
 function evidenceById(status, id) {
   return (status?.evidence || []).find((item) => item?.id === id);
+}
+
+function matchesTargetCommit(status, commit) {
+  return /^[0-9a-f]{40}$/.test(commit || "") && commit === status?.target?.commit;
+}
+
+function hasStaticVerification(status) {
+  const verification = status?.staticVerification;
+  return verification?.status === "PASS" &&
+    matchesTargetCommit(status, verification?.commit) &&
+    hasText(verification?.artifact) &&
+    Array.isArray(verification?.commands) &&
+    REQUIRED_STAN_STATIC_COMMANDS.every((command) => verification.commands.includes(command));
+}
+
+function hasCleanCi(status) {
+  const cleanCi = status?.cleanCi;
+  return cleanCi?.status === "PASS" &&
+    matchesTargetCommit(status, cleanCi?.commit) &&
+    /^https:\/\/github\.com\/[^/]+\/[^/]+\/actions\/runs\/\d+$/.test(cleanCi?.runUrl || "") &&
+    CI_EVENTS.has(cleanCi?.event) &&
+    REQUIRED_STAN_CI_JOBS.every((job) => cleanCi?.jobs?.[job] === "PASS");
 }
 
 function hasFoundationPass(status) {
@@ -181,6 +211,8 @@ export function deriveStanReleaseDecision(status) {
     allEvidencePasses &&
     hasFinalTarget(status) &&
     hasFoundationPass(status) &&
+    hasStaticVerification(status) &&
+    hasCleanCi(status) &&
     hasExistingRuntimeRevalidation(status) &&
     hasRuntimeComparison(status) &&
     hasIndependentReview(status) &&
@@ -192,6 +224,63 @@ export function deriveStanReleaseDecision(status) {
   ) return "PASS";
 
   return "BLOCKED";
+}
+
+function validateStaticVerification(status, errors) {
+  const verification = status.staticVerification;
+  if (!isRecord(verification) || !RUNTIME_STATES.has(verification?.status)) {
+    errors.push("staticVerification.statusが不正です");
+    return;
+  }
+  if (verification.commit !== null && !/^[0-9a-f]{40}$/.test(verification.commit || "")) {
+    errors.push("staticVerification.commitは40桁SHAまたはnullです");
+  }
+  if (!Array.isArray(verification.commands) || verification.commands.some((command) => !hasText(command))) {
+    errors.push("staticVerification.commandsは文字列配列である必要があります");
+  } else if (new Set(verification.commands).size !== verification.commands.length) {
+    errors.push("staticVerification.commandsが重複しています");
+  }
+  if (verification.artifact !== null && !hasText(verification.artifact)) {
+    errors.push("staticVerification.artifactはnullまたは文字列です");
+  }
+  if (
+    verification.status === "PASS" || evidenceById(status, "SRG02")?.status === "PASS"
+  ) {
+    if (!hasStaticVerification(status)) {
+      errors.push("SRG02のPASSには対象commitと一致する必須静的検証コマンドと証拠リンクが必要です");
+    }
+  }
+}
+
+function validateCleanCi(status, errors) {
+  const cleanCi = status.cleanCi;
+  if (!isRecord(cleanCi) || !RUNTIME_STATES.has(cleanCi?.status)) {
+    errors.push("cleanCi.statusが不正です");
+    return;
+  }
+  if (cleanCi.commit !== null && !/^[0-9a-f]{40}$/.test(cleanCi.commit || "")) {
+    errors.push("cleanCi.commitは40桁SHAまたはnullです");
+  }
+  if (cleanCi.runUrl !== null && !hasText(cleanCi.runUrl)) {
+    errors.push("cleanCi.runUrlはnullまたは文字列です");
+  }
+  if (cleanCi.event !== null && !CI_EVENTS.has(cleanCi.event)) {
+    errors.push("cleanCi.eventが不正です");
+  }
+  if (!isRecord(cleanCi.jobs)) {
+    errors.push("cleanCi.jobsが必要です");
+  } else {
+    for (const job of REQUIRED_STAN_CI_JOBS) {
+      if (!RUNTIME_STATES.has(cleanCi.jobs[job])) {
+        errors.push(`cleanCi.jobs.${job}が不正です`);
+      }
+    }
+  }
+  if (cleanCi.status === "PASS" || evidenceById(status, "SRG03")?.status === "PASS") {
+    if (!hasCleanCi(status)) {
+      errors.push("SRG03のPASSには対象commitと一致するGitHub Actions runとNode・R・Stan各jobの成功が必要です");
+    }
+  }
 }
 
 function validateEvidence(status, errors) {
@@ -471,6 +560,8 @@ export function validateStanReleaseStatus(status) {
     errors.push("SRG01のPASSにはFoundation GateのPASSと証拠リンクが必要です");
   }
 
+  validateStaticVerification(status, errors);
+  validateCleanCi(status, errors);
   validateRuntimeComparison(status, errors);
   validateExistingRuntimeRevalidation(status, errors);
   validateIndependentReview(status, errors);
@@ -490,6 +581,8 @@ export function validateStanReleaseStatus(status) {
   if (status.decision === "PASS") {
     if (!hasFinalTarget(status)) errors.push("PASSには40桁commit SHAとHTTPS URLが必要です");
     if (!hasFoundationPass(status)) errors.push("PASSにはFoundation GateのPASSが必要です");
+    if (!hasStaticVerification(status)) errors.push("PASSには対象commitのStan静的検証が必要です");
+    if (!hasCleanCi(status)) errors.push("PASSには対象commitのクリーンCIが必要です");
     if (!hasExistingRuntimeRevalidation(status)) errors.push("PASSには既存runtime証拠の再検証が必要です");
     if (!hasRuntimeComparison(status)) errors.push("PASSにはL40の弱情報・強情報runtime比較が必要です");
     if (!hasIndependentReview(status)) errors.push("PASSには独立レビューが必要です");
