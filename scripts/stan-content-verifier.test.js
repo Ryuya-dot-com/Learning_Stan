@@ -10,6 +10,8 @@ import {
   validateLinkComparisonLab,
   validateManuscript,
   validateModelReviewCorpus,
+  validateReparameterizationEvidence,
+  validateReparameterizationRunner,
   validateRuntimeEvidence,
   validateScenarioEvidence,
   validateScenarioManuscript,
@@ -225,6 +227,65 @@ describe("Stan教材パック", () => {
         content.runnerSource
       )
     ).toContain("Stanコードが実行証拠取得後に変更されています");
+  });
+
+  it("L40比較runnerから全反復診断の保存を削ると検出する", () => {
+    const broken = content.reparameterizationRunner.replace(
+      "lapply(performance_results, `[[`, \"diagnostics\")",
+      "lapply(primary_results, `[[`, \"diagnostics\")"
+    );
+    expect(validateReparameterizationRunner(broken)).toContain(
+      "L40比較が全性能反復の診断を保存していません"
+    );
+  });
+
+  it("L40比較実行後にrunnerが変わると証拠を無効化する", () => {
+    const sources = {
+      "mr03-centered.candidate.stan": content.modelReviewSources[
+        "model-review/mr03-centered.candidate.stan"
+      ],
+      "mr03-noncentered.reference.stan": content.modelReviewSources[
+        "model-review/mr03-noncentered.reference.stan"
+      ],
+      "run-reparameterization-comparison.R": `${content.reparameterizationRunner}\n# changed`,
+    };
+    expect(validateReparameterizationEvidence(content.reparameterizationEvidence, sources)).toContain(
+      "run-reparameterization-comparison.RがL40再パラメータ化実行証拠取得後に変更されています"
+    );
+  });
+
+  it("L40の弱情報non-centeredへdivergenceを混入すると検出する", () => {
+    const broken = structuredClone(content.reparameterizationEvidence);
+    broken.performance.weak.noncentered.divergentTotal = 1;
+    const sources = {
+      "mr03-centered.candidate.stan": content.modelReviewSources[
+        "model-review/mr03-centered.candidate.stan"
+      ],
+      "mr03-noncentered.reference.stan": content.modelReviewSources[
+        "model-review/mr03-noncentered.reference.stan"
+      ],
+      "run-reparameterization-comparison.R": content.reparameterizationRunner,
+    };
+    expect(validateReparameterizationEvidence(broken, sources)).toContain(
+      "L40弱情報実測がcenteredの幾何問題とnon-centeredの修復を示していません"
+    );
+  });
+
+  it("L40の事後分布同値性を許容幅外へ変えると検出する", () => {
+    const broken = structuredClone(content.reparameterizationEvidence);
+    broken.posteriorEquivalence.maximumAbsoluteMcseZ = 4.1;
+    const sources = {
+      "mr03-centered.candidate.stan": content.modelReviewSources[
+        "model-review/mr03-centered.candidate.stan"
+      ],
+      "mr03-noncentered.reference.stan": content.modelReviewSources[
+        "model-review/mr03-noncentered.reference.stan"
+      ],
+      "run-reparameterization-comparison.R": content.reparameterizationRunner,
+    };
+    expect(validateReparameterizationEvidence(broken, sources)).toContain(
+      "L40のモデル尺度における事後分布同値性証拠が固定基準を満たしません"
+    );
   });
 
   it("白紙再現を欠いた文法単元を検出する", () => {

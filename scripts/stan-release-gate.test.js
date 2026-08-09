@@ -105,13 +105,13 @@ describe("Stan Release Gateの機械判定", () => {
     expect(deriveStanReleaseDecision(current)).toBe("BLOCKED");
   });
 
-  it("証拠なしのPASS宣言を拒否する", () => {
+  it("残る付帯証拠なしのPASS宣言を拒否する", () => {
     const dishonest = structuredClone(current);
     dishonest.decision = "PASS";
     const errors = validateStanReleaseStatus(dishonest).join("\n");
     expect(errors).toContain("decisionはBLOCKED");
     expect(errors).toContain("40桁commit SHA");
-    expect(errors).toContain("L40の弱情報・強情報runtime比較");
+    expect(errors).toContain("独立レビュー");
     expect(errors).toContain("初学者観察3件以上");
     expect(errors).toContain("保持記録3件以上");
   });
@@ -228,7 +228,7 @@ describe("Stan Release Gateの機械判定", () => {
     const report = spawnSync(process.execPath, [scriptPath, statusPath], { encoding: "utf8" });
     expect(report.status).toBe(0);
     expect(report.stdout).toContain("Stan Release Gate: BLOCKED");
-    expect(report.stdout).toContain("PASS 0/10");
+    expect(report.stdout).toContain("PASS 1/10");
     expect(report.stdout).toContain("learners: 0/3");
     expect(report.stdout).toContain("delayed retention: 0/3");
 

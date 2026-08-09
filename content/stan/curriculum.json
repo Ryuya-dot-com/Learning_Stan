@@ -171,6 +171,22 @@
       "evidence": "link-comparison-validation.json",
       "artifactCount": 13,
       "outcome": "線形予測子を応答尺度へ戻し、比較対象・観測単位をそろえてからPSIS-LOO、Pareto k、ELPD差、不確実性、stackingを解釈できる"
+    },
+    {
+      "id": "stan-case-reparameterization-01",
+      "status": "draft-unpublished",
+      "title": "群情報量で変わる階層モデルの幾何――中心化と非中心化を実測で選ぶ",
+      "manuscript": "lessons/l40-reparameterization-geometry.md",
+      "runner": "examples/run-reparameterization-comparison.R",
+      "prerequisiteUnits": ["g06"],
+      "lessonMap": ["l38", "l40", "l41"],
+      "models": [
+        "model-review/mr03-centered.candidate.stan",
+        "model-review/mr03-noncentered.reference.stan"
+      ],
+      "evidence": "reparameterization-validation.json",
+      "artifactCount": 12,
+      "outcome": "固定した弱情報・強情報データで同じ生成モデルの中心化・非中心化表現を4 chain・3反復比較し、診断、MCSE、ESS/sec、モデル尺度の事後分布同値性から表現を選べる"
     }
   ],
   "lessons": [

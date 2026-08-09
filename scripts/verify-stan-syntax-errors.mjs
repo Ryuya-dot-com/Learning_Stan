@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { accessSync, constants, existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
@@ -35,13 +35,25 @@ function argumentValue(name) {
 
 function findStanc() {
   const explicit = argumentValue("--stanc") || process.env.LEARNING_STAN_STANC;
+  const executable = process.platform === "win32" ? "stanc.exe" : "stanc";
+  const bundled = process.platform === "win32"
+    ? "stanc.exe"
+    : process.platform === "darwin" ? "mac-stanc" : "linux-stanc";
   const candidates = [
     explicit,
-    resolve(root, ".codex-cmdstan", "cmdstan-2.39.0", "bin", "stanc.exe"),
-    resolve(root, ".codex-cmdstan", "cmdstan-2.39.0", "bin", "linux-stanc"),
-    resolve(root, ".codex-cmdstan", "cmdstan-2.39.0", "bin", "mac-stanc"),
+    resolve(homedir(), ".cmdstan", "cmdstan-2.39.0", "bin", executable),
+    resolve(root, ".codex-cmdstan", "cmdstan-2.39.0", "bin", executable),
+    resolve(root, ".codex-cmdstan", "cmdstan-2.39.0", "bin", bundled),
   ].filter(Boolean);
-  return candidates.find((candidate) => existsSync(candidate)) || null;
+  return candidates.find((candidate) => {
+    if (!existsSync(candidate)) return false;
+    try {
+      accessSync(candidate, constants.X_OK);
+      return true;
+    } catch {
+      return false;
+    }
+  }) || null;
 }
 
 function runStanc(stanc, flags, sourcePath, outputPath) {

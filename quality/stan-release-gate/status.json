@@ -14,34 +14,34 @@
   },
   "runtimeComparison": {
     "weakInformation": {
-      "status": "BLOCKED",
-      "scenarioId": null,
-      "artifact": null
+      "status": "PASS",
+      "scenarioId": "weak-groups-v1",
+      "artifact": "content/stan/reparameterization-validation.json"
     },
     "strongInformation": {
-      "status": "BLOCKED",
-      "scenarioId": null,
-      "artifact": null
+      "status": "PASS",
+      "scenarioId": "strong-groups-v1",
+      "artifact": "content/stan/reparameterization-validation.json"
     },
     "sourceHashes": {
-      "centered": null,
-      "noncentered": null
+      "centered": "5b7d42ab9565d1d76bfaad5a8d0f9c76c0468336bd0d80a65d6d7cf312034cc6",
+      "noncentered": "d29a79cd4b771657ba7500afba85f78065175875f832f502315cfb85a0d73ff4"
     },
     "environment": {
-      "rVersion": null,
-      "cmdstanrVersion": null,
-      "cmdstanVersion": null
+      "rVersion": "4.6.1",
+      "cmdstanrVersion": "0.9.0",
+      "cmdstanVersion": "2.39.0"
     },
     "diagnostics": {
-      "chains": 0,
-      "divergenceChecked": false,
-      "treedepthChecked": false,
-      "ebfmiChecked": false,
-      "rhatChecked": false,
-      "essChecked": false,
-      "mcseChecked": false,
-      "timingChecked": false,
-      "posteriorEquivalenceChecked": false
+      "chains": 4,
+      "divergenceChecked": true,
+      "treedepthChecked": true,
+      "ebfmiChecked": true,
+      "rhatChecked": true,
+      "essChecked": true,
+      "mcseChecked": true,
+      "timingChecked": true,
+      "posteriorEquivalenceChecked": true
     }
   },
   "independentReview": {
@@ -97,9 +97,13 @@
     },
     {
       "id": "SRG05",
-      "status": "BLOCKED",
-      "artifacts": [],
-      "note": "L40のcentered / non-centeredを弱い群情報と強い群情報で4 chain実測するCmdStan環境が必要"
+      "status": "PASS",
+      "artifacts": [
+        "content/stan/reparameterization-validation.json",
+        "content/stan/examples/run-reparameterization-comparison.R",
+        "scripts/verify-stan-reparameterization-runtime.R"
+      ],
+      "note": "固定した弱・強情報の両条件でcentered / non-centeredを各4 chain・3反復実行し、全chain診断、ESS/sec、モデル尺度の事後同値性、環境、source hashを保存・再検証した"
     },
     {
       "id": "SRG06",

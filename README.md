@@ -84,6 +84,8 @@ npm run test:stan-distributions  # 正規・Beta・事前予測・切断のPNG�
 npm run test:stan-links  # logit・probit・cloglog・Poisson offsetのPNGと数値基準を検査
 npm run test:stan-scenario-runtime  # 切断ケース3モデルを実行し、真値回収・誤答のずれ・診断・8成果物を検査
 npm run test:stan-model-comparison-runtime  # 2つのlogitモデルを実行し、LOO・Pareto k・stacking・13成果物を検査
+npm run run:stan-reparameterization  # L40の弱・強情報でcentered / non-centeredを各4 chain・3反復実行
+npm run test:stan-reparameterization-runtime  # L40の全chain診断・ESS/sec・事後同値性・12成果物を再検査
 npm run gate:stan-release:status       # Stan公開証拠10項目を検証（現在はBLOCKED）
 npm run gate:stan-release:require-pass # 10項目と付帯条件が揃うまで公開workflowを停止
 npm run gate:status        # Foundation Gateの現在状態を表示
