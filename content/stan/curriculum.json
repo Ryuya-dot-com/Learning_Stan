@@ -5,7 +5,7 @@
   "releasePolicy": "Foundation Gate通過後に、前段階の評価結果を反映して1レッスンずつ公開する",
   "lessonDelivery": {
     "status": "draft-unpublished",
-    "authoredLessonIds": ["l34", "l35", "l36", "l37"],
+    "authoredLessonIds": ["l34", "l35", "l36", "l37", "l38"],
     "assessmentArtifact": "foundation-assessments.json",
     "requiredSections": [
       "このレッスンのゴール",
@@ -309,14 +309,33 @@
     {
       "id": "l38",
       "title": "推定値より先に診断を読む",
+      "manuscript": "lessons/l38-diagnostics-before-estimates.md",
       "prerequisites": ["l37"],
-      "outcome": "R-hat、ESS、MCSE、divergence、treedepth、E-BFMIを確認し、推定結果を解釈してよいか判断できる",
+      "outcome": "HMC診断、chain間整合性、有効情報量、Monte Carlo精度を順に確認し、一般推奨線と研究上必要な精度を分けて、推定値の解釈を続けるか止めるか判断できる",
+      "outcomeDimensions": ["diagnostic-order", "convergence-mixing", "monte-carlo-precision", "hmc-geometry", "stop-interpretation", "transfer"],
+      "assessmentIds": [
+        "stan-l38-q1-divergence-priority",
+        "stan-l38-q2-diagnostic-scope",
+        "stan-l38-q3-mcse-decision",
+        "stan-l38-q4-treedepth-severity",
+        "stan-l38-q5-transfer-valid-wrong"
+      ],
       "concepts": ["R-hat", "ESS", "MCSE", "divergence", "treedepth", "E-BFMI"],
       "directEvidence": [
         {
-          "artifact": "診断判定メモ",
-          "method": "case-analysis",
-          "criterion": "警告を列挙するだけでなく、解釈を止める条件と次に調べるモデル箇所を説明する"
+          "artifact": "単回帰の診断判定表",
+          "method": "constructed-response",
+          "criterion": "divergence・treedepth・E-BFMI、R-hat、bulk・tail ESS、報告量のMCSEを抽出し、一般推奨線と必要精度を分ける"
+        },
+        {
+          "artifact": "問題runの診断デバッグメモ",
+          "method": "debugging-task",
+          "criterion": "良好なR-hat・ESSでdivergenceを相殺せず、解釈停止、次の調査、単一変更、再実行を記録する"
+        },
+        {
+          "artifact": "計算とモデル妥当性の転移レビュー",
+          "method": "transfer-task",
+          "criterion": "計算診断が良い誤指定モデルについて、target探索と観測過程の正しさを分け、予測検査へ送る問いを示す"
         }
       ]
     },
@@ -382,6 +401,10 @@
     "https://mc-stan.org/cmdstanr/articles/cmdstanr.html",
     "https://mc-stan.org/cmdstanr/reference/model-method-check_syntax.html",
     "https://mc-stan.org/cmdstanr/reference/model-method-compile.html",
-    "https://mc-stan.org/docs/2_39/cmdstan-guide/diagnose_utility.html"
+    "https://mc-stan.org/docs/2_39/cmdstan-guide/diagnose_utility.html",
+    "https://mc-stan.org/docs/reference-manual/analysis.html",
+    "https://mc-stan.org/docs/cmdstan-guide/diagnose_utility.html",
+    "https://mc-stan.org/cmdstanr/reference/fit-method-summary.html",
+    "https://mc-stan.org/posterior/reference/diagnostics.html"
   ]
 }

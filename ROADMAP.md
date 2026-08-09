@@ -451,11 +451,21 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 | 32 | EDU-011 | L1–L16の段階的反復練習 | UX-PATH-001, EDU-003 | 実装済み・対象者観察待ち | Codex / 実施者 | 各レッスンで、まねる→1か所変える→例を閉じて想起→別文脈へ転移の4段階を順に解除。自己記録を理解・実践の証拠と分離し、schema v1・v2からv3へ進捗を移行 |
 | 33 | STAN-005 | Stan分布文法スパイラルと切断ケース | STAN-001, STAN-003 | 非公開実行検証済み・独立レビュー待ち | Codex / レビュー者 | ブロック、分布接尾辞、target、事前予測、ハイパーパラメータ、切断・打ち切りの6単元24課題。採用範囲のある測定器で正答・誤答3モデルを実行し、数式、Stan 2.39、R乱数、7枚のPNG、理論モーメント、8成果物を同期検査 |
 | 34 | STAN-006 | リンク関数とPSIS-LOOモデル比較 | STAN-003, STAN-005 | 非公開実行検証済み・独立レビュー待ち | Codex / レビュー者 | logit・probit・cloglog・Poisson-log、offset、係数尺度、比較可能性、pointwise log_lik、ELPD差、Pareto k、stackingの2単元8課題。線形・二次logitを4 chainで実行し、13成果物とSHA-256を同期検査 |
-| 35 | STAN-007 | Stan Syntax Spine三層カバレッジと配置設計 | D-012, STAN-001, STAN-005, STAN-006 | 正本化・L34–L37受講用原稿実装、L38以降の拡張待ち | Codex / レビュー者 | 言語・確率モデル・計算の三層、STEP 5〜L41の配置、6接触、3回の累積・遅延評価、6公開ゲートを`curriculum.json`と静的検証で固定。L34–L37は独立原稿4本・理解問題20問・目標次元・直接評価まで同期 |
+| 35 | STAN-007 | Stan Syntax Spine三層カバレッジと配置設計 | D-012, STAN-001, STAN-005, STAN-006 | 正本化・L34–L38受講用原稿実装、L39以降の拡張待ち | Codex / レビュー者 | 言語・確率モデル・計算の三層、STEP 5〜L41の配置、6接触、3回の累積・遅延評価、6公開ゲートを`curriculum.json`と静的検証で固定。L34–L38は独立原稿5本・理解問題25問・目標次元・直接評価まで同期 |
 | 36 | STAN-008 | 型・次元・ブロック・関数のエラーコーパス | STAN-007 | 非公開コア実装・独立レビュー / CI待ち | Codex / Stan経験者 | セミコロン、array / vector、matrix / vector演算、添字型、スコープ、`_rng`許可ブロック、関数シグネチャ、Bernoulli観測型の壊れた例／修正版8組。固定版stanc3 2.39.0で失敗8・成功8、診断断片、16ソースSHA-256、転移課題、動的次元の検出限界を同期検査 |
 | 37 | STAN-009 | コンパイル成功後のモデルレビューと計算文法 | STAN-007, STAN-008 | 非公開コア実装・切断以外の実測 / 独立レビュー待ち | Codex / 統計レビュー者 | Jacobian、Bernoulli-logit数値安定性、centered / non-centered、Poisson offset、pointwise log_lik、切断正規化のcandidate / reference 6組。全12ソースがstanc3 2.39.0を通ること、意味差、pedantic警告数、SHA-256を固定し、reject・prefer・context-dependentを分離。切断は複数chain実測済み |
 | 38 | STAN-010 | 累積復習・遅延想起・未見転移 | STAN-007, STAN-009 | 非公開コア実装・pilot / 対象者観察待ち | Codex / 実施者 | L37後・L40後・L41後の3地点、10課題、6評価次元。初回／修正版／支援を分離し、L41後7〜14日の未見lognormal転移、facilitator参照モデル、匿名記録schema、pilot前は合格閾値未固定を構造検証。保持の実測は未実施 |
 | 39 | OBS-005 | Stan構文初心者観察ゲート | STAN-008, STAN-009, STAN-010, M7 | 未着手 | 実施者 / 独立レビュー者 | 適格な初学者3名以上について、公式資料利用、初回エラー、支援水準、自己修正、正答コード、正しく動く誤モデルの発見、遅延転移を匿名記録し、未解決P0/P1ゼロで判定 |
+
+### 2026-08-09 L38受講用原稿
+
+- 推定値の解釈前に、対象run、divergence・E-BFMI、最大treedepth、R-hat、bulk・tail ESS、報告量のMCSEを確認する判断順序を固定した
+- `$diagnostic_summary()`が返すchain別HMC診断と、`$summary()`・`posterior::mcse_quantile()`が返すparameter別診断を分離した
+- divergenceは良好なR-hat・ESSで相殺せず実質的解釈を停止する一方、最大treedepth到達は主に効率問題として重大度と次の行動を分けた
+- `R-hat < 1.01`、bulk・tail ESSの`100 × chain数`、E-BFMI 0.30という一般確認線を、研究目的に応じたMCSEの必要精度と区別した
+- 保存済み単回帰の実測診断を教材内で判定しつつ、過去の証拠に未保存のMCSEを推測して追加しない証拠境界を明記した
+- 計算診断が良い切断正規化なしモデルを反例に、指定した`target`の探索と観測モデルの妥当性を分け、L39の事後予測へ接続した
+- 5問の理解問題と3つの直接評価を追加し、原稿・カリキュラム・評価次元・必須説明の同期検査をL34–L38へ拡張した
 
 ### 2026-08-09 L37受講用原稿
 

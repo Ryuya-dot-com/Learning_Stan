@@ -761,6 +761,199 @@
           "retryHint": "応答型の変更と、全モデルで維持する再現性契約を分け、各工程の入力がいつ初めて使われるかを追います。"
         }
       ]
+    },
+    {
+      "lessonId": "l38",
+      "outcomeDimensions": [
+        "diagnostic-order",
+        "convergence-mixing",
+        "monte-carlo-precision",
+        "hmc-geometry",
+        "stop-interpretation",
+        "transfer"
+      ],
+      "questions": [
+        {
+          "id": "stan-l38-q1-divergence-priority",
+          "kind": "selected-response",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "diagnostic-order",
+            "hmc-geometry",
+            "stop-interpretation"
+          ],
+          "prompt": "4 chainのrunで、R-hat最大1.00、bulk ESS最小1800、tail ESS最小1600ですが、warmup後divergenceが3件ありました。最も適切な判断はどれですか。",
+          "choices": [
+            {
+              "id": "ignore-divergence",
+              "text": "R-hatとESSが良好なので、3件は無視して係数を解釈する",
+              "diagnostic": "chain間整合性と情報量でHMCの数値積分エラーを相殺している"
+            },
+            {
+              "id": "stop-and-localize",
+              "text": "推定値の実質的解釈を止め、divergent drawのparameter領域、尺度、相関、制約境界、parameterizationを調べる",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "add-draws-only",
+              "text": "モデルや設定を確認せずiter_samplingだけを2倍にすれば必ず解決する",
+              "diagnostic": "悪い幾何による偏りをdraw数の追加だけで直せると考えている"
+            },
+            {
+              "id": "delete-draws",
+              "text": "divergent drawの3行だけをCSVから削除し、残りを正式結果にする",
+              "diagnostic": "警告を生んだ探索の構造を直さず、事後sampleを事後的に改変している"
+            }
+          ],
+          "correctChoiceId": "stop-and-localize",
+          "correctFeedback": "warmup後のdivergenceはHMCがposteriorを十分に探索できず推定が偏る可能性を示します。R-hatとESSが良好でも相殺できないため、解釈を止めて幾何とparameter領域を調べます。",
+          "retryHint": "各診断が測る対象を分け、良好な値がどの問題を検出できないか考えます。"
+        },
+        {
+          "id": "stan-l38-q2-diagnostic-scope",
+          "kind": "output-prediction",
+          "cognitiveProcess": "analyze",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "diagnostic-order",
+            "convergence-mixing",
+            "stop-interpretation"
+          ],
+          "prompt": "次の出力を得ました。betaについて最初に行う判断として最も適切なものはどれですか。",
+          "code": "fit$diagnostic_summary(quiet = TRUE)\n# num_divergent: 0 0 0 0\n# num_max_treedepth: 0 0 0 0\n# ebfmi: 0.82 0.77 0.91 0.74\n\nfit$summary(\"beta\", \"rhat\", \"ess_bulk\", \"ess_tail\", \"mcse_mean\")\n# beta: rhat=1.04, ess_bulk=92, ess_tail=310, mcse_mean=0.07",
+          "choices": [
+            {
+              "id": "all-clear",
+              "text": "diagnostic_summaryに警告がないので、betaのchainも収束済みである",
+              "diagnostic": "HMC診断だけでparameter別R-hatとESSも確認したと誤解している"
+            },
+            {
+              "id": "mixing-stop",
+              "text": "betaのR-hatが1.01以上でbulk ESSも4 chainの一般確認線400を下回るため、betaの解釈を止めてchain別挙動を調べる",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "ebfmi-fail",
+              "text": "E-BFMIがすべて1未満なので、低E-BFMIとして失敗である",
+              "diagnostic": "E-BFMIを1へ近いほど合格とする指標だと誤解し、名目的警告線0.30を使っていない"
+            },
+            {
+              "id": "tail-overrides",
+              "text": "tail ESSが310あるので、R-hat 1.04とbulk ESS 92を無視できる",
+              "diagnostic": "tailの情報量でchain間不整合と中心部の低ESSを相殺している"
+            }
+          ],
+          "correctChoiceId": "mixing-stop",
+          "correctFeedback": "diagnostic_summaryはdivergence、treedepth、E-BFMIを扱います。betaのR-hatとESSはsummaryで別に確認し、この例ではchain間整合性と中心部の有効情報量に問題があるため解釈を止めます。",
+          "retryHint": "各出力の関数名ごとに、HMC全体・chain・parameterのどれを要約しているか分けます。"
+        },
+        {
+          "id": "stan-l38-q3-mcse-decision",
+          "kind": "constructed-response",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "monte-carlo-precision",
+            "stop-interpretation"
+          ],
+          "prompt": "4 chainのrunでdivergence・最大treedepth到達は0、E-BFMIは全chain 0.30以上、betaのR-hatは1.00、bulk・tail ESSはともに800です。betaのposterior平均は0.12、posterior SDは0.50、平均のMCSEは0.08でした。研究上0.05の平均差を区別したいとき、posterior SDとMCSEを分けて判断し、次の行動を説明してください。",
+          "rubric": [
+            {
+              "id": "uncertainty-separation",
+              "criterion": "posterior SD 0.50をparameterに関する不確実性、MCSE 0.08を有限MCMCによる平均推定の近似誤差として区別する"
+            },
+            {
+              "id": "goal-relative-precision",
+              "criterion": "MCSE 0.08が区別したい差0.05より大きく、この目的の平均推定精度には不足すると判断する"
+            },
+            {
+              "id": "threshold-limits",
+              "criterion": "R-hatとESSの一般確認線を満たしても、研究目的固有のMCSE十分性を保証しないと説明する"
+            },
+            {
+              "id": "targeted-next-step",
+              "criterion": "HMC妥当性とmixingが良好であることを確認した上で、draw追加と再度のMCSE比較を提案する"
+            }
+          ],
+          "modelAnswer": "posterior SD 0.50はデータとモデルのもとでbetaに残る不確実性で、平均のMCSE 0.08は有限drawからposterior平均を計算する近似誤差である。一般的なHMC・R-hat・ESS確認線は満たすが、0.05の差を区別したい目的に対してMCSE 0.08は大きく、平均0.12を必要精度で報告できない。divergenceや未混合がないことを再確認した上でiter_samplingを増やした新runを作り、MCSEが目的に対して十分小さくなったか再評価する。posterior SDはdraw追加だけで消す対象ではない。",
+          "retryHint": "posteriorそのものの幅と、そのposterior要約を数値計算する誤差を別の単位で説明します。"
+        },
+        {
+          "id": "stan-l38-q4-treedepth-severity",
+          "kind": "selected-response",
+          "cognitiveProcess": "evaluate",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "hmc-geometry",
+            "stop-interpretation"
+          ],
+          "prompt": "divergence 0、E-BFMIは全chain 0.30以上、R-hat 1.00ですが、4000 transition中7件が最大treedepthに到達しました。最も適切な説明はどれですか。",
+          "choices": [
+            {
+              "id": "same-as-divergence",
+              "text": "7件のdivergenceと完全に同じ妥当性問題なので、診断名を区別する必要はない",
+              "diagnostic": "最大treedepth到達を数値積分のdivergenceと同一視している"
+            },
+            {
+              "id": "efficiency-investigate",
+              "text": "主に効率上の警告として、尺度・相関・ESSと計算時間を調べ、少数到達ならmax_treedepth変更も根拠と前後比較付きで検討する",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "delete-transitions",
+              "text": "該当7 transitionを削除すれば、原因調査なしで正式結果にできる",
+              "diagnostic": "サンプラーの効率問題を事後的なdraw削除で処理している"
+            },
+            {
+              "id": "always-invalid",
+              "text": "1件でも最大treedepthへ到達すれば、モデルは統計的に必ず誤指定である",
+              "diagnostic": "計算効率の警告から観測モデルの誤指定を断定している"
+            }
+          ],
+          "correctChoiceId": "efficiency-investigate",
+          "correctFeedback": "最大treedepth到達は主にtrajectoryが上限で打ち切られる効率問題です。divergenceと重大度を分け、尺度・相関・ESS・時間を確認してから設定またはモデル表現を変更します。",
+          "retryHint": "その警告が偏りの直接兆候か、計算時間と探索効率の兆候かを区別します。"
+        },
+        {
+          "id": "stan-l38-q5-transfer-valid-wrong",
+          "kind": "transfer-task",
+          "responseMode": "constructed",
+          "cognitiveProcess": "transfer",
+          "evidenceStrength": "direct",
+          "targetDimensions": [
+            "diagnostic-order",
+            "stop-interpretation",
+            "transfer"
+          ],
+          "scenario": "測定器が0から1の範囲だけを採用するデータへ、Aは切断正規化項を含むモデル、Bはparameter制約だけで正規化項を含まないモデルを当てました。両モデルともdivergence・最大treedepth到達0、E-BFMI 0.30以上、R-hat 1.01未満、bulk・tail ESS 400以上です。",
+          "prompt": "計算診断から言えること・言えないことを分け、Bを採用する前にコード・生成過程・予測で何を確認するか説明してください。",
+          "rubric": [
+            {
+              "id": "computational-scope",
+              "criterion": "両モデルについて、指定されたtargetを記録上は明らかなHMC警告なしに探索できたと限定して述べる"
+            },
+            {
+              "id": "validity-separation",
+              "criterion": "良好なR-hat・ESS・HMC診断は、正規化項や観測過程の正しさを保証しないと説明する"
+            },
+            {
+              "id": "code-math-review",
+              "criterion": "採用範囲で条件付けた尤度の分母・lcdf/lccdfまたは等価な正規化項を数式とStanコードで照合する"
+            },
+            {
+              "id": "predictive-question",
+              "criterion": "L39へ向け、採用範囲内の分布形状や境界付近の観測統計量をy_repと比較する問いを示す"
+            },
+            {
+              "id": "no-truth-ranking",
+              "criterion": "診断値がより良い、ESSが大きいという理由だけでBを真または優れたモデルとしない"
+            }
+          ],
+          "modelAnswer": "両runは、指定した各targetについて記録済みのHMC・R-hat・ESS確認線を満たしたと言えるだけで、target自体が測定器の採用過程を正しく表すとは言えない。Bでは0から1に採用された条件付き密度の正規化分母が欠けていないかを数式とnormal_lcdf・normal_lccdf等のコードで確認する。事後予測では採用範囲内の平均・SDだけでなく境界付近の頻度や分位点を比較する。BのESSが大きくても採用理由にはせず、生成過程・正規化・予測の証拠で判断する。",
+          "retryHint": "サンプラーが解いた計算問題と、研究者が指定すべき観測モデルを別の問いとして書きます。"
+        }
+      ]
     }
   ]
 }
