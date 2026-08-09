@@ -144,7 +144,7 @@ npm run gate:stan-release:require-pass
 
 L40比較は2026-08-09に同じR・CmdStanR・CmdStan版、Darwin arm64、Apple clang 21.0.0で実行済みです。各表現を4 chain・3反復した結果、弱情報ではcentered / non-centeredのdivergence合計が235 / 0、`tau` bulk ESS/sec中央値が341 / 16,233でした。強情報では0 / 0、ESS/secが27,624 / 3,500で、centeredを選びました。別の高精度runによる`mu`・`tau`・`theta[1:8]`の20比較はすべて4 combined MCSE以内でしたが、弱情報centeredには146 divergenceが残るため、その平均要約だけを探索妥当性の証拠にはしません。
 
-公開候補への昇格条件は`quality/stan-release-gate/status.json`を機械可読な正本とします。Foundation Gate、対象commitの静的検証とクリーンCI、既存runtime証拠の再検証、L40の弱情報・強情報centered / non-centered比較、独立専門レビュー、適格な初学者3名以上の観察、L41後7〜14日の保持3名以上、公開範囲監査、最終判断の10項目です。`SRG04`と`SRG05`は完了しましたが、現在も他の未完了条件により全体は`BLOCKED`です。
+公開候補への昇格条件は`quality/stan-release-gate/status.json`を機械可読な正本とします。Foundation Gate、対象commitの静的検証とクリーンCI、既存runtime証拠の再検証、L40の弱情報・強情報centered / non-centered比較、独立専門レビュー、適格な初学者3名以上の観察、L41後7〜14日の保持3名以上、公開範囲監査、最終判断の10項目です。公開候補`f7276e2`について`SRG02`〜`SRG05`は完了しましたが、現在も他の未完了条件により全体は`BLOCKED`です。
 
 ## 執筆原則
 

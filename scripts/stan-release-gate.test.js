@@ -123,9 +123,21 @@ describe("Stan Release Gateの機械判定", () => {
     expect(deriveStanReleaseDecision(current)).toBe("BLOCKED");
   });
 
+  it("現在のSRG02証拠を対象commitと必須コマンドへ固定する", () => {
+    const artifactPath = join(root, current.staticVerification.artifact);
+    const artifact = JSON.parse(readFileSync(artifactPath, "utf8"));
+
+    expect(artifact.evidenceId).toBe("SRG02");
+    expect(artifact.targetCommit).toBe(current.target.commit);
+    expect(artifact.targetUrl).toBe(current.target.url);
+    expect(artifact.commands.map(({ command }) => command)).toEqual(REQUIRED_STAN_STATIC_COMMANDS);
+    expect(artifact.commands.every(({ status }) => status === "PASS")).toBe(true);
+  });
+
   it("残る付帯証拠なしのPASS宣言を拒否する", () => {
     const dishonest = structuredClone(current);
     dishonest.decision = "PASS";
+    dishonest.target.commit = null;
     const errors = validateStanReleaseStatus(dishonest).join("\n");
     expect(errors).toContain("decisionはBLOCKED");
     expect(errors).toContain("40桁commit SHA");
@@ -303,7 +315,7 @@ describe("Stan Release Gateの機械判定", () => {
     const report = spawnSync(process.execPath, [scriptPath, statusPath], { encoding: "utf8" });
     expect(report.status).toBe(0);
     expect(report.stdout).toContain("Stan Release Gate: BLOCKED");
-    expect(report.stdout).toContain("PASS 2/10");
+    expect(report.stdout).toContain("PASS 4/10");
     expect(report.stdout).toContain("learners: 0/3");
     expect(report.stdout).toContain("delayed retention: 0/3");
 

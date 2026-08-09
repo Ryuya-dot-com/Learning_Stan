@@ -17,7 +17,7 @@
 - 実機アクセシビリティ監査・初学者観察・公開判定の手順は [Foundation Gate実施キット](quality/foundation-gate/README.md) を参照
 - L12→L13で「読込成功」と「分析可能な品質」を区別できるかの観察手順は [STEP 1 Data Quality Gate](quality/step1-data-gate/README.md) を参照
 - L16修了後に、中心課題を見ず別データへ品質検査・集計・解釈を移せるかの観察手順は [STEP 1独立転移観察キット](quality/step1-transfer-gate/README.md) を参照
-- Stan編は [非公開教材パック](content/stan/README.md) でL34「実行経路とデータ契約」からL41「自分のモデルを設計・診断・報告する」までの受講用原稿8本と理解問題40問を実装しました。単回帰・切断・PSIS-LOOの再検証とL40の弱・強情報比較は完了し、[Stan Release Gate](quality/stan-release-gate/README.md)は`SRG04`・`SRG05`が`PASS`（2/10）です。独立レビュー・初学者観察・対象commitのクリーンCIなどが未完了のため、全体は`BLOCKED`で公開アプリにはまだ含めません
+- Stan編は [非公開教材パック](content/stan/README.md) でL34「実行経路とデータ契約」からL41「自分のモデルを設計・診断・報告する」までの受講用原稿8本と理解問題40問を実装しました。対象commitの静的検証・クリーンCI、単回帰・切断・PSIS-LOOの再検証、L40の弱・強情報比較が完了し、[Stan Release Gate](quality/stan-release-gate/README.md)は`SRG02`〜`SRG05`が`PASS`（4/10）です。Foundation Gate、独立レビュー、初学者観察、遅延保持などが未完了のため、全体は`BLOCKED`で公開アプリにはまだ含めません
 - STEP 2は [非公開教材パック](content/step2/README.md) でL17–L20の意味ID・依存関係・成果物契約、L17記述統計、L18分布図、L19参加者内対応図、L20一括再生成・限界報告、20件の診断的理解問題を検証中です。[初心者観察ゲート](quality/step2-observation-gate/README.md)の通過前は公開アプリへ含めません
 - 4段階練習・理解問題・実機チェックの進みぐあいは、版付きデータとしてブラウザ内に保存されます（サーバには何も送信しません）。4段階練習は自己記録であり、それだけでは理解済みになりません。記述回答の本文は保存せず、JSONの書き出し・読み込み・明示的なリセットができます
 
