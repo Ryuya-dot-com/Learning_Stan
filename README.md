@@ -13,10 +13,11 @@
 - L16修了後には、列名・条件名・参加者を入れ替えた[独立転移課題](https://ryuya-dot-com.github.io/Learning_Stan/challenges/step1-transfer.qmd)があります。完成コードは載せず、別シナリオで同じ品質判断と集計を再構成し、付属チェッカーで成果物だけを自己採点します
 - 続編（可視化・シミュレーション・ベイズ推定・brms・Stan）の構想は [学習ロードマップ](https://ryuya-dot-com.github.io/Learning_Stan/roadmap.html) を参照
 - 品質改善・検証基盤・段階公開の実行計画は [改善・発展ロードマップ](ROADMAP.md) を参照
+- GitHubで公開するソース、学習アプリへ出す教材、実観察で非公開にする記録の境界は [公開範囲ポリシー](PUBLICATION_SCOPE.md) を参照
 - 実機アクセシビリティ監査・初学者観察・公開判定の手順は [Foundation Gate実施キット](quality/foundation-gate/README.md) を参照
 - L12→L13で「読込成功」と「分析可能な品質」を区別できるかの観察手順は [STEP 1 Data Quality Gate](quality/step1-data-gate/README.md) を参照
 - L16修了後に、中心課題を見ず別データへ品質検査・集計・解釈を移せるかの観察手順は [STEP 1独立転移観察キット](quality/step1-transfer-gate/README.md) を参照
-- Stan編は [非公開教材パック](content/stan/README.md) でL34–L41の設計、単回帰の縦切り、8単元32課題の文法反復、分布・リンク関数の可視化、切断モデル、PSIS-LOOによる予測モデル比較を検証中です。公開アプリにはまだ含まれません
+- Stan編は [非公開教材パック](content/stan/README.md) でL34–L41を設計し、L34「実行経路とデータ契約」・L35「ブロック、型、制約」の受講用原稿と理解問題10問まで実装しました。単回帰の縦切り、8単元32課題の文法反復、分布・リンク関数の可視化、切断モデル、PSIS-LOOによる予測モデル比較も検証中ですが、公開アプリにはまだ含まれません
 - STEP 2は [非公開教材パック](content/step2/README.md) でL17–L20の意味ID・依存関係・成果物契約、L17記述統計、L18分布図、L19参加者内対応図、L20一括再生成・限界報告、20件の診断的理解問題を検証中です。[初心者観察ゲート](quality/step2-observation-gate/README.md)の通過前は公開アプリへ含めません
 - 4段階練習・理解問題・実機チェックの進みぐあいは、版付きデータとしてブラウザ内に保存されます（サーバには何も送信しません）。4段階練習は自己記録であり、それだけでは理解済みになりません。記述回答の本文は保存せず、JSONの書き出し・読み込み・明示的なリセットができます
 
@@ -76,6 +77,9 @@ npm run test:step2-observation-rehearsal  # 観察用ZIP展開から初回提出
 npm run gate:step2-observation:status  # 実観察状態を表示（現在はNOT RUN）
 npm run test:r   # Rコード例と期待出力の照合（R 4.6.1が必要）
 npm run test:stan-content  # 非公開Stan原稿・.stan・R実行コード・評価設計の同期検査
+npm run test:stan-syntax-errors  # 固定版stanc3で壊れた8例の期待診断と修正版8例の成功を再検証
+npm run test:stan-model-review  # 両方ともコンパイルできる6モデル対の意味差・警告数・SHA証拠を検証
+npm run test:stan-retention  # L37・L40・L41後の10保持課題と未見lognormal参照モデルを検証
 npm run test:stan-distributions  # 正規・Beta・事前予測・切断のPNG生成と理論値照合
 npm run test:stan-links  # logit・probit・cloglog・Poisson offsetのPNGと数値基準を検査
 npm run test:stan-scenario-runtime  # 切断ケース3モデルを実行し、真値回収・誤答のずれ・診断・8成果物を検査
@@ -104,5 +108,6 @@ dev・preview とも `vite.config.js` の `base`(`/Learning_Stan/`)配下で配�
 |---|---|
 | コード（`src/` のUI・ロジック、ビルド設定） | [MIT](LICENSE) |
 | レッスン本文・演習問題（`src/data/` のテキスト） | [CC BY 4.0](LICENSE-CONTENT) |
+| 公開中・公開前を含む教材原稿（`content/`） | [CC BY 4.0](LICENSE-CONTENT) |
 
 教材テキストを再利用する場合は、クレジットとして `Ryuya-dot-com` を表示してください。

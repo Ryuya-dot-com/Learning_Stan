@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "verifiedAt": "2026-08-05",
+  "environment": {
+    "compiler": "stanc3",
+    "version": "2.39.0",
+    "target": "Win32"
+  },
+  "flags": [
+    "--warn-pedantic"
+  ],
+  "corpusSha256": "05a2934ad39b23f26bd821a1dbb1354b97d95e582dcf24bf0ea23d669fa430f2",
+  "cases": [
+    {
+      "id": "se01",
+      "broken": "se01-missing-semicolon.bad.stan",
+      "fixed": "se01-missing-semicolon.fixed.stan",
+      "brokenSha256": "bd9735731b93ed2b18d84a67e0cd87a21250b0fae2967269ab2c0152628778ae",
+      "fixedSha256": "90b2bd0e2a46543278a9eebd78836579b463e5fa636b76ec23bdf76921076a71",
+      "brokenExitCode": 1,
+      "fixedExitCode": 0
+    },
+    {
+      "id": "se02",
+      "broken": "se02-array-vector-assignment.bad.stan",
+      "fixed": "se02-array-vector-assignment.fixed.stan",
+      "brokenSha256": "1103c6a4a7f3c10bf1bacb0c4619d6f94aff5b89cb705458da29ff7f2a011aad",
+      "fixedSha256": "52b76af1d05c75b40d65fbfd79ca41e8ca8f1e2e3171b5b31b2dcee7bee66872",
+      "brokenExitCode": 1,
+      "fixedExitCode": 0
+    },
+    {
+      "id": "se03",
+      "broken": "se03-matrix-vector-operation.bad.stan",
+      "fixed": "se03-matrix-vector-operation.fixed.stan",
+      "brokenSha256": "19228e5bf550aefd71fe4669007ae987ead939ebdf5e6639a76de71f3b1acaec",
+      "fixedSha256": "faab85b137b4d1f36e4085b62133062a1a79817743f6ab8f463888af42e0635c",
+      "brokenExitCode": 1,
+      "fixedExitCode": 0
+    },
+    {
+      "id": "se04",
+      "broken": "se04-real-index.bad.stan",
+      "fixed": "se04-real-index.fixed.stan",
+      "brokenSha256": "c0490c12a2cf7ebb497024396cb0615a8d29b288af75e5f7bb4ac7e593daf64e",
+      "fixedSha256": "e48efaea6c154b2bab851b16ae101b97917c319f7aefc72c933ab36669773956",
+      "brokenExitCode": 1,
+      "fixedExitCode": 0
+    },
+    {
+      "id": "se05",
+      "broken": "se05-local-scope.bad.stan",
+      "fixed": "se05-local-scope.fixed.stan",
+      "brokenSha256": "b89a6c83291915d39e4aabec06cd5bf1c859af903795d2124726a5c2d853b5e9",
+      "fixedSha256": "92fa26a60f9e0f0c75d5af4129bff8a701db1cabb8faa460d061ab4e2d8a3237",
+      "brokenExitCode": 1,
+      "fixedExitCode": 0
+    },
+    {
+      "id": "se06",
+      "broken": "se06-rng-in-model.bad.stan",
+      "fixed": "se06-rng-in-model.fixed.stan",
+      "brokenSha256": "01e6d0bc78e072e55a98d9aa25a9d000b314830af0f1c2661d247c6f573f1f12",
+      "fixedSha256": "8b9980ef42c99aa58fdca60d243f4aaa2f859fc44d956694003cef6dc5f2cbc7",
+      "brokenExitCode": 1,
+      "fixedExitCode": 0
+    },
+    {
+      "id": "se07",
+      "broken": "se07-user-function-signature.bad.stan",
+      "fixed": "se07-user-function-signature.fixed.stan",
+      "brokenSha256": "a74cfeef1f4551521027ea8e9b47467ec0908238fe7ecc9196a69ef691983945",
+      "fixedSha256": "20d9a7a0396753551d899d16830ee574ee5c932b23bc7cfa38c4b07a444b4dcb",
+      "brokenExitCode": 1,
+      "fixedExitCode": 0
+    },
+    {
+      "id": "se08",
+      "broken": "se08-distribution-type.bad.stan",
+      "fixed": "se08-distribution-type.fixed.stan",
+      "brokenSha256": "528cf5dba28c60f98920e3b407af1349a9b4bf94b50d057608af827d2e2d16c3",
+      "fixedSha256": "ee564398307bae938020e5dfcf79f4dbf895b308e3327acf2ffc30eaee954815",
+      "brokenExitCode": 1,
+      "fixedExitCode": 0
+    }
+  ],
+  "limitations": [
+    "固定版stanc3の構文・意味解析だけを検証し、C++コンパイル、データ読込、サンプリングは実行しない",
+    "診断文の完全一致は要求せず、教材上必要な分類・期待型・実際型を示す安定断片を検証する",
+    "動的な次元不一致や、コンパイルは通る統計的誤指定はSTAN-009の実行・レビュー課題へ分離する"
+  ]
+}

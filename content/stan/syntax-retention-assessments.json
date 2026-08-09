@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-unpublished",
+  "answerExposure": "excluded-from-participant-pack-before-first-submission",
+  "rubricScale": {
+    "thresholdStatus": "not-fixed-before-pilot",
+    "levels": [
+      {"score": 0, "label": "未証拠", "meaning": "成果物がない、または支援なしでは対象技能を示せない"},
+      {"score": 1, "label": "部分証拠", "meaning": "主要方針は正しいが、型・密度・予測単位・説明のいずれかに修正が必要"},
+      {"score": 2, "label": "直接証拠", "meaning": "成果物と説明が課題の対象技能を直接示し、必要な修正を自分で理由付きで行える"}
+    ]
+  },
+  "dimensions": [
+    {"id": "syntax-execution", "title": "構文と実行", "criterion": "ブロック、型、次元、関数を整合させ、構文確認を通せる"},
+    {"id": "error-explanation", "title": "エラー説明", "criterion": "位置情報、期待型、実際型、スコープまたは許可ブロックから原因を説明できる"},
+    {"id": "math-code-translation", "title": "数式とコードの往復", "criterion": "生成過程、密度、リンク、変換をStan文へ対応付けられる"},
+    {"id": "model-review", "title": "コンパイル後レビュー", "criterion": "構文成功後に支持範囲、正規化、予測単位、幾何、数値安定性を点検できる"},
+    {"id": "transfer", "title": "未見転移", "criterion": "見本と異なる応答型・変数名・データ形状へ変更した仮定を説明して移せる"},
+    {"id": "delayed-retention", "title": "遅延保持", "criterion": "一定期間後も完成例なしで計画・実装・修正・説明を再達成できる"}
+  ],
+  "tasks": [
+    {
+      "id": "sr37-01",
+      "checkpointId": "sr37",
+      "mode": "debug-with-diagnosis",
+      "sourceUnits": ["g01"],
+      "sourceCases": ["se02", "se04", "se07"],
+      "prompt": "array / vector、実数添字、関数シグネチャのうちランダムに1例を受け取り、実行前の予測、初回診断、修正版、原因説明を提出する",
+      "evidenceArtifacts": ["diagnosis-before-run.md", "first.stan", "first-compiler.txt", "revised.stan", "repair.md"],
+      "rubricDimensions": ["syntax-execution", "error-explanation"],
+      "successEvidence": "診断表示の語句を転記するだけでなく、期待型と実際型またはスコープ規則を使って修正を説明する"
+    },
+    {
+      "id": "sr37-02",
+      "checkpointId": "sr37",
+      "mode": "blank-recall",
+      "sourceUnits": ["g01", "g02", "g03"],
+      "prompt": "見本を閉じ、N個の連続観測を持つ正規モデルをdata・parameters・modelの3ブロックから白紙で作り、~とtargetの意味を3文で説明する",
+      "evidenceArtifacts": ["normal-model.stan", "compiler.txt", "density-explanation.md"],
+      "rubricDimensions": ["syntax-execution", "math-code-translation"],
+      "successEvidence": "N・y・mu・sigmaの型と制約、事前分布、ベクトル化尤度が整合し、~を代入または乱数生成と説明しない"
+    },
+    {
+      "id": "sr37-03",
+      "checkpointId": "sr37",
+      "mode": "near-transfer",
+      "sourceUnits": ["g01", "g02", "g03"],
+      "prompt": "正規モデルを0/1観測のBernoulli-logitモデルへ変更し、変えた型・支持範囲・分布関数・リンクと、変えていない線形予測子の役割を列挙する",
+      "evidenceArtifacts": ["binary-model.stan", "compiler.txt", "assumption-diff.md"],
+      "rubricDimensions": ["syntax-execution", "math-code-translation", "transfer"],
+      "successEvidence": "観測をarray[] intへ変更し、bernoulli_logitと係数のlog-odds尺度を説明できる"
+    },
+    {
+      "id": "sr40-01",
+      "checkpointId": "sr40",
+      "mode": "compile-success-review",
+      "sourceUnits": ["g05", "g06"],
+      "sourceCases": ["mr01", "mr06"],
+      "prompt": "両方とも構文確認を通るモデル対から1組を受け取り、密度尺度、Jacobianまたは切断正規化、警告と正しさの関係をレビューする",
+      "evidenceArtifacts": ["candidate-review.md", "density-derivation.md", "decision.md"],
+      "rubricDimensions": ["math-code-translation", "model-review"],
+      "successEvidence": "コンパイラ警告だけで決めず、欠落または追加された密度項を数式とコードで特定する"
+    },
+    {
+      "id": "sr40-02",
+      "checkpointId": "sr40",
+      "mode": "parameterization-rewrite",
+      "sourceUnits": ["g05"],
+      "sourceCases": ["mr03"],
+      "prompt": "centered階層モデルをnon-centeredへ書き換え、両者が同じ生成モデルを表す条件と、比較すべきHMC診断を記録する",
+      "evidenceArtifacts": ["noncentered.stan", "compiler.txt", "geometry-plan.md"],
+      "rubricDimensions": ["syntax-execution", "math-code-translation", "model-review"],
+      "successEvidence": "z ~ std_normal()とtheta = mu + tau * zを対応付け、centeredを無条件の誤りと呼ばない"
+    },
+    {
+      "id": "sr40-03",
+      "checkpointId": "sr40",
+      "mode": "generated-quantities-transfer",
+      "sourceUnits": ["g04", "g07"],
+      "sourceCases": ["mr02", "mr04"],
+      "prompt": "件数モデルへlog(exposure) offsetとy_repを追加し、生のexposureを足す場合との予測倍率をexposure=1と2で比較する",
+      "evidenceArtifacts": ["count-model.stan", "compiler.txt", "offset-check.md", "prediction-plan.md"],
+      "rubricDimensions": ["syntax-execution", "math-code-translation", "model-review", "transfer"],
+      "successEvidence": "logリンク上の加算が応答尺度上の乗算になることと、_rngの許可ブロックを説明できる"
+    },
+    {
+      "id": "sr41d-01",
+      "checkpointId": "sr41d",
+      "mode": "pre-code-plan",
+      "sourceUnits": ["g01", "g02", "g05", "g07"],
+      "prompt": "機器負荷と正の完了時間という未見シナリオについて、コードを書く前にデータ契約、生成過程、lognormalのパラメータ、事前分布、予測量を設計する",
+      "evidenceArtifacts": ["pre-code-plan.md", "data-contract.json"],
+      "rubricDimensions": ["math-code-translation", "transfer", "delayed-retention"],
+      "successEvidence": "試行数と観測単位、正の支持範囲、log尺度の位置、sigmaの役割、y_repの目的をコード前に説明する"
+    },
+    {
+      "id": "sr41d-02",
+      "checkpointId": "sr41d",
+      "mode": "blank-far-transfer",
+      "sourceUnits": ["g01", "g02", "g03", "g04", "g05", "g07", "g08"],
+      "prompt": "完成例なしでlognormal回帰を白紙実装し、固定seedで実行するR側手順、観測別log_lik、y_repを含める",
+      "evidenceArtifacts": ["positive-duration.stan", "run-model.R", "first-compiler.txt", "execution-plan.md"],
+      "rubricDimensions": ["syntax-execution", "math-code-translation", "transfer", "delayed-retention"],
+      "successEvidence": "正の観測、lognormal尤度、正値sigma、pointwise log_lik、generated quantitiesの_rng、再現条件が一つの成果物で整合する"
+    },
+    {
+      "id": "sr41d-03",
+      "checkpointId": "sr41d",
+      "mode": "adversarial-review",
+      "sourceUnits": ["g06", "g08"],
+      "sourceCases": ["mr05", "mr06"],
+      "prompt": "構文確認と計算診断が良好という設定のモデルについて、観測別log_likまたは観測過程の欠落を発見し、結果解釈を止める理由を記す",
+      "evidenceArtifacts": ["first-model-review.md", "revised.stan", "review-decision.md"],
+      "rubricDimensions": ["model-review", "error-explanation", "delayed-retention"],
+      "successEvidence": "構文成功やR-hatだけに依存せず、予測単位または正規化項の欠落を特定する"
+    },
+    {
+      "id": "sr41d-04",
+      "checkpointId": "sr41d",
+      "mode": "retention-reflection",
+      "sourceUnits": ["g01", "g02", "g03", "g04", "g05", "g06", "g07", "g08"],
+      "prompt": "最初の計画、初回コード、コンパイラ結果、モデルレビュー、修正版を比較し、変更した仮定、維持した仮定、受けた支援、次回先に確認する項目を記録する",
+      "evidenceArtifacts": ["retention-reflection.md", "artifact-hashes.json", "assistance-record.json"],
+      "rubricDimensions": ["error-explanation", "model-review", "transfer", "delayed-retention"],
+      "successEvidence": "正解だけを報告せず、初回からの変更理由と支援水準を追跡可能に記録する"
+    }
+  ]
+}

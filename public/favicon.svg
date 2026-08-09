@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- R青・緑・Stan赤の3色ドット（アプリの TriDots と同じ配色） -->
-  <circle cx="8" cy="20" r="6" fill="#276DC3" />
-  <circle cx="16" cy="10" r="6" fill="#389826" />
-  <circle cx="24" cy="20" r="6" fill="#7C1128" />
+  <!-- Rで整え、検証し、Stanへ接続する学習経路 -->
+  <rect x="2" y="12" width="12" height="8" rx="4" fill="#276DC3" />
+  <rect x="15" y="12" width="3" height="8" rx="1.5" fill="#389826" />
+  <rect x="19" y="12" width="11" height="8" rx="4" fill="#7C1128" />
 </svg>

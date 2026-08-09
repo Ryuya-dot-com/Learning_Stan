@@ -4,16 +4,20 @@ import {
   validateCmdStanRunner,
   validateCurriculum,
   validateDistributionGrammarLab,
+  validateFoundationLessons,
   validateGrammarDrills,
   validateLinkComparisonEvidence,
   validateLinkComparisonLab,
   validateManuscript,
+  validateModelReviewCorpus,
   validateRuntimeEvidence,
   validateScenarioEvidence,
   validateScenarioManuscript,
   validateScenarioRunner,
   validateStanContent,
   validateStanProgram,
+  validateSyntaxErrorCorpus,
+  validateSyntaxRetention,
   validateWrongNaiveProgram,
 } from "./stan-content-verifier.mjs";
 
@@ -45,6 +49,30 @@ describe("Stan教材パック", () => {
     expect(validateCurriculum(broken)).toContain("l34: 後続レッスンl40へ逆依存しています");
   });
 
+  it("L34原稿からデータ契約の説明を削ると検出する", () => {
+    const manuscripts = structuredClone(content.lessonManuscripts);
+    manuscripts.l34 = manuscripts.l34.replaceAll("データ契約", "入力対応");
+    expect(
+      validateFoundationLessons(content.curriculum, content.foundationAssessments, manuscripts)
+    ).toContain("l34: 必須説明「データ契約」がありません");
+  });
+
+  it("L35の理解問題を5問未満にすると検出する", () => {
+    const assessments = structuredClone(content.foundationAssessments);
+    assessments.lessons.find((lesson) => lesson.lessonId === "l35").questions.pop();
+    expect(
+      validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
+    ).toContain("l35: カリキュラムと5問の理解問題IDが一致しません");
+  });
+
+  it("理解問題の自己回答を実技証拠へ格上げすると検出する", () => {
+    const assessments = structuredClone(content.foundationAssessments);
+    assessments.designRules.learnerAnswersAreNotPerformanceEvidence = false;
+    expect(
+      validateFoundationLessons(content.curriculum, assessments, content.lessonManuscripts)
+    ).toContain("L34–L35理解問題が5問・4形式・初回保存・実技証拠分離の設計を満たしていません");
+  });
+
   it("原稿と実行用Stanコードのずれを検出する", () => {
     const broken = content.manuscript.replace(
       "vector[N] mu = alpha + beta * x_centered;",
@@ -69,6 +97,121 @@ describe("Stan教材パック", () => {
     const broken = structuredClone(content.grammarDrills);
     broken.units[0].steps = broken.units[0].steps.filter((step) => step.id !== "recall");
     expect(validateGrammarDrills(broken)).toContain("g01: 4段階練習の順序または段階が不完全です");
+  });
+
+  it("Stan構文スパインの三層設計欠落を検出する", () => {
+    const broken = structuredClone(content.curriculum);
+    broken.syntaxSpine.layers = broken.syntaxSpine.layers.filter((layer) => layer.id !== "computational");
+    expect(validateCurriculum(broken)).toContain(
+      "Stan構文スパインは言語・確率モデル・計算の三層を十分な範囲で定義する必要があります"
+    );
+  });
+
+  it("Stan構文スパインの遅延想起欠落を検出する", () => {
+    const broken = structuredClone(content.curriculum);
+    broken.syntaxSpine.delayedChecks = broken.syntaxSpine.delayedChecks.slice(0, 2);
+    expect(validateCurriculum(broken)).toContain(
+      "Stan構文スパインに累積・遅延想起の評価証拠が不足しています"
+    );
+  });
+
+  it("構文エラーの修正版が証拠取得後に変わると検出する", () => {
+    const sources = structuredClone(content.syntaxErrorSources);
+    sources["errors/se02-array-vector-assignment.fixed.stan"] = sources[
+      "errors/se02-array-vector-assignment.fixed.stan"
+    ].replace("vector[N] y_copy", "array[N] real y_copy");
+    expect(
+      validateSyntaxErrorCorpus(
+        content.syntaxErrorCorpus,
+        content.syntaxErrorEvidence,
+        sources,
+        content.syntaxErrorCorpusSource
+      )
+    ).toContain("se02: stanc3実測証拠取得後にソースが変更されています");
+  });
+
+  it("構文エラー課題から転移基準を削ると検出する", () => {
+    const corpus = structuredClone(content.syntaxErrorCorpus);
+    corpus.cases[0].transferPrompt = "";
+    expect(
+      validateSyntaxErrorCorpus(
+        corpus,
+        content.syntaxErrorEvidence,
+        content.syntaxErrorSources,
+        content.syntaxErrorCorpusSource
+      )
+    ).toContain("se01: transferPromptがありません");
+  });
+
+  it("コンパイル成功モデル対が証拠取得後に変わると検出する", () => {
+    const sources = structuredClone(content.modelReviewSources);
+    sources["model-review/mr04-exposure-log.reference.stan"] = sources[
+      "model-review/mr04-exposure-log.reference.stan"
+    ].replace("log(exposure)", "exposure");
+    expect(
+      validateModelReviewCorpus(
+        content.modelReviewCorpus,
+        content.modelReviewEvidence,
+        sources,
+        content.modelReviewCorpusSource
+      )
+    ).toContain("mr04: stanc3実測証拠取得後にモデルレビューソースが変更されています");
+  });
+
+  it("centered表現を無条件の誤答へ変えると検出する", () => {
+    const corpus = structuredClone(content.modelReviewCorpus);
+    corpus.cases.find((item) => item.id === "mr03").judgement = "candidate-reject";
+    expect(
+      validateModelReviewCorpus(
+        corpus,
+        content.modelReviewEvidence,
+        content.modelReviewSources,
+        content.modelReviewCorpusSource
+      )
+    ).toContain("mr03: candidate-reject・prefer-reference・context-dependentの区別が教材設計と一致しません");
+  });
+
+  it("遅延転移を直後評価へ変えると検出する", () => {
+    const plan = structuredClone(content.syntaxRetentionPlan);
+    plan.checkpoints.find((item) => item.id === "sr41d").schedule.minimumDays = 0;
+    expect(
+      validateSyntaxRetention(
+        plan,
+        content.syntaxRetentionAssessments,
+        content.syntaxRetentionEvidence,
+        content.syntaxRetentionReference,
+        content.syntaxRetentionPlanSource,
+        content.syntaxRetentionAssessmentSource
+      )
+    ).toContain("sr41dはpilotで再検討する7〜14日後の未見lognormal転移である必要があります");
+  });
+
+  it("自己チェックを保持の証拠へ格上げすると検出する", () => {
+    const plan = structuredClone(content.syntaxRetentionPlan);
+    plan.masteryPolicy.selfRecordIsMasteryEvidence = true;
+    expect(
+      validateSyntaxRetention(
+        plan,
+        content.syntaxRetentionAssessments,
+        content.syntaxRetentionEvidence,
+        content.syntaxRetentionReference,
+        content.syntaxRetentionPlanSource,
+        content.syntaxRetentionAssessmentSource
+      )
+    ).toContain("Stan保持計画が自己記録・直後・遅延・初回提出・pilot前閾値を分離していません");
+  });
+
+  it("未見lognormal参照モデルが証拠取得後に変わると検出する", () => {
+    expect(
+      validateSyntaxRetention(
+        content.syntaxRetentionPlan,
+        content.syntaxRetentionAssessments,
+        content.syntaxRetentionEvidence,
+        `${content.syntaxRetentionReference}\n// changed after evidence`,
+        content.syntaxRetentionPlanSource,
+        content.syntaxRetentionAssessmentSource
+      )
+    ).toContain("Stan保持計画・課題・参照モデルが実測証拠取得後に変更されています");
   });
 
   it("切断モデルから正規化の確認を削ると検出する", () => {

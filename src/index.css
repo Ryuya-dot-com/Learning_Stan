@@ -1,1 +1,273 @@
 @import "tailwindcss";
+
+/*
+ * Application skin
+ *
+ * 色・書体の値は theme.js から .app-shell のCSS変数として受け取る。
+ * ここでは、Julia版から移植したインライン中心の見た目ではなく、
+ * Rで整え、検証し、Stanへ進む教材としての階層・余白・質感を定義する。
+ */
+
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+  background:
+    radial-gradient(circle at 8% 3%, color-mix(in srgb, var(--c-accent-soft) 72%, transparent) 0 11rem, transparent 28rem),
+    radial-gradient(circle at 94% 13%, color-mix(in srgb, var(--c-alert-soft) 54%, transparent) 0 9rem, transparent 25rem),
+    var(--c-paper);
+  color: var(--c-ink);
+  font-family: var(--font-jp);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-shell ::selection {
+  background: var(--c-accent-line);
+  color: var(--c-ink);
+}
+
+.brand-ribbon {
+  position: relative;
+  z-index: 2;
+  height: 4px;
+  background:
+    linear-gradient(
+      90deg,
+      var(--c-accent) 0 46%,
+      var(--c-ok) 46% 51%,
+      var(--c-stan) 51% 100%
+    );
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--c-ink) 8%, transparent);
+}
+
+.app-layout {
+  position: relative;
+  z-index: 1;
+}
+
+.content-column {
+  padding-bottom: 3rem;
+}
+
+.content-column h1,
+.content-column h2,
+.content-column h3 {
+  text-wrap: balance;
+}
+
+.content-column p,
+.content-column li,
+.content-column dd {
+  text-wrap: pretty;
+}
+
+.home-view > h1 {
+  letter-spacing: -0.035em;
+}
+
+.home-view > h1 + p {
+  max-width: 58ch;
+}
+
+.surface-card,
+.journey-card,
+.lesson-card {
+  box-shadow:
+    0 1px 1px color-mix(in srgb, var(--c-ink) 4%, transparent),
+    0 10px 28px color-mix(in srgb, var(--c-ink) 4%, transparent);
+}
+
+.action-card {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--c-accent-deep) 8%, transparent);
+}
+
+.action-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -2.5rem -3.75rem auto;
+  width: 9rem;
+  aspect-ratio: 1;
+  border: 1.25rem solid color-mix(in srgb, var(--c-accent) 8%, transparent);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.journey-card {
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.journey-card:hover {
+  box-shadow:
+    0 1px 1px color-mix(in srgb, var(--c-ink) 5%, transparent),
+    0 14px 34px color-mix(in srgb, var(--c-ink) 7%, transparent);
+  transform: translateY(-1px);
+}
+
+.lesson-card {
+  border-radius: 1.25rem;
+}
+
+.lesson-sidebar {
+  padding: 0.25rem 0.5rem 0.75rem 0;
+  scrollbar-color: var(--c-accent-line) transparent;
+  scrollbar-width: thin;
+}
+
+.lesson-sidebar button,
+.lesson-sidebar a {
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.lesson-sidebar button:hover,
+.lesson-sidebar a:hover {
+  background: color-mix(in srgb, var(--c-accent-soft) 68%, transparent);
+  transform: translateX(2px);
+}
+
+.ui-button {
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--c-ink) 10%, transparent);
+  transition: box-shadow 150ms ease, opacity 150ms ease, transform 150ms ease;
+}
+
+.ui-button:hover:not(:disabled) {
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--c-ink) 15%, transparent);
+  transform: translateY(-1px);
+}
+
+.ui-button:active:not(:disabled) {
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--c-ink) 10%, transparent);
+  opacity: 0.82;
+  transform: translateY(0);
+}
+
+.learning-mark {
+  filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--c-ink) 12%, transparent));
+}
+
+.learning-mark__segment {
+  display: block;
+}
+
+.code-shell {
+  background: var(--c-night);
+  box-shadow:
+    inset 0 1px color-mix(in srgb, white 5%, transparent),
+    0 12px 30px color-mix(in srgb, var(--c-night) 14%, transparent);
+}
+
+.code-toolbar {
+  border-bottom: 1px solid color-mix(in srgb, white 7%, transparent);
+}
+
+.code-language {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--c-dim) 36%, transparent);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+}
+
+.code-language[data-language="r"] {
+  border-color: color-mix(in srgb, var(--c-accent) 72%, white);
+  color: color-mix(in srgb, var(--c-accent) 42%, white) !important;
+}
+
+.code-language[data-language="stan"] {
+  border-color: color-mix(in srgb, var(--c-stan) 68%, white);
+  color: color-mix(in srgb, var(--c-stan) 36%, white) !important;
+}
+
+.code-caption {
+  font-family: var(--font-mono);
+  opacity: 0.8;
+}
+
+@media (max-width: 639px) {
+  .app-layout {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .content-column {
+    padding-bottom: 1.5rem;
+  }
+
+  .surface-card,
+  .journey-card,
+  .lesson-card,
+  .action-card {
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--c-ink) 5%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .journey-card,
+  .ui-button,
+  .lesson-sidebar button,
+  .lesson-sidebar a {
+    transition: none;
+  }
+
+  .journey-card:hover,
+  .ui-button:hover:not(:disabled),
+  .lesson-sidebar button:hover,
+  .lesson-sidebar a:hover {
+    transform: none;
+  }
+}
+
+@media print {
+  .app-shell {
+    background: white;
+  }
+
+  .brand-ribbon,
+  .lesson-sidebar {
+    display: none;
+  }
+
+  .surface-card,
+  .journey-card,
+  .lesson-card,
+  .action-card,
+  .code-shell {
+    box-shadow: none;
+  }
+}

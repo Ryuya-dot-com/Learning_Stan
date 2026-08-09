@@ -3,6 +3,15 @@ node_modules/
 dist/
 /outputs/
 
+# 実観察で生じる非公開データ（空の原本・手順書は公開する）
+/quality/**/private/
+/quality/**/raw/
+/quality/**/recordings/
+/quality/**/filled-records/
+
+# 公開リポジトリと分離して作る、初回提出用の未見課題・採点鍵
+/content/**/private-variants/
+
 # 固定版Nodeの一時検証ディレクトリ（検証後に削除する）
 /.codex-node-*/
 /.codex-r-lib-*/

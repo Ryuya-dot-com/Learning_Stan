@@ -4,7 +4,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { C, GLOBAL_CSS } from "./theme.js";
+import { C, THEME_CSS_VARS, GLOBAL_CSS } from "./theme.js";
 
 const srcDir = dirname(fileURLToPath(import.meta.url));
 const WHITE = "#FFFFFF";
@@ -46,6 +46,14 @@ describe("配色定義", () => {
       }
     }
     expect(missing, `theme.js に未定義の色キーが参照されている`).toEqual([]);
+  });
+
+  it("CSSへ渡す変数が配色と書体の正本を参照する", () => {
+    expect(THEME_CSS_VARS["--c-accent"]).toBe(C.accent);
+    expect(THEME_CSS_VARS["--c-accent-deep"]).toBe(C.accentDeep);
+    expect(THEME_CSS_VARS["--c-stan"]).toBe(C.stan);
+    expect(THEME_CSS_VARS["--font-jp"]).toContain("Hiragino Sans");
+    expect(THEME_CSS_VARS["--font-mono"]).toContain("ui-monospace");
   });
 
   it("Julia版の色キーが残っていない", () => {

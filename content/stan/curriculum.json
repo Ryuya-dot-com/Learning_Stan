@@ -3,6 +3,19 @@
   "status": "draft-unpublished",
   "entryPrerequisite": "l33",
   "releasePolicy": "Foundation Gate通過後に、前段階の評価結果を反映して1レッスンずつ公開する",
+  "lessonDelivery": {
+    "status": "draft-unpublished",
+    "authoredLessonIds": ["l34", "l35"],
+    "assessmentArtifact": "foundation-assessments.json",
+    "requiredSections": [
+      "このレッスンのゴール",
+      "よくある誤り",
+      "内容理解問題",
+      "直接評価",
+      "公式資料"
+    ],
+    "practiceEncounters": ["read", "complete", "modify", "debug", "recall", "delayed-transfer"]
+  },
   "grammarPractice": {
     "artifact": "grammar-drills.json",
     "manuscript": "distribution-grammar-lab.md",
@@ -15,6 +28,114 @@
       "l40": ["g06"]
     },
     "masteryPolicy": "各単元で白紙再現と転移を1回以上成功し、構文エラーと統計的仮定の誤りを別々に説明する"
+  },
+  "syntaxSpine": {
+    "status": "planned-extension",
+    "start": "step5-brms-stancode",
+    "end": "l41-delayed-transfer",
+    "layers": [
+      {
+        "id": "language",
+        "title": "Stan言語の文法",
+        "focus": ["ブロックと実行順", "スコープ", "型と次元", "array・vector・row_vector・matrix", "添字とスライス", "制御構文とユーザー定義関数"]
+      },
+      {
+        "id": "probabilistic",
+        "title": "確率モデルの文法",
+        "focus": ["distribution statement", "target", "分布関数の接尾辞", "支持範囲", "リンク関数", "制約・切断・打ち切り"]
+      },
+      {
+        "id": "computational",
+        "title": "計算の文法",
+        "focus": ["generated quantities", "乱数生成", "変数変換とJacobian", "non-centered parameterization", "数値安定性", "ベクトル化と計算量"]
+      }
+    ],
+    "encounters": ["read", "complete", "modify", "debug", "recall", "delayed-transfer"],
+    "lessonPlan": [
+      {
+        "stage": "step5",
+        "role": "brmsが生成したStanコードを読み、式・生成過程・コードを対応付ける。白紙実装はまだ要求しない"
+      },
+      {
+        "stage": "l34-l35",
+        "role": "実行境界、データ契約、ブロック、型、次元、スコープを読み、最小プログラムを構文確認する"
+      },
+      {
+        "stage": "l36-l37",
+        "role": "生成過程を対数密度へ翻訳し、型・次元・ブロック・分布関数のコンパイルエラーを修正する"
+      },
+      {
+        "stage": "l38-l40",
+        "role": "構文エラー、計算診断、統計的誤指定を分類し、generated quantitiesと再パラメータ化を実装する"
+      },
+      {
+        "stage": "l41",
+        "role": "見本なしの統合実装、第三者コードのレビュー、一定期間後の未見データ型への転移で保持を確認する"
+      }
+    ],
+    "delayedChecks": [
+      {
+        "after": "l37",
+        "revisit": ["g01", "g02", "g03"],
+        "evidence": "見本なしの最小モデルと、型・次元・ブロック違反を含むエラー修正記録"
+      },
+      {
+        "after": "l40",
+        "revisit": ["g04", "g05", "g06", "g07"],
+        "evidence": "コンパイルは通るが観測過程またはパラメータ化が不適切なモデルの診断メモ"
+      },
+      {
+        "after": "l41",
+        "revisit": ["g01", "g02", "g03", "g04", "g05", "g06", "g07", "g08"],
+        "evidence": "1〜2週間後に別の応答型を扱う白紙実装と、変更した仮定・維持した仮定の説明"
+      }
+    ],
+    "plannedCoverage": [
+      "type-shape-indexing",
+      "scope-user-functions",
+      "compiler-error-repair",
+      "constraints-jacobian",
+      "non-centered-parameterization",
+      "numerical-stability"
+    ],
+    "errorCorpus": {
+      "status": "draft-unpublished",
+      "artifact": "syntax-error-corpus.json",
+      "evidence": "syntax-error-validation.json",
+      "runner": "scripts/verify-stan-syntax-errors.mjs",
+      "caseIds": ["se01", "se02", "se03", "se04", "se05", "se06", "se07", "se08"],
+      "compiler": "stanc3 2.39.0",
+      "coverage": ["syntax", "array-vector", "matrix-vector", "indexing", "scope", "block-permission", "function-signature", "distribution-signature"]
+    },
+    "modelReview": {
+      "status": "draft-unpublished",
+      "artifact": "model-review-corpus.json",
+      "evidence": "model-review-validation.json",
+      "runner": "scripts/verify-stan-model-review.mjs",
+      "caseIds": ["mr01", "mr02", "mr03", "mr04", "mr05", "mr06"],
+      "compiler": "stanc3 2.39.0",
+      "reviewClasses": ["density-transformation", "numerical-stability", "parameterization-geometry", "link-offset-scale", "prediction-unit", "normalization-observation-process"]
+    },
+    "retentionPlan": {
+      "status": "draft-unpublished",
+      "plan": "syntax-retention-plan.json",
+      "assessments": "syntax-retention-assessments.json",
+      "evidence": "syntax-retention-validation.json",
+      "runner": "scripts/verify-stan-retention.mjs",
+      "checkpointIds": ["sr37", "sr40", "sr41d"],
+      "taskCount": 10,
+      "delayedWindowDays": [7, 14],
+      "facilitatorReference": "retention/facilitator/positive-duration-reference.stan",
+      "thresholdStatus": "not-fixed-before-pilot"
+    },
+    "releaseGates": [
+      "syntax-compiles",
+      "error-explanation",
+      "math-code-translation",
+      "valid-but-wrong-diagnosis",
+      "novel-response-transfer",
+      "delayed-recall"
+    ]
   },
   "caseStudies": [
     {
@@ -56,28 +177,66 @@
     {
       "id": "l34",
       "title": "RからStanへ――実行経路とデータ契約",
+      "manuscript": "lessons/l34-execution-data-contract.md",
       "prerequisites": ["l33"],
       "outcome": "R、CmdStanR、コンパイル済みStanモデル、サンプル出力の役割を区別し、Rのlistをdataブロックへ対応付けられる",
+      "outcomeDimensions": ["execution-responsibility", "data-contract", "pipeline-boundaries", "transfer"],
+      "assessmentIds": [
+        "stan-l34-q1-responsibility",
+        "stan-l34-q2-contract",
+        "stan-l34-q3-repair-list",
+        "stan-l34-q4-syntax-meaning",
+        "stan-l34-q5-transfer-binomial"
+      ],
       "concepts": ["RとStanの責務", ".stanファイル", "名前付きlist", "コンパイルとサンプリング"],
       "directEvidence": [
         {
           "artifact": "実行経路図とデータ対応表",
           "method": "constructed-response",
           "criterion": "各処理をR、CmdStanR、Stanのいずれが担うか説明し、N・x・yの名前と型を対応付ける"
+        },
+        {
+          "artifact": "データ契約違反の修正記録",
+          "method": "debugging-task",
+          "criterion": "名前または長さが不一致なlistについて、初回状態、発生地点、修正版、修正理由を残す"
+        },
+        {
+          "artifact": "二項データの契約表",
+          "method": "transfer-task",
+          "criterion": "未見の成功回数・試行回数データへ、整数型、長さ、値域、変数間制約を移す"
         }
       ]
     },
     {
       "id": "l35",
       "title": "ブロック、型、制約を読む",
+      "manuscript": "lessons/l35-blocks-types-constraints.md",
       "prerequisites": ["l34"],
-      "outcome": "6つの主要ブロックの実行時期、int・real・vector・制約、分布関数の接尾辞をコードから説明できる",
-      "concepts": ["program blocks", "execution order", "types", "constraints", "lpdf・lpmf・lcdf・lccdf・rng"],
+      "outcome": "Stanの7ブロックと教材例で使う主要6ブロックを区別し、実行時期、スコープ、型・次元、制約、分布関数の接尾辞をコードから説明してエラーを修正できる",
+      "outcomeDimensions": ["block-order", "scope", "type-shape", "constraint-semantics", "transfer"],
+      "assessmentIds": [
+        "stan-l35-q1-block-order",
+        "stan-l35-q2-scope",
+        "stan-l35-q3-array-vector",
+        "stan-l35-q4-constraint-prior",
+        "stan-l35-q5-transfer-binary"
+      ],
+      "concepts": ["functionsと主要6ブロック", "execution order", "scope", "types and dimensions", "constraints", "lpdf・lpmf・lcdf・lccdf・rng"],
       "directEvidence": [
         {
-          "artifact": "ブロック分類と型エラー修正",
+          "artifact": "ブロック実行・スコープ表",
+          "method": "constructed-response",
+          "criterion": "7ブロックの順序、実行時期、利用可能な値、drawへの保存有無を説明する"
+        },
+        {
+          "artifact": "型・スコープエラーの修正記録",
           "method": "debugging-task",
-          "criterion": "宣言を適切なブロックへ移し、Nとvectorの不整合および不正な制約を修正する"
+          "criterion": "arrayとvectorの不一致および局所スコープ違反について、初回診断、修正版、修正理由を残す"
+        },
+        {
+          "artifact": "二値応答の最小Stanプログラム",
+          "method": "transfer-task",
+          "criterion": "連続応答から0/1応答へ、型、支持範囲、Bernoulli-logit尤度を移して構文確認する"
         }
       ]
     },
@@ -168,6 +327,7 @@
   ],
   "officialSources": [
     "https://mc-stan.org/docs/reference-manual/blocks.html",
+    "https://mc-stan.org/docs/reference-manual/types.html",
     "https://mc-stan.org/docs/reference-manual/execution.html",
     "https://mc-stan.org/docs/reference-manual/syntax.html",
     "https://mc-stan.org/docs/reference-manual/user-functions.html",
@@ -182,6 +342,8 @@
     "https://mc-stan.org/loo/reference/loo_compare.html",
     "https://mc-stan.org/loo/reference/loo_model_weights.html",
     "https://mc-stan.org/cmdstanr/articles/cmdstanr.html",
+    "https://mc-stan.org/cmdstanr/reference/model-method-check_syntax.html",
+    "https://mc-stan.org/cmdstanr/reference/model-method-compile.html",
     "https://mc-stan.org/docs/2_39/cmdstan-guide/diagnose_utility.html"
   ]
 }

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "verifiedAt": "2026-08-05",
+  "environment": {
+    "compiler": "stanc3",
+    "version": "2.39.0",
+    "target": "Win32"
+  },
+  "flags": [
+    "--warn-pedantic"
+  ],
+  "planSha256": "2748a8db14bd5256e404bd84518b51686796ed3d89c9f6f6f1b87fe0c045bf16",
+  "assessmentsSha256": "4b617360c367f232fd160aa0e86bae72123cff097bd98b5a79c713404920f50c",
+  "reference": "retention/facilitator/positive-duration-reference.stan",
+  "referenceSha256": "30c8ab9d954a1b623cd33553bf7015dbe5a92eb97e16faa6a60659577dc86b9d",
+  "referenceExitCode": 0,
+  "referenceWarningCount": 0,
+  "limitations": [
+    "未見lognormal課題のfacilitator参照モデルが構文確認を通ることだけを検証し、学習者の保持・転移はまだ測定していない",
+    "7〜14日の間隔とrubric閾値はpilot前の暫定設計であり、適格な初学者観察後に固定する",
+    "参照モデルは模範解答の唯一性を意味せず、同じ生成過程・予測契約を満たす別実装を許容する"
+  ]
+}

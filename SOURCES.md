@@ -94,11 +94,13 @@ rstan が同梱する Stan はこれより古い世代であるため、本教�
 |---|---|---|
 | ブロックごとに実行時期・保存対象・許可される処理が異なる | [Stan Reference Manual: Program Blocks](https://mc-stan.org/docs/reference-manual/blocks.html) | transformed dataはデータ読込後、transformed parametersとmodelは対数密度評価時、generated quantitiesはdraw生成後に実行される |
 | 制約付きparameterは内部の無制約空間との間で変換される | [Stan Reference Manual: Program Blocks](https://mc-stan.org/docs/reference-manual/blocks.html) | parametersの制約変換とJacobian調整を、事前分布そのものと区別した |
+| すべての変数は明示的な型を持ち、array・vector・row_vector・matrixは相互交換できない | [Stan Reference Manual: Data Types and Declarations](https://mc-stan.org/docs/reference-manual/types.html) | L35で要素数と型を分離し、直接代入できない例と明示的変換を扱う |
 | 単回帰の正規尤度はvector化できる | [Stan User's Guide: Regression Models](https://mc-stan.org/docs/stan-users-guide/regression.html) | `y ~ normal(alpha + beta * x, sigma)`と観測ごとのloopが同じモデルを表す |
 | CmdStanRは`.stan`をコンパイルし、名前付きR listをdataとして`$sample()`へ渡す | [CmdStanR: Getting started](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) | `cmdstan_model()`、`$sample()`、複数chain、seed、fit要約の基本経路を確認 |
+| `$check_syntax()`はコンパイルせずStan構文を検査し、`$compile()`はStan-to-C++変換と実行ファイル生成を行う | [CmdStanR: Check syntax](https://mc-stan.org/cmdstanr/reference/model-method-check_syntax.html)、[CmdStanR: Compile](https://mc-stan.org/cmdstanr/reference/model-method-compile.html) | L34で構文確認・コンパイル・サンプリングの成功範囲を分離した |
 | 診断はdivergence、treedepth、E-BFMI、ESS、R-hatを含む | [CmdStan diagnose utility](https://mc-stan.org/docs/2_39/cmdstan-guide/diagnose_utility.html) | 推定値の解釈前に計算上の問題を確認する構成とした |
 
-Stan教材パックの一次資料は`mc-stan.org`に限定し、最終確認日は2026-08-01とする。静的検証の成功はStanコンパイラでの構文確認やMCMC診断の代替ではない。
+Stan教材パックの一次資料は`mc-stan.org`に限定し、最終確認日は2026-08-09とする。静的検証の成功はStanコンパイラでの構文確認やMCMC診断の代替ではない。
 
 ## brms の挙動（同梱ヘルプで確認）
 

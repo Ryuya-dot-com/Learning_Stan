@@ -1,3 +1,6 @@
+# ソースと教材の改行をOSに依存させず、公開差分の全行置換を防ぐ。
+* text=auto eol=lf
+
 # 配布データとZIP生成入力はOSに依存しない改行へ固定する。
 public/data/**/*.csv text eol=lf
 public/data/**/*.tsv text eol=lf
@@ -18,6 +21,7 @@ content/step2/**/*.json text eol=lf
 content/step2/**/*.md text eol=lf
 content/step2/**/*.R text eol=lf
 content/stan/**/*.md text eol=lf
+content/stan/**/*.json text eol=lf
 content/stan/**/*.stan text eol=lf
 content/stan/**/*.R text eol=lf
 public/data/**/*.xlsx binary
