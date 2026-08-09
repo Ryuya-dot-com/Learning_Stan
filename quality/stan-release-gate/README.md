@@ -36,7 +36,9 @@ npm run gate:stan-release:require-pass
 
 `SRG02`は`staticVerification`に対象commit、`npm test`と`npm run test:stan-content`、証拠リンクを記録し、すべてが`target.commit`と一致する場合だけ`PASS`にできます。`SRG03`は`cleanCi`に対象commit、GitHub Actions run URL、イベント、`build`・`r-verify`・`stan-verify`の状態を記録し、3 jobが同じ対象commitで成功した場合だけ`PASS`にできます。
 
-CI workflow自体はbase branchを問わずpull requestを検証し、Node・一般R・固定版CmdStanの3 jobを分離します。手動dispatchは検証だけを行い、Pagesへのupload・deployは`main`へのpushに限定します。2026-08-10の[run 31323415009](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31323415009)で3 job成功とPR時deploy skipを確認しましたが、これはworkflow実装の検証です。最終候補commitはまだ固定していないため、`SRG02`と`SRG03`は`NOT RUN`のままです。
+`SRG09`の自動検査は`npm run build`と`npm run audit:stan-public-scope`です。Git管理対象に非公開観察path、credentialファイル、代表的なsecret、メールアドレス、実ユーザー名を含む絶対pathがないことを検査し、`roadmap.html`を除くビルド成果物へL34〜L41の教材が混入していないことを確認します。ただし自動検査は研究データの公開権限や自由記述の匿名性を判断できないため、`publicScopeReview`には対象commit、両コマンド、証拠URL、3検査の成功に加えて、主実装者以外の署名が必要です。
+
+CI workflow自体はbase branchを問わずpull requestを検証し、Node・一般R・固定版CmdStanの3 jobを分離します。Node jobはビルド後に公開範囲自動監査も実行します。手動dispatchは検証だけを行い、Pagesへのupload・deployは`main`へのpushに限定します。2026-08-10の[run 31323415009](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31323415009)で3 job成功とPR時deploy skipを確認しましたが、これはworkflow実装の検証です。最終候補commitはまだ固定していないため、`SRG02`と`SRG03`は`NOT RUN`のままです。
 
 ## 状態
 

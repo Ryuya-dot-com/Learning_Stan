@@ -99,6 +99,8 @@
   "publicScopeReview": {
     "reviewerCode": null,
     "signedAt": null,
+    "commit": null,
+    "commands": [],
     "artifact": null,
     "secretScan": "NOT RUN",
     "personalDataScan": "NOT RUN",

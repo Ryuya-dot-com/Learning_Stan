@@ -8,6 +8,7 @@ import {
   REQUIRED_REVIEW_SCOPES,
   REQUIRED_STAN_RELEASE_EVIDENCE_IDS,
   REQUIRED_STAN_STATIC_COMMANDS,
+  REQUIRED_STAN_PUBLIC_SCOPE_COMMANDS,
   deriveStanReleaseDecision,
   validateStanReleaseStatus,
 } from "./stan-release-gate.mjs";
@@ -98,6 +99,8 @@ function passingStatus() {
   status.publicScopeReview = {
     reviewerCode: "RELEASE-02",
     signedAt: "2026-08-21T10:00:00+09:00",
+    commit: status.target.commit,
+    commands: [...REQUIRED_STAN_PUBLIC_SCOPE_COMMANDS],
     artifact: "evidence/SRG-TEST/public-scope.md",
     secretScan: "PASS",
     personalDataScan: "PASS",
@@ -246,6 +249,24 @@ describe("Stan Release Gateの機械判定", () => {
     tooEarly.decision = "BLOCKED";
     tooEarly.delayedRetention.records[0].daysAfter = 6;
     expect(validateStanReleaseStatus(tooEarly).join("\n")).toContain("7〜14日のdaysAfter");
+  });
+
+  it("SRG09は対象commitの自動監査と主実装者以外の署名を要求する", () => {
+    const wrongCommit = passingStatus();
+    wrongCommit.decision = "BLOCKED";
+    wrongCommit.publicScopeReview.commit = "d".repeat(40);
+    expect(validateStanReleaseStatus(wrongCommit).join("\n")).toContain("SRG09のPASS");
+    expect(deriveStanReleaseDecision(wrongCommit)).toBe("BLOCKED");
+
+    const missingCommand = passingStatus();
+    missingCommand.decision = "BLOCKED";
+    missingCommand.publicScopeReview.commands.pop();
+    expect(validateStanReleaseStatus(missingCommand).join("\n")).toContain("対象commitの自動監査");
+
+    const selfReview = passingStatus();
+    selfReview.decision = "BLOCKED";
+    selfReview.publicScopeReview.reviewerCode = selfReview.primaryImplementerCode;
+    expect(validateStanReleaseStatus(selfReview).join("\n")).toContain("主実装者以外");
   });
 
   it("失敗証拠と未解決P1をFAILにし、管理済みP2だけを許容する", () => {

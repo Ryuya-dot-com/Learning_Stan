@@ -48,6 +48,7 @@ Stan編は、[Stan Release Gate](quality/stan-release-gate/README.md)でFoundati
 ## 5. コミット前チェック
 
 - `git diff --cached`で公開対象をファイル単位に確認する
+- `npm run build && npm run audit:stan-public-scope`でGit管理対象とアプリ成果物を検査する
 - secret、直接識別子、入力済み記録がないことを検索する
 - `draft-unpublished`と「GitHub非公開」を混同していないか確認する
 - participant packに採点鍵・自己チェッカー・完成コードが混入していないことをテストする
