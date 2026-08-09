@@ -121,8 +121,12 @@ describe("GitHub Pages workflow", () => {
     expect(packageJson.scripts["install:stan-ci"]).toBe("Rscript scripts/install-stan-ci.R");
     expect(stanJob.permissions).toEqual({ contents: "read" });
     expect(stanJob["timeout-minutes"]).toBe(30);
-    expect(stanJob.env.LEARNING_STAN_CMDSTAN).toContain("cmdstan-2.39.0");
-    expect(stanJob.env.LEARNING_STAN_STANC).toContain("cmdstan-2.39.0/bin/stanc");
+    expect(stanJob.env).toBeUndefined();
+    const configurePaths = stanJob.steps.find((step) => step.name === "Configure CmdStan paths");
+    expect(configurePaths.run).toContain("CMDSTAN=${RUNNER_TEMP}/cmdstan");
+    expect(configurePaths.run).toContain("LEARNING_STAN_CMDSTAN=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0");
+    expect(configurePaths.run).toContain("LEARNING_STAN_STANC=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0/bin/stanc");
+    expect(workflow).not.toContain("${{ runner.temp }}");
     expect(runs).toEqual(expect.arrayContaining([
       "Rscript scripts/install-stan-ci.R",
       "npm run test:stan-syntax-errors",

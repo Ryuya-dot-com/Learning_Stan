@@ -75,10 +75,6 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      CMDSTAN: ${{ runner.temp }}/cmdstan
-      LEARNING_STAN_CMDSTAN: ${{ runner.temp }}/cmdstan/cmdstan-2.39.0
-      LEARNING_STAN_STANC: ${{ runner.temp }}/cmdstan/cmdstan-2.39.0/bin/stanc
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -87,6 +83,11 @@ jobs:
       - uses: r-lib/actions/setup-r@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
         with:
           r-version: "4.6.1"
+      - name: Configure CmdStan paths
+        run: |
+          echo "CMDSTAN=${RUNNER_TEMP}/cmdstan" >> "${GITHUB_ENV}"
+          echo "LEARNING_STAN_CMDSTAN=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0" >> "${GITHUB_ENV}"
+          echo "LEARNING_STAN_STANC=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0/bin/stanc" >> "${GITHUB_ENV}"
       - run: Rscript scripts/install-stan-ci.R
       - run: npm run test:stan-syntax-errors
       - run: npm run test:stan-model-review
