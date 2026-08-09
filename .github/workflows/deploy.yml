@@ -37,6 +37,7 @@ jobs:
       - run: npm run test:step2-observation-pack
       - run: npm run gate:step2-observation:status
       - run: npm run gate:step1-transfer:status
+      - run: npm run gate:stan-release:status
       - run: npm run build
       - if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5

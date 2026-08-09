@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "gateId": "SRG-CURRENT",
+  "updatedAt": "2026-08-09",
+  "decision": "BLOCKED",
+  "primaryImplementerCode": "CODEX",
+  "target": {
+    "commit": null,
+    "url": "https://ryuya-dot-com.github.io/Learning_Stan/"
+  },
+  "foundationGate": {
+    "decision": "BLOCKED",
+    "artifact": "quality/foundation-gate/status.json"
+  },
+  "runtimeComparison": {
+    "weakInformation": {
+      "status": "BLOCKED",
+      "scenarioId": null,
+      "artifact": null
+    },
+    "strongInformation": {
+      "status": "BLOCKED",
+      "scenarioId": null,
+      "artifact": null
+    },
+    "sourceHashes": {
+      "centered": null,
+      "noncentered": null
+    },
+    "environment": {
+      "rVersion": null,
+      "cmdstanrVersion": null,
+      "cmdstanVersion": null
+    },
+    "diagnostics": {
+      "chains": 0,
+      "divergenceChecked": false,
+      "treedepthChecked": false,
+      "ebfmiChecked": false,
+      "rhatChecked": false,
+      "essChecked": false,
+      "mcseChecked": false,
+      "timingChecked": false,
+      "posteriorEquivalenceChecked": false
+    }
+  },
+  "independentReview": {
+    "reviewerCode": null,
+    "signedAt": null,
+    "scopes": []
+  },
+  "learnerObservation": {
+    "eligibleComplete": 0,
+    "records": []
+  },
+  "delayedRetention": {
+    "minimumDays": 7,
+    "maximumDays": 14,
+    "eligibleComplete": 0,
+    "records": []
+  },
+  "publicScopeReview": {
+    "reviewerCode": null,
+    "signedAt": null,
+    "artifact": null,
+    "secretScan": "NOT RUN",
+    "personalDataScan": "NOT RUN",
+    "appScopeConfirmed": "NOT RUN"
+  },
+  "decisionRecord": null,
+  "evidence": [
+    {
+      "id": "SRG01",
+      "status": "BLOCKED",
+      "artifacts": [
+        "quality/foundation-gate/status.json"
+      ],
+      "note": "Foundation Gateは実機アクセシビリティ監査と初学者観察待ちでBLOCKED"
+    },
+    {
+      "id": "SRG02",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "L34〜L41のローカル静的検証は成功済みだが、対象commitを固定した証拠ではない"
+    },
+    {
+      "id": "SRG03",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "対象commitのクリーンCI run待ち"
+    },
+    {
+      "id": "SRG04",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "既存の単回帰・切断・リンク比較を対象commitの保存可能な環境で再検証する必要がある"
+    },
+    {
+      "id": "SRG05",
+      "status": "BLOCKED",
+      "artifacts": [],
+      "note": "L40のcentered / non-centeredを弱い群情報と強い群情報で4 chain実測するCmdStan環境が必要"
+    },
+    {
+      "id": "SRG06",
+      "status": "BLOCKED",
+      "artifacts": [],
+      "note": "Stan言語・統計モデル・学習原稿を主実装者以外が独立レビューする必要がある"
+    },
+    {
+      "id": "SRG07",
+      "status": "BLOCKED",
+      "artifacts": [],
+      "note": "適格な初学者3名以上による構文修正・モデルレビュー・未見転移の観察が必要"
+    },
+    {
+      "id": "SRG08",
+      "status": "BLOCKED",
+      "artifacts": [],
+      "note": "L41後7〜14日のsr41dを適格な初学者3名以上で実施する必要がある"
+    },
+    {
+      "id": "SRG09",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "対象commitに対するsecret・個人情報・アプリ公開範囲の監査待ち"
+    },
+    {
+      "id": "SRG10",
+      "status": "NOT RUN",
+      "artifacts": [],
+      "note": "全証拠と問題トリアージを参照する最終公開判断・署名待ち"
+    }
+  ],
+  "issues": []
+}
