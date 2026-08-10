@@ -105,8 +105,7 @@ describe("Foundation Gate実施キット", () => {
       ...[
         "README.md",
         "DECISION_RECORD.md",
-        "INDEPENDENT_REVIEW_PROTOCOL.md",
-        "INDEPENDENT_REVIEW_RECORD.md",
+        "FEEDBACK_NOTES.md",
       ].map((name) => join(stanReleaseQualityRoot, name)),
     ];
 
@@ -309,16 +308,29 @@ describe("STEP 1 Independent Transfer Gate", () => {
 });
 
 describe("Stan Release Gate文書", () => {
-  it("10証拠と現在のBLOCKEDを公開条件として明記する", () => {
+  it("10証拠を必須6項目と改善4項目へ分けて現在のBLOCKEDを明記する", () => {
     const hub = readStanRelease("README.md");
 
     for (let index = 1; index <= 10; index += 1) {
       expect(hub).toContain(`SRG${String(index).padStart(2, "0")}`);
     }
     expect(hub).toContain("現在は`BLOCKED`");
+    expect(hub).toContain("必須6項目");
+    expect(hub).toContain("4/6");
+    expect(hub).toContain("公開を止めない改善証拠（4項目）");
     expect(hub).toContain("decision`だけを`PASS`へ書き換えても");
     expect(hub).toContain("7〜14日");
-    expect(hub).toContain("初学者3名以上");
+    expect(hub).toContain("未実施でもベータ公開は可能");
+  });
+
+  it("第三者の口頭感想を署名なしの短い改善記録として扱う", () => {
+    const hub = readStanRelease("README.md");
+    const feedback = readStanRelease("FEEDBACK_NOTES.md");
+
+    expect(hub).toContain("口頭・チャット・文書");
+    expect(hub).toContain("独立署名は求めません");
+    expect(feedback).toContain("正式な審査、署名、全範囲の確認は求めません");
+    expect(feedback).toContain("未実施でもベータ公開は妨げません");
   });
 
   it("L40実測の二条件・診断・再現情報を判断票に持つ", () => {

@@ -436,7 +436,7 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 | 17 | STAN-001 | L34–L41の目標・依存・直接評価設計 | D-007, M4 | 非公開ドラフト完了 | Codex | `curriculum.json`の連番・逆依存・直接証拠を自動検査 |
 | 18 | STAN-002 | 単回帰Stanコードの行単位解説 | STAN-001 | 非公開ドラフト完了 | Codex | 6ブロック、target、ベクトル化、診断、y_repを1本の原稿で接続 |
 | 19 | STAN-003 | Stan原稿・実行コード同期検証器 | STAN-002 | 完了 | Codex | 原稿と`.stan` / `.R`の一致、事前分布・尤度・生成量・seed・実行証拠SHAを検査 |
-| 20 | STAN-004 | 固定版CmdStanで構文・実行・診断証拠を取得 | STAN-003 | ローカル・CI実測完了、独立レビュー待ち | Codex / レビュー者 | CmdStan 2.39.0で4 chain完走、診断・予測・限界を記録し、固定版CI jobも成功（run 31323415009） |
+| 20 | STAN-004 | 固定版CmdStanで構文・実行・診断証拠を取得 | STAN-003 | ローカル・CI実測完了、第三者フィードバック継続 | Codex / 協力者 | CmdStan 2.39.0で4 chain完走、診断・予測・限界を記録し、固定版CI jobも成功（run 31323415009） |
 | 21 | EDU-003 | STEP 1データ操作とNB1 | D-007, D-010, M4 | 実装済み・対象者観察待ち | Codex / 実施者 | L11–L16、認知課題パイロットの分析依頼、CSV 5件・TSV 1件・区切りTXT 1件・Excel 3件、15ファイルの一括スターターZIP、完成版Rスクリプト、raw/issue/processed分離、条件差と解釈限界、再現可能なNB1、全6目標の直接証拠、R実行検証、成果物4項目 |
 | 22 | OBS-002 | L12→L13データ品質観察 | EDU-003, UX-PATH-001 | 実施準備完了・対象者観察待ち | Codex / 実施者 | DQ01–DQ05、中立プロンプト、支援水準、raw fingerprint、未見表転移、匿名記録、単一変更の判断票を構造テストで固定 |
 | 23 | EDU-004 | STEP 1独立転移課題 | EDU-003, M7 | 実装済み・対象者実施待ち | Codex / 実施者 | 列名・条件名・参加者数を変更し、完成コード非掲載、raw MD5固定、既知問題5件、検査済み16行、参加者別切替コスト80・100・100・110ms、3行メモを独立Rチェッカーで検査 |
@@ -449,34 +449,34 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 | 30 | EDU-010 | STEP 2 L20再現可能な最終分析パック | EDU-006, EDU-007, EDU-009 | 非公開実行検証済み | Codex | 1本の入口から2図・3CSV・探索メモを空の一時Projectで再生成し、入力不変、6成果物、7報告節、画像寸法、反復実行のバイト一致を検査。L20理解問題5問も追加 |
 | 31 | OBS-004 | STEP 2初心者観察ゲート | EDU-010, OBS-003 | 実施準備完了・機械判定NOT RUN | Codex / 実施者 | S201–S205、未見のデバイス負荷データ、参加者用2ファイルZIP、完成コード・採点キー・チェッカー分離、初回提出固定、支援水準、自己修正、匿名記録、3名・対象SHA・独立レビュー・未解決P0/P1ゼロの機械判定を固定 |
 | 32 | EDU-011 | L1–L16の段階的反復練習 | UX-PATH-001, EDU-003 | 実装済み・対象者観察待ち | Codex / 実施者 | 各レッスンで、まねる→1か所変える→例を閉じて想起→別文脈へ転移の4段階を順に解除。自己記録を理解・実践の証拠と分離し、schema v1・v2からv3へ進捗を移行 |
-| 33 | STAN-005 | Stan分布文法スパイラルと切断ケース | STAN-001, STAN-003 | 非公開実行検証済み・独立レビュー待ち | Codex / レビュー者 | ブロック、分布接尾辞、target、事前予測、ハイパーパラメータ、切断・打ち切りの6単元24課題。採用範囲のある測定器で正答・誤答3モデルを実行し、数式、Stan 2.39、R乱数、7枚のPNG、理論モーメント、8成果物を同期検査 |
-| 34 | STAN-006 | リンク関数とPSIS-LOOモデル比較 | STAN-003, STAN-005 | 非公開実行検証済み・独立レビュー待ち | Codex / レビュー者 | logit・probit・cloglog・Poisson-log、offset、係数尺度、比較可能性、pointwise log_lik、ELPD差、Pareto k、stackingの2単元8課題。線形・二次logitを4 chainで実行し、13成果物とSHA-256を同期検査 |
-| 35 | STAN-007 | Stan Syntax Spine三層カバレッジと配置設計 | D-012, STAN-001, STAN-005, STAN-006 | 正本化・L34–L41受講用原稿実装完了、独立レビュー・pilot待ち | Codex / レビュー者 | 言語・確率モデル・計算の三層、STEP 5〜L41の配置、6接触、3回の累積・遅延評価、6公開ゲートを`curriculum.json`と静的検証で固定。L34–L41は独立原稿8本・理解問題40問・目標次元・直接評価まで同期 |
-| 36 | STAN-008 | 型・次元・ブロック・関数のエラーコーパス | STAN-007 | 非公開コア実装・独立レビュー / CI待ち | Codex / Stan経験者 | セミコロン、array / vector、matrix / vector演算、添字型、スコープ、`_rng`許可ブロック、関数シグネチャ、Bernoulli観測型の壊れた例／修正版8組。固定版stanc3 2.39.0で失敗8・成功8、診断断片、16ソースSHA-256、転移課題、動的次元の検出限界を同期検査 |
-| 37 | STAN-009 | コンパイル成功後のモデルレビューと計算文法 | STAN-007, STAN-008 | 非公開コア実装・L40実測完了、残り実測 / 独立レビュー待ち | Codex / 統計レビュー者 | Jacobian、Bernoulli-logit数値安定性、centered / non-centered、Poisson offset、pointwise log_lik、切断正規化のcandidate / reference 6組。全12ソースの構文証拠に加え、切断とL40弱・強情報比較は複数chain実測済み。残る数値極限・真値回収と独立レビューを待つ |
+| 33 | STAN-005 | Stan分布文法スパイラルと切断ケース | STAN-001, STAN-003 | 非公開実行検証済み・第三者フィードバック継続 | Codex / 協力者 | ブロック、分布接尾辞、target、事前予測、ハイパーパラメータ、切断・打ち切りの6単元24課題。採用範囲のある測定器で正答・誤答3モデルを実行し、数式、Stan 2.39、R乱数、7枚のPNG、理論モーメント、8成果物を同期検査 |
+| 34 | STAN-006 | リンク関数とPSIS-LOOモデル比較 | STAN-003, STAN-005 | 非公開実行検証済み・第三者フィードバック継続 | Codex / 協力者 | logit・probit・cloglog・Poisson-log、offset、係数尺度、比較可能性、pointwise log_lik、ELPD差、Pareto k、stackingの2単元8課題。線形・二次logitを4 chainで実行し、13成果物とSHA-256を同期検査 |
+| 35 | STAN-007 | Stan Syntax Spine三層カバレッジと配置設計 | D-012, STAN-001, STAN-005, STAN-006 | 正本化・L34–L41受講用原稿実装完了、第三者フィードバック・pilot継続 | Codex / 協力者 | 言語・確率モデル・計算の三層、STEP 5〜L41の配置、6接触、3回の累積・遅延評価、6公開ゲートを`curriculum.json`と静的検証で固定。L34–L41は独立原稿8本・理解問題40問・目標次元・直接評価まで同期 |
+| 36 | STAN-008 | 型・次元・ブロック・関数のエラーコーパス | STAN-007 | 非公開コア実装・固定版CI済み・第三者フィードバック継続 | Codex / Stan経験者 | セミコロン、array / vector、matrix / vector演算、添字型、スコープ、`_rng`許可ブロック、関数シグネチャ、Bernoulli観測型の壊れた例／修正版8組。固定版stanc3 2.39.0で失敗8・成功8、診断断片、16ソースSHA-256、転移課題、動的次元の検出限界を同期検査 |
+| 37 | STAN-009 | コンパイル成功後のモデルレビューと計算文法 | STAN-007, STAN-008 | 非公開コア実装・L40実測完了、残り実測 / 第三者フィードバック継続 | Codex / 統計協力者 | Jacobian、Bernoulli-logit数値安定性、centered / non-centered、Poisson offset、pointwise log_lik、切断正規化のcandidate / reference 6組。全12ソースの構文証拠に加え、切断とL40弱・強情報比較は複数chain実測済み。残る数値極限・真値回収と第三者フィードバックを改善課題として追跡する |
 | 38 | STAN-010 | 累積復習・遅延想起・未見転移 | STAN-007, STAN-009 | 非公開コア実装・pilot / 対象者観察待ち | Codex / 実施者 | L37後・L40後・L41後の3地点、10課題、6評価次元。初回／修正版／支援を分離し、L41後7〜14日の未見lognormal転移、facilitator参照モデル、匿名記録schema、pilot前は合格閾値未固定を構造検証。保持の実測は未実施 |
 | 39 | OBS-005 | Stan構文初心者観察ゲート | STAN-008, STAN-009, STAN-010, M7 | 未着手 | 実施者 / 独立レビュー者 | 適格な初学者3名以上について、公式資料利用、初回エラー、支援水準、自己修正、正答コード、正しく動く誤モデルの発見、遅延転移を匿名記録し、未解決P0/P1ゼロで判定 |
-| 40 | STAN-011 | Stan公開判定ゲート | STAN-004, STAN-007, STAN-008, STAN-009, STAN-010, OBS-005 | SRG02〜SRG05 PASS（4/10）、SRG09自動監査PASS・独立署名待ち、全体はBLOCKED | Codex / 実施者 / 独立レビュー者 | SRG01〜SRG10、対象SHA、Foundation PASS、既存runtime再検証、L40弱・強情報4-chain比較、独立レビュー、初学者3名、7〜14日後保持3名、公開範囲監査、問題トリアージ、最終判断を機械判定。宣言だけのPASS、証拠欠落、自己レビュー、期間外保持、未解決P0/P1を拒否 |
+| 40 | STAN-011 | Stan公開判定ゲート | STAN-004, STAN-007, STAN-008, STAN-009, STAN-010 | 必須4/6 PASS、SRG09自動監査PASS・所有者確認待ち、全体はBLOCKED | Codex / 所有者 | 必須は対象SHA、静的検証、クリーンCI、既存runtime再検証、L40弱・強情報4-chain比較、公開範囲の所有者確認、最終判断。Foundation、第三者感想、初学者観察、7〜14日後保持は非阻害の改善証拠として追跡。宣言だけのPASS、証拠欠落、未解決P0/P1を拒否 |
 
 ### 2026-08-10 Stan公開候補の固定とCI証拠
 
 - 公開候補を`f7276e235ed36d39c016982a2b34b5cc87d98af3`へ固定し、クリーンなworktreeで`npm test`（24 files・395 tests）と`npm run test:stan-content`を再実行して`SRG02`を`PASS`にした
 - 同じSHAへの[push run 31325892271](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31325892271)で`build`・`r-verify`・`stan-verify`がすべて成功したため、`SRG03`を`PASS`にした
-- 同runのビルドと公開範囲自動監査も成功した。`SRG09`は自動部分を記録済みだが、主実装者以外による確認と署名がないため`NOT RUN`を維持する
-- Stan Release Gateは`SRG02`〜`SRG05`の4/10が`PASS`になった。Foundation Gate、独立専門レビュー、初学者観察、遅延保持、公開範囲の独立確認、最終判断が残るため全体は正しく`BLOCKED`である
+- 同runのビルドと公開範囲自動監査も成功した。`SRG09`は自動部分を記録済みで、所有者の公開範囲確認待ちである
+- Stan Release Gateは必須6項目中`SRG02`〜`SRG05`の4/6が`PASS`になった。所有者の公開範囲確認と最終判断が残るため全体は`BLOCKED`である
 
-### 2026-08-10 Stan独立レビューパック
+### 2026-08-10 Stan公開ゲートの実用化
 
-- `SRG06`のStan言語・統計モデル・学習原稿3 scopeと、`SRG09`の公開範囲手動確認を対象SHA`f7276e2`へ固定した
-- review plan、実施手順、未実施記録票を分離し、別worktreeで対象候補を再現してからレビューする契約にした
-- 参照正本、必須コマンド、CI URL、repository内pathを機械検査し、対象SHAのずれ、scope欠落、repository外証拠、未実施planへの署名混入を拒否する
-- パックの`READY TO REVIEW`はレビュー完了を意味しない。主実装者以外の記録と署名が受理されるまで`SRG06`・`SRG09`の状態は変更しない
+- ベータ公開を止める条件を`SRG02`〜`SRG05`・`SRG09`・`SRG10`の6項目へ限定した
+- Foundation Gate、第三者フィードバック、初学者観察、遅延保持は非阻害の改善証拠へ移し、未実施の効果を主張しない契約にした
+- `SRG06`は正式な審査や署名ではなく、口頭・チャット・文書の感想について日付、相手の属性、範囲、要点、対応を短く残す`RECORDED`状態に変更した
+- `SRG09`は対象commitの自動監査とリポジトリ所有者の確認を要求し、第三者の署名を廃止した
 
 ### 2026-08-10 Stan公開範囲の自動監査
 
 - Git管理対象の非公開観察path、credentialファイル、代表的なsecret、メールアドレス、実ユーザー名を含む絶対pathを検出する`npm run audit:stan-public-scope`を追加した
 - ビルド後の通常assetへL34〜L41の教材ID・原稿が混入していないことを検査し、公開予定を示す`roadmap.html`だけを明示的に許可した
-- CIのNode jobでビルド直後に監査を実行する。SRG09は対象commit、監査証拠、主実装者以外の署名が揃うまで`NOT RUN`のままであり、自動検査だけを公開許可へ格上げしない
+- CIのNode jobでビルド直後に監査を実行する。SRG09は対象commit、監査証拠、リポジトリ所有者の確認が揃うまで`NOT RUN`のままであり、自動検査だけを公開許可へ格上げしない
 
 ### 2026-08-10 既存Stan runtime再検証
 
@@ -492,14 +492,14 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 - 性能runの全48 chain診断行を集約し、弱情報ではcentered / non-centeredのdivergenceが235 / 0、`tau` bulk ESS/sec中央値が341 / 16,233、強情報では0 / 0、27,624 / 3,500となった。弱情報はnon-centered、強情報はcenteredを選ぶ固定教材ケースとした
 - 別の4 chain・sampling 2,000・`adapt_delta=0.99` runで`mu`・`tau`・`theta[1:8]`の20比較を行い、すべて4 combined MCSE以内、最大0.886 MCSEだった。一方で弱情報centeredには146 divergenceが残るため、平均一致だけを探索妥当性へ格上げしない
 - 入力・環境・source hash・全chain診断・3反復時間・効率・事後同値性・2図を12成果物契約へまとめ、空の一時ディレクトリから再実行するR検証器と、改変を拒否する静的検証を追加した
-- Stan Release Gateの`SRG05`を`PASS`へ更新した。対象commitのクリーンCI、Foundation Gate、独立レビュー、初学者観察、遅延保持、公開範囲監査は別条件のため、全体判定は`BLOCKED`のままである
+- Stan Release Gateの`SRG05`を`PASS`へ更新した。当時の初版ゲートでは対象commitのクリーンCI、Foundation Gate、独立レビュー、初学者観察、遅延保持、公開範囲監査を別条件としていたため、全体判定は`BLOCKED`のままだった
 
-### 2026-08-09 Stan公開判定ゲート
+### 2026-08-09 Stan公開判定ゲート（初版・現在は上記の実用化で改訂済み）
 
-- L34〜L41の原稿完成と学習アプリ公開を分離し、10証拠の`Stan Release Gate`を追加した。現在判定は`BLOCKED`で、原稿完成やローカルテスト成功を公開許可へ格上げしない
-- `SRG01`で既存Foundation Gateの`PASS`を必須とし、対象commitの40桁SHAとHTTPS URL、クリーンCI、既存runtime証拠の再検証を要求する
+- L34〜L41の原稿完成と学習アプリ公開を分離し、当初は10証拠の`Stan Release Gate`を追加した。原稿完成やローカルテスト成功だけを公開許可へ格上げしない原則は現在も維持する
+- 初版では`SRG01`で既存Foundation Gateの`PASS`を必須とし、対象commitの40桁SHAとHTTPS URL、クリーンCI、既存runtime証拠の再検証を要求した。2026-08-10の改訂でFoundation Gateは非阻害の改善証拠へ移した
 - `SRG05`はL40のcentered / non-centeredを弱い群情報と強い群情報の両方で4 chain以上実測し、source hash、R・CmdStanR・CmdStan版、divergence、treedepth、E-BFMI、R-hat、ESS、MCSE、時間、事後同値性を記録したため、2026-08-09に`PASS`へ更新した
-- 主実装者と異なる独立レビュー、Stan言語・統計モデル・学習原稿の3 scope、初学者3名以上、L41後7〜14日の保持3名以上を構造化し、自己レビュー、重複記録、期間外記録を拒否する
+- 初版では主実装者と異なる独立レビュー、初学者3名以上、L41後7〜14日の保持3名以上を必須条件として構造化した。2026-08-10の改訂で、第三者の感想、初学者観察、遅延保持はいずれも非阻害の改善証拠へ移した
 - secret・個人情報・アプリ公開範囲の監査と最終判断票を追加し、未解決P0・P1または明示的な失敗を`FAIL`、未実施・外部待ちを`BLOCKED`、管理情報のないP2を公開不可とした
 - 入力済み観察記録、録画・録音、生ログ、直接識別子、未見variant、採点鍵は公開せず、GitHubには対象commit、環境、hash、匿名集約、問題、判断だけを置く契約を固定した
 

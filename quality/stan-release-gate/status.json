@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "gateId": "SRG-CURRENT",
   "updatedAt": "2026-08-10",
   "decision": "BLOCKED",
@@ -84,10 +84,12 @@
     "teachingConclusionsChecked": true,
     "artifactsChecked": true
   },
-  "independentReview": {
-    "reviewerCode": null,
-    "signedAt": null,
-    "scopes": []
+  "externalFeedback": {
+    "status": "NOT RUN",
+    "receivedAt": null,
+    "contributorProfile": null,
+    "scopes": [],
+    "summaryArtifact": null
   },
   "learnerObservation": {
     "eligibleComplete": 0,
@@ -99,9 +101,9 @@
     "eligibleComplete": 0,
     "records": []
   },
-  "publicScopeReview": {
-    "reviewerCode": null,
-    "signedAt": null,
+  "publicScopeConfirmation": {
+    "confirmedByCode": null,
+    "confirmedAt": null,
     "commit": "f7276e235ed36d39c016982a2b34b5cc87d98af3",
     "commands": [
       "npm run build",
@@ -116,11 +118,11 @@
   "evidence": [
     {
       "id": "SRG01",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [
         "quality/foundation-gate/status.json"
       ],
-      "note": "Foundation Gateは実機アクセシビリティ監査と初学者観察待ちでBLOCKED"
+      "note": "Foundation Gateは未完了。ベータ公開を止めない改善証拠として継続する"
     },
     {
       "id": "SRG02",
@@ -160,21 +162,21 @@
     },
     {
       "id": "SRG06",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "Stan言語・統計モデル・学習原稿を主実装者以外が独立レビューする必要がある"
+      "note": "第三者から口頭または文書で感想を得た場合、属性・範囲・要点・対応だけを短く記録する任意の改善証拠"
     },
     {
       "id": "SRG07",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "適格な初学者3名以上による構文修正・モデルレビュー・未見転移の観察が必要"
+      "note": "初学者観察は教材改善と学習効果の主張を支える任意の追跡証拠。ベータ公開の必須条件ではない"
     },
     {
       "id": "SRG08",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "L41後7〜14日のsr41dを適格な初学者3名以上で実施する必要がある"
+      "note": "L41後7〜14日のsr41dは保持設計を改善する任意の追跡証拠。未実施時は保持効果を主張しない"
     },
     {
       "id": "SRG09",
@@ -182,13 +184,13 @@
       "artifacts": [
         "https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31325892271"
       ],
-      "note": "対象commitの自動監査3項目は成功済み。主実装者以外による確認と署名待ち"
+      "note": "対象commitの自動監査3項目は成功済み。リポジトリ所有者による公開範囲確認待ち"
     },
     {
       "id": "SRG10",
       "status": "NOT RUN",
       "artifacts": [],
-      "note": "全証拠と問題トリアージを参照する最終公開判断・署名待ち"
+      "note": "必須6項目、既知の限界、問題トリアージを参照する所有者の最終公開判断待ち"
     }
   ],
   "issues": []

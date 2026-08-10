@@ -95,7 +95,7 @@ Stan構文はL35だけで完結させず、STEP 5でbrms生成コードを読む
 
 判断は`candidate-reject`、`prefer-reference`、`context-dependent`に分ける。centered表現を常に誤りと呼ばず、Bernoulliの二表現を別モデルと呼ばない。Jacobian参照版だけがpedanticの「2 priors」警告を出し、Jacobian欠落版は無警告だった実測も保存し、警告の有無を数学的正しさの代用にしない。
 
-複数chainの推定差まで実測済みなのは切断ケース、リンク・LOOケース、centered / non-centeredの弱・強情報比較である。Jacobian、極端な線形予測子、offsetの真値回収と数値極限は、構文成功とソース同期までであり、追加実測と独立レビューを公開前に行う。
+複数chainの推定差まで実測済みなのは切断ケース、リンク・LOOケース、centered / non-centeredの弱・強情報比較である。Jacobian、極端な線形予測子、offsetの真値回収と数値極限は、構文成功とソース同期までである。この限界を明示してベータ公開し、追加実測と第三者フィードバックを改善項目として継続する。
 
 ### 累積復習・遅延想起・未見転移
 
@@ -144,7 +144,7 @@ npm run gate:stan-release:require-pass
 
 L40比較は2026-08-09に同じR・CmdStanR・CmdStan版、Darwin arm64、Apple clang 21.0.0で実行済みです。各表現を4 chain・3反復した結果、弱情報ではcentered / non-centeredのdivergence合計が235 / 0、`tau` bulk ESS/sec中央値が341 / 16,233でした。強情報では0 / 0、ESS/secが27,624 / 3,500で、centeredを選びました。別の高精度runによる`mu`・`tau`・`theta[1:8]`の20比較はすべて4 combined MCSE以内でしたが、弱情報centeredには146 divergenceが残るため、その平均要約だけを探索妥当性の証拠にはしません。
 
-公開候補への昇格条件は`quality/stan-release-gate/status.json`を機械可読な正本とします。Foundation Gate、対象commitの静的検証とクリーンCI、既存runtime証拠の再検証、L40の弱情報・強情報centered / non-centered比較、独立専門レビュー、適格な初学者3名以上の観察、L41後7〜14日の保持3名以上、公開範囲監査、最終判断の10項目です。公開候補`f7276e2`について`SRG02`〜`SRG05`は完了しましたが、現在も他の未完了条件により全体は`BLOCKED`です。
+公開候補への昇格条件は`quality/stan-release-gate/status.json`を機械可読な正本とします。必須条件は、対象commitの静的検証とクリーンCI、既存runtime証拠の再検証、L40の弱情報・強情報centered / non-centered比較、所有者による公開範囲確認、最終判断の6項目です。Foundation Gate、第三者フィードバック、初学者観察、L41後7〜14日の保持は公開を止めない改善証拠として追跡し、未実施の効果を主張しません。現在は必須4/6が完了し、所有者確認と最終判断待ちのため`BLOCKED`です。
 
 ## 執筆原則
 

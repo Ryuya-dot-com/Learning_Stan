@@ -4,11 +4,12 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import {
+  FEEDBACK_SCOPES,
   REQUIRED_STAN_CI_JOBS,
-  REQUIRED_REVIEW_SCOPES,
   REQUIRED_STAN_RELEASE_EVIDENCE_IDS,
   REQUIRED_STAN_STATIC_COMMANDS,
   REQUIRED_STAN_PUBLIC_SCOPE_COMMANDS,
+  STAN_RELEASE_EVIDENCE_IDS,
   deriveStanReleaseDecision,
   validateStanReleaseStatus,
 } from "./stan-release-gate.mjs";
@@ -24,10 +25,6 @@ function passingStatus() {
   status.decision = "PASS";
   status.target.commit = "c".repeat(40);
   status.target.url = "https://example.test/Learning_Stan/commit/candidate";
-  status.foundationGate = {
-    decision: "PASS",
-    artifact: "evidence/SRG-TEST/foundation-gate.json",
-  };
   status.staticVerification = {
     status: "PASS",
     commit: status.target.commit,
@@ -73,32 +70,9 @@ function passingStatus() {
       posteriorEquivalenceChecked: true,
     },
   };
-  status.independentReview = {
-    reviewerCode: "STAN-REVIEWER-02",
-    signedAt: "2026-08-20T10:00:00+09:00",
-    scopes: [...REQUIRED_REVIEW_SCOPES],
-  };
-  status.learnerObservation = {
-    eligibleComplete: 3,
-    records: [
-      "evidence/SRG-TEST/learner-P01.md",
-      "evidence/SRG-TEST/learner-P02.md",
-      "evidence/SRG-TEST/learner-P03.md",
-    ],
-  };
-  status.delayedRetention = {
-    minimumDays: 7,
-    maximumDays: 14,
-    eligibleComplete: 3,
-    records: [
-      { artifact: "evidence/SRG-TEST/sr41d-P01.md", daysAfter: 7 },
-      { artifact: "evidence/SRG-TEST/sr41d-P02.md", daysAfter: 10 },
-      { artifact: "evidence/SRG-TEST/sr41d-P03.md", daysAfter: 14 },
-    ],
-  };
-  status.publicScopeReview = {
-    reviewerCode: "RELEASE-02",
-    signedAt: "2026-08-21T10:00:00+09:00",
+  status.publicScopeConfirmation = {
+    confirmedByCode: "OWNER-01",
+    confirmedAt: "2026-08-21T10:00:00+09:00",
     commit: status.target.commit,
     commands: [...REQUIRED_STAN_PUBLIC_SCOPE_COMMANDS],
     artifact: "evidence/SRG-TEST/public-scope.md",
@@ -107,11 +81,15 @@ function passingStatus() {
     appScopeConfirmed: "PASS",
   };
   status.decisionRecord = "evidence/SRG-TEST/decision.md";
-  status.evidence = REQUIRED_STAN_RELEASE_EVIDENCE_IDS.map((id) => ({
+  status.evidence = STAN_RELEASE_EVIDENCE_IDS.map((id) => ({
     id,
-    status: "PASS",
-    artifacts: [`evidence/SRG-TEST/${id}.md`],
-    note: `${id}を対象commitで確認済み`,
+    status: REQUIRED_STAN_RELEASE_EVIDENCE_IDS.includes(id) ? "PASS" : "NOT RUN",
+    artifacts: REQUIRED_STAN_RELEASE_EVIDENCE_IDS.includes(id)
+      ? [`evidence/SRG-TEST/${id}.md`]
+      : [],
+    note: REQUIRED_STAN_RELEASE_EVIDENCE_IDS.includes(id)
+      ? `${id}を対象commitで確認済み`
+      : `${id}は任意の改善証拠として未実施`,
   }));
   status.issues = [];
   return status;
@@ -134,22 +112,21 @@ describe("Stan Release Gateの機械判定", () => {
     expect(artifact.commands.every(({ status }) => status === "PASS")).toBe(true);
   });
 
-  it("残る付帯証拠なしのPASS宣言を拒否する", () => {
+  it("対象と所有者判断なしのPASS宣言を拒否する", () => {
     const dishonest = structuredClone(current);
     dishonest.decision = "PASS";
     dishonest.target.commit = null;
     const errors = validateStanReleaseStatus(dishonest).join("\n");
     expect(errors).toContain("decisionはBLOCKED");
     expect(errors).toContain("40桁commit SHA");
-    expect(errors).toContain("独立レビュー");
-    expect(errors).toContain("初学者観察3件以上");
-    expect(errors).toContain("保持記録3件以上");
+    expect(errors).toContain("所有者による公開範囲確認");
+    expect(errors).toContain("最終判断記録");
   });
 
   it("SRG01〜SRG10の欠落・重複・未知IDを拒否する", () => {
     const missing = structuredClone(current);
     missing.evidence.pop();
-    expect(validateStanReleaseStatus(missing).join("\n")).toContain("必須evidence");
+    expect(validateStanReleaseStatus(missing).join("\n")).toContain("evidenceがありません");
 
     const duplicate = structuredClone(current);
     duplicate.evidence[1].id = duplicate.evidence[0].id;
@@ -165,7 +142,7 @@ describe("Stan Release Gateの機械判定", () => {
     status.decision = "BLOCKED";
     status.evidence[1].artifacts = [];
     const errors = validateStanReleaseStatus(status).join("\n");
-    expect(errors).toContain("SRG02: PASSには匿名化された証拠リンク");
+    expect(errors).toContain("SRG02: PASS・RECORDEDには公開可能な証拠リンク");
   });
 
   it("SRG02は対象commitと必須静的検証コマンドの一致を要求する", () => {
@@ -194,19 +171,21 @@ describe("Stan Release Gateの機械判定", () => {
     expect(validateStanReleaseStatus(failedStan).join("\n")).toContain("Node・R・Stan各job");
   });
 
-  it("全10証拠と付帯条件が揃った場合だけPASSにする", () => {
+  it("必須6証拠が揃えば改善証拠が未実施でもPASSにする", () => {
     const status = passingStatus();
     expect(validateStanReleaseStatus(status)).toEqual([]);
     expect(deriveStanReleaseDecision(status)).toBe("PASS");
+    expect(status.foundationGate.decision).toBe("BLOCKED");
+    expect(status.learnerObservation.eligibleComplete).toBe(0);
+    expect(status.delayedRetention.eligibleComplete).toBe(0);
   });
 
-  it("Foundation Gateの宣言だけを偽装できない", () => {
+  it("Foundation Gateは改善証拠として記録するが未完了でも公開を止めない", () => {
     const status = passingStatus();
-    status.decision = "BLOCKED";
     status.foundationGate.decision = "BLOCKED";
-    const errors = validateStanReleaseStatus(status).join("\n");
-    expect(deriveStanReleaseDecision(status)).toBe("BLOCKED");
-    expect(errors).toContain("SRG01のPASSにはFoundation GateのPASS");
+    status.evidence[0].status = "NOT RUN";
+    expect(validateStanReleaseStatus(status)).toEqual([]);
+    expect(deriveStanReleaseDecision(status)).toBe("PASS");
   });
 
   it("L40は弱情報・強情報、4 chain、全診断、異なるsource hashを要求する", () => {
@@ -239,46 +218,62 @@ describe("Stan Release Gateの機械判定", () => {
     expect(validateStanReleaseStatus(uncheckedHashes).join("\n")).toContain("SRG04のPASS");
   });
 
-  it("自己レビューとscope不足を独立レビューとして扱わない", () => {
-    const selfReview = passingStatus();
-    selfReview.decision = "BLOCKED";
-    selfReview.independentReview.reviewerCode = selfReview.primaryImplementerCode;
-    expect(validateStanReleaseStatus(selfReview).join("\n")).toContain("主実装者と異なる独立レビュー");
+  it("口頭を含む第三者感想は短い要約として任意記録できる", () => {
+    const recorded = passingStatus();
+    recorded.externalFeedback = {
+      status: "RECORDED",
+      receivedAt: "2026-08-20",
+      contributorProfile: "Stanを利用した経験のある教育関係者",
+      scopes: [FEEDBACK_SCOPES[0]],
+      summaryArtifact: "quality/stan-release-gate/feedback/example.md",
+    };
+    recorded.evidence.find(({ id }) => id === "SRG06").status = "RECORDED";
+    recorded.evidence.find(({ id }) => id === "SRG06").artifacts = [recorded.externalFeedback.summaryArtifact];
+    expect(validateStanReleaseStatus(recorded)).toEqual([]);
+    expect(deriveStanReleaseDecision(recorded)).toBe("PASS");
 
-    const missingScope = passingStatus();
-    missingScope.decision = "BLOCKED";
-    missingScope.independentReview.scopes.pop();
-    expect(deriveStanReleaseDecision(missingScope)).toBe("BLOCKED");
+    const missingSummary = structuredClone(recorded);
+    missingSummary.externalFeedback.summaryArtifact = null;
+    expect(validateStanReleaseStatus(missingSummary).join("\n")).toContain("短い要約artifact");
+
+    const mismatched = structuredClone(recorded);
+    mismatched.evidence.find(({ id }) => id === "SRG06").status = "NOT RUN";
+    expect(validateStanReleaseStatus(mismatched).join("\n")).toContain("状態をNOT RUNまたはRECORDEDで一致");
   });
 
   it("初学者記録の重複と7〜14日外の保持記録を拒否する", () => {
     const duplicate = passingStatus();
-    duplicate.decision = "BLOCKED";
-    duplicate.learnerObservation.records[2] = duplicate.learnerObservation.records[1];
+    duplicate.learnerObservation = {
+      eligibleComplete: 3,
+      records: ["feedback/P01.md", "feedback/P02.md", "feedback/P02.md"],
+    };
     expect(validateStanReleaseStatus(duplicate).join("\n")).toContain("初学者観察記録が重複");
 
     const tooEarly = passingStatus();
-    tooEarly.decision = "BLOCKED";
-    tooEarly.delayedRetention.records[0].daysAfter = 6;
+    tooEarly.delayedRetention = {
+      minimumDays: 7,
+      maximumDays: 14,
+      eligibleComplete: 1,
+      records: [{ artifact: "feedback/sr41d-P01.md", daysAfter: 6 }],
+    };
     expect(validateStanReleaseStatus(tooEarly).join("\n")).toContain("7〜14日のdaysAfter");
   });
 
-  it("SRG09は対象commitの自動監査と主実装者以外の署名を要求する", () => {
+  it("SRG09は対象commitの自動監査と所有者確認を要求する", () => {
     const wrongCommit = passingStatus();
     wrongCommit.decision = "BLOCKED";
-    wrongCommit.publicScopeReview.commit = "d".repeat(40);
+    wrongCommit.publicScopeConfirmation.commit = "d".repeat(40);
     expect(validateStanReleaseStatus(wrongCommit).join("\n")).toContain("SRG09のPASS");
     expect(deriveStanReleaseDecision(wrongCommit)).toBe("BLOCKED");
 
     const missingCommand = passingStatus();
     missingCommand.decision = "BLOCKED";
-    missingCommand.publicScopeReview.commands.pop();
+    missingCommand.publicScopeConfirmation.commands.pop();
     expect(validateStanReleaseStatus(missingCommand).join("\n")).toContain("対象commitの自動監査");
 
-    const selfReview = passingStatus();
-    selfReview.decision = "BLOCKED";
-    selfReview.publicScopeReview.reviewerCode = selfReview.primaryImplementerCode;
-    expect(validateStanReleaseStatus(selfReview).join("\n")).toContain("主実装者以外");
+    const ownerConfirmation = passingStatus();
+    ownerConfirmation.publicScopeConfirmation.confirmedByCode = ownerConfirmation.primaryImplementerCode;
+    expect(validateStanReleaseStatus(ownerConfirmation)).toEqual([]);
   });
 
   it("失敗証拠と未解決P1をFAILにし、管理済みP2だけを許容する", () => {
@@ -315,7 +310,8 @@ describe("Stan Release Gateの機械判定", () => {
     const report = spawnSync(process.execPath, [scriptPath, statusPath], { encoding: "utf8" });
     expect(report.status).toBe(0);
     expect(report.stdout).toContain("Stan Release Gate: BLOCKED");
-    expect(report.stdout).toContain("PASS 4/10");
+    expect(report.stdout).toContain("Required: PASS 4/6");
+    expect(report.stdout).toContain("Advisory: PASS 0/4");
     expect(report.stdout).toContain("learners: 0/3");
     expect(report.stdout).toContain("delayed retention: 0/3");
 

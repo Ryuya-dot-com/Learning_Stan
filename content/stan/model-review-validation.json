@@ -10,7 +10,7 @@
   "flags": [
     "--warn-pedantic"
   ],
-  "corpusSha256": "e038a011e9013a5228c5a0c0cb2ef7e77202548db20d377a650ba016ae3650c1",
+  "corpusSha256": "1e66b26de0469924b77aec57a481e1ed5984f27fde94e8eaaf409dedaa0973de",
   "cases": [
     {
       "id": "mr01",
