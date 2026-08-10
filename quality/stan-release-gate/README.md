@@ -45,7 +45,7 @@ npm run gate:stan-release:require-pass
 
 `SRG09`の自動検査は`npm run build`と`npm run audit:stan-public-scope`です。Git管理対象に非公開観察path、credentialファイル、代表的なsecret、メールアドレス、実ユーザー名を含む絶対pathがないことを検査し、`roadmap.html`を除くビルド成果物へL34〜L41の教材が混入していないことを確認します。自動検査が判断できない公開権限や自由記述の匿名性は、リポジトリ所有者が確認日とコードを`publicScopeConfirmation`へ記録します。独立署名は求めません。
 
-CI workflow自体はbase branchを問わずpull requestを検証し、Node・一般R・固定版CmdStanの3 jobを分離します。Node jobはビルド後に公開範囲自動監査も実行します。手動dispatchは検証だけを行い、Pagesへのupload・deployは`main`へのpushに限定します。公開候補を[`f7276e2`](https://github.com/Ryuya-dot-com/Learning_Stan/commit/f7276e235ed36d39c016982a2b34b5cc87d98af3)へ固定し、クリーンなworktreeで必須静的検証を再実行しました。さらに、同じSHAへの[push run 31325892271](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31325892271)で`build`・`r-verify`・`stan-verify`がすべて成功したため、`SRG02`と`SRG03`は`PASS`です。
+CI workflow自体はbase branchを問わずpull requestを検証し、Node・一般R・固定版CmdStanの3 jobを分離します。Node jobはビルド後に公開範囲自動監査も実行します。手動dispatchは検証だけを行い、Pagesへのupload・deployは`main`へのpushに限定します。公開候補を[`cbc6ef2`](https://github.com/Ryuya-dot-com/Learning_Stan/commit/cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff)へ固定し、クリーンなworktreeで必須静的検証を再実行しました。さらに、同じSHAへの[pull request run 31349208141](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31349208141)で`build`・`r-verify`・`stan-verify`がすべて成功したため、`SRG02`と`SRG03`は`PASS`です。
 
 同じrunで`npm run build`と`npm run audit:stan-public-scope`も成功し、`SRG09`の自動監査3項目は`PASS`になりました。リポジトリ所有者の確認が未記録なので、`SRG09`自体は`NOT RUN`です。
 

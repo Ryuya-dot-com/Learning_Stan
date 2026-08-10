@@ -460,8 +460,8 @@ Syntax Spineの公開判定は、次の証拠を別々に要求する。
 
 ### 2026-08-10 Stan公開候補の固定とCI証拠
 
-- 公開候補を`f7276e235ed36d39c016982a2b34b5cc87d98af3`へ固定し、クリーンなworktreeで`npm test`（24 files・395 tests）と`npm run test:stan-content`を再実行して`SRG02`を`PASS`にした
-- 同じSHAへの[push run 31325892271](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31325892271)で`build`・`r-verify`・`stan-verify`がすべて成功したため、`SRG03`を`PASS`にした
+- 公開候補を`cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff`へ固定し、クリーンなworktreeで`npm test`（24 files・397 tests）と`npm run test:stan-content`を再実行して`SRG02`を`PASS`にした
+- 同じSHAへの[pull request run 31349208141](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31349208141)で`build`・`r-verify`・`stan-verify`がすべて成功したため、`SRG03`を`PASS`にした
 - 同runのビルドと公開範囲自動監査も成功した。`SRG09`は自動部分を記録済みで、所有者の公開範囲確認待ちである
 - Stan Release Gateは必須6項目中`SRG02`〜`SRG05`の4/6が`PASS`になった。所有者の公開範囲確認と最終判断が残るため全体は`BLOCKED`である
 
