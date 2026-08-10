@@ -140,6 +140,48 @@ describe("レッスンデータ", () => {
       expect(text).not.toContain("非公開ドラフト");
     }
   });
+
+  it("Stanベータの画面へ教材制作側のID・公開判定・証跡ファイル名を出さない", () => {
+    const internalMarkers = [
+      ["内部課題ID", /\b(?:sr\d{2}[a-z]?|mr\d{2})\b/i],
+      ["教材制作・観察用語", /\b(?:beta-public|pilot|facilitator|delayed retention)\b/i],
+      ["公開判定用語", /Release Gate|対象commit|クリーンCI|runtime証拠|未解決P[01]|学習者観察/],
+      ["内部証跡ファイル", /(?:validation\.json|scripts\/verify-stan|model-review\/)/i],
+    ];
+
+    for (const lesson of LESSONS.filter((item) => item.section === "7-stan")) {
+      const visibleText = [
+        lesson.title,
+        lesson.tag,
+        ...lesson.pages.flatMap((page) => [page.t, ...page.b, page.code, ...page.a]),
+        ...lesson.ex.flatMap((exercise) => [
+          exercise.q,
+          exercise.code,
+          ...(exercise.opts || []),
+          exercise.why,
+          exercise.hint,
+          ...(exercise.rubric || []),
+          exercise.example,
+        ]),
+        lesson.practice?.title,
+        lesson.practice?.intro,
+        ...(lesson.practice?.items || []).flatMap((item) => [item.label, item.criterion]),
+        lesson.practiceLadder?.title,
+        lesson.practiceLadder?.intro,
+        ...(lesson.practiceLadder?.steps || []).flatMap((step) => [
+          step.label,
+          step.support,
+          step.task,
+          step.criterion,
+        ]),
+      ]
+        .filter(Boolean)
+        .join("\n");
+      for (const [label, pattern] of internalMarkers) {
+        expect(visibleText, `${lesson.id} に${label}が表示されています`).not.toMatch(pattern);
+      }
+    }
+  });
 });
 
 describe("到達目標―評価対応", () => {

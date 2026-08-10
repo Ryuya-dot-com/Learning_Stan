@@ -197,6 +197,30 @@ describe("Stan教材パック", () => {
     ).toContain("l41: 必須説明「claim–evidence–limit」がありません");
   });
 
+  it("L41原稿から読み手向けの後日復習案内を削ると検出する", () => {
+    const manuscripts = structuredClone(content.lessonManuscripts);
+    manuscripts.l41 = manuscripts.l41.replaceAll("1〜2週間後", "後日");
+    expect(
+      validateFoundationLessons(content.curriculum, content.foundationAssessments, manuscripts)
+    ).toContain("l41: 必須説明「1〜2週間後」がありません");
+  });
+
+  it("受講用原稿に内部保持IDが混入すると検出する", () => {
+    const manuscripts = structuredClone(content.lessonManuscripts);
+    manuscripts.l41 += "\n後日課題はsr41dとする。\n";
+    expect(
+      validateFoundationLessons(content.curriculum, content.foundationAssessments, manuscripts)
+    ).toContain("l41: 読み手向け原稿に内部文言「sr41d」が残っています");
+  });
+
+  it("受講用原稿に公開前の判定文言が混入すると検出する", () => {
+    const manuscripts = structuredClone(content.lessonManuscripts);
+    manuscripts.l40 += "\nStan Release Gateの判定が必要である。\n";
+    expect(
+      validateFoundationLessons(content.curriculum, content.foundationAssessments, manuscripts)
+    ).toContain("l40: 読み手向け原稿に内部文言「制作側の公開判定・検証用語」が残っています");
+  });
+
   it("L41の成果物追跡性を評価対象から外すと検出する", () => {
     const assessments = structuredClone(content.foundationAssessments);
     const questions = assessments.lessons.find((lesson) => lesson.lessonId === "l41").questions;

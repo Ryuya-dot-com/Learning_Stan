@@ -1,6 +1,6 @@
 # L39 generated quantitiesでモデルを検査・比較する
 
-状態: ベータ公開中（`beta-public`）
+> このレッスンはStanベータ編の一部です。L38で計算診断を確認したモデルを、予測と比較の観点から調べます。
 
 L38では、推定値の前にHMC診断、R-hat、ESS、MCSEを読み、指定した`target`を計算上信頼してよいか判断しました。L39では、その`target`が観測データの重要な特徴を再現できるかを`y_rep`で調べ、比較可能な候補モデルだけを観測別`log_lik`とPSIS-LOOで比べます。
 
@@ -17,13 +17,13 @@ L38では、推定値の前にHMC診断、R-hat、ESS、MCSEを読み、指定�
 5. Pareto kをELPD順位より先に読み、`elpd_diff`と`se_diff`を一緒に解釈する。
 6. stacking weightやLOO順位を、posterior model probability、モデルの真実性、因果同定の証拠と呼ばない。
 
-### 作る証拠
+### このレッスンで作るもの
 
 - 観測統計量と同じ統計量を各`y_rep`へ適用した事後予測チェック表・図
 - 壊れたpointwise `log_lik`を、予測単位を根拠に修正したデバッグ記録
 - 未見の反復測定データについて、予測対象、分割単位、PPC、PSIS診断、比較判断を分けたレビュー
 
-自己採点だけで修得とは判定しません。チェック前に選んだ統計量、初回の図、比較対象、除外単位、診断、判断、修正版を上書きせず残します。
+チェック前に選んだ統計量、初回の図、比較対象、除外単位、診断、判断、修正版を上書きせず残します。結果を見てから都合よく評価方法を変えていないか、自分で振り返れる形にしましょう。
 
 ## 1. generated quantitiesはposterior drawの後に実行される
 
@@ -276,7 +276,7 @@ print(comparison)
 
 ## 9. 実測済み二値回帰ケースを判断する
 
-教材の`link-comparison-validation.json`は、同じ400観測へ線形logitと二次logitを当て、各4 chain、warmup 750、sampling 750で実行した証拠です。
+ここで扱う二値回帰例では、同じ400観測へ線形logitと二次logitを当て、各4 chain、warmup 750、sampling 750で実行しています。
 
 | 項目 | 線形 | 二次 | 判断 |
 |---|---:|---:|---|
@@ -346,7 +346,7 @@ elpd_diff・se_diff・pointwise差を解釈
 
 PPCとLOOは競合する採点法ではありません。PPCは各モデルが重要なデータ特徴を再現できない箇所を探し、LOOは定義した予測課題における候補間の相対予測性能を評価します。
 
-## 12. 6回の接触で検査・比較を結ぶ
+## 12. 6回の練習で検査と比較を結ぶ
 
 ### 1回目: 読む・予測する
 
@@ -473,4 +473,4 @@ L38で計算診断を確認した単回帰fitから`y_rep`を抽出し、観測�
 - [loo: Model comparison](https://mc-stan.org/loo/reference/loo_compare.html)
 - [loo: Stacking and model weights](https://mc-stan.org/loo/reference/loo_model_weights.html)
 
-L39の原稿、理解問題、既存ケースの実行証拠はGitHub上でレビュー可能ですが、学習アプリへはまだ公開しません。実測値は`link-comparison-validation.json`に保存済みのrunだけを使用し、未実行の結果を補いません。
+L39を終えたら、観測値と複製データを同じ統計量で比べ、Pareto kをモデルの順位より先に確認できるか試してください。別の予測課題へ応用するときは、何を1つのデータ点として除くのかも選び直しましょう。

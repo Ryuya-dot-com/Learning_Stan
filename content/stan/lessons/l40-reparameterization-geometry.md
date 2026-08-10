@@ -1,6 +1,6 @@
 # L40 悪い幾何をモデル側から直す
 
-状態: ベータ公開中（`beta-public`）
+> このレッスンはStanベータ編の一部です。L38・L39で見つけた計算上の問題を、モデルの表現から改善します。
 
 L38では、推定値より先にdivergence、E-BFMI、R-hat、ESS、MCSEを読みました。L39では、計算できたposteriorが観測データの重要な特徴を再現するかを検査しました。L40では、警告の原因が階層モデルの座標と尺度にあるとき、生成モデルを保ったまま探索しやすい表現へ書き換えます。
 
@@ -17,13 +17,13 @@ L38では、推定値より先にdivergence、E-BFMI、R-hat、ESS、MCSEを読�
 5. 再パラメータ化、尺度の標準化、priorの変更、制約・切断・打ち切りを区別する。
 6. `adapt_delta`だけで警告を消すのではなく、原因仮説、変更、同値性、診断、予測を追跡可能な記録として残す。
 
-### 作る証拠
+### このレッスンで作るもの
 
 - funnelとcentered/non-centeredの同値性を数式・コードで説明したレビュー
 - centered表現をnon-centeredへ直し、弱い群情報と強い群情報で診断を比較するデバッグ記録
 - 未見のvarying-slopeモデルについて、尺度、parameterization、prior、予測を分離した転移レビュー
 
-理解問題への自己回答だけで修得とは判定しません。比較前の原因予測、初回コード、初回診断、修正版、再診断、実行時間、判断を上書きせず保存します。
+比較前の原因予測、初回コード、初回診断、修正版、再診断、実行時間、判断を上書きせず保存します。どの変更が診断の改善につながったかを後から説明できる形にしましょう。
 
 ## 1. 階層モデルは群を部分的にまとめる
 
@@ -210,7 +210,7 @@ noncentered_diagnostics <- noncentered_fit$diagnostic_summary()
 ```
 
 この断片は比較項目の設計例であり、下の仮想診断の数値を生成した実行コードではありません。
-実測に使った完全なコードは`examples/run-reparameterization-comparison.R`で、固定入力、全chainのCSV、3回の時間計測、モデル尺度の同値性表、2図を一つの出力先へ保存します。
+続く実測では、固定入力、全chainのCSV、3回の時間計測、モデル尺度の同値性表、2図を一つの出力先へ保存する完全な実行スクリプトを使います。
 
 ## 8. 仮想診断を正しく読む
 
@@ -234,9 +234,9 @@ noncentered_diagnostics <- noncentered_fit$diagnostic_summary()
 
 両表現に明らかな警告がなく、model-scaleのposteriorもMCSE内で整合するなら、この仮想ケースではcenteredを選ぶことが合理的です。「L40でnon-centeredを学んだから」という理由で遅い方を選ぶ必要はありません。
 
-## 9. このリポジトリで実測済みの範囲
+## 9. 教材で実測した範囲
 
-`model-review/mr03-centered.candidate.stan`と`model-review/mr03-noncentered.reference.stan`は、固定版stanc3 2.39.0、`--warn-pedantic`で構文成功・警告0件です。ソースのSHA-256も`model-review-validation.json`へ保存されています。
+比較に使ったcentered表現とnon-centered表現は、stanc3 2.39.0の`--warn-pedantic`で構文成功・警告0件を確認しています。実行時には、使用したソースと入力が途中で変わっていないことも内容指紋で照合しました。
 
 2026-08-09には、R 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0、Darwin arm64、Apple clang 21.0.0で両表現を実測しました。弱情報は8群・各1観測・真の`tau=0.1`、強情報は8群・各30観測・真の`tau=1`です。両条件・両表現へ同じ`adapt_delta=0.9`、warmup 1,000、sampling 1,000、4 chainを適用し、実行順を交互にした3反復を行いました。
 
@@ -251,7 +251,7 @@ noncentered_diagnostics <- noncentered_fit$diagnostic_summary()
 
 さらに、同じ固定データで`adapt_delta=0.99`、4 chain、sampling 2,000の同値性runを別に実行しました。`mu`、`tau`、`theta[1:8]`の20比較はすべて平均差が4 combined MCSE以内で、最大は0.886 MCSEでした。ただし弱情報centeredにはなお146 divergenceが残りました。したがって、平均の近さだけでcenteredの探索を正当化せず、数式上の同値性と診断良好なnon-centered runを合わせて判断します。
 
-機械可読な結果、source hash、入力hash、環境、12成果物、限界は`reparameterization-validation.json`に保存しています。再実行入口は`examples/run-reparameterization-comparison.R`、空の一時ディレクトリからの検証入口は`scripts/verify-stan-reparameterization-runtime.R`です。前節のケースA・Bは引き続き判断練習用の仮想診断であり、この実測表とは混ぜません。実測は固定した小規模正規random-interceptモデル1種の教材校正で、varying slope、相関構造、未知の観測誤差や別環境へ一般化する証拠ではありません。
+実測では、数値結果だけでなく、使用したソースと入力の内容指紋、環境、12個の成果物、解釈上の限界も一緒に記録しました。前節のケースA・Bは判断練習用の仮想診断であり、この実測表とは混ぜません。実測は固定した小規模正規random-interceptモデル1種での確認なので、varying slope、相関構造、未知の観測誤差や別環境へそのまま一般化はできません。
 
 ## 10. 標準化はpriorと報告尺度まで含めて設計する
 
@@ -307,7 +307,7 @@ prior・likelihood・implied parameter分布を数式で照合
 
 良好な計算診断は、指定したtargetを探索できたという証拠です。観測分布、prior、切断・打ち切り、予測妥当性の正しさは、L36とL39の検査へ戻って別に確認します。
 
-## 13. 6回の接触で再パラメータ化を定着させる
+## 13. 6回の練習で再パラメータ化を身につける
 
 ### 1回目: 読む・予測する
 
@@ -372,7 +372,7 @@ L41後、random interceptとvarying slopeを持つ未見モデルへ移します
    parameterの内部変換と観測過程の尤度は別です。
 
 9. **構文成功を推定性能の証拠とする**
-   `model-review-validation.json`は構文証拠、`reparameterization-validation.json`は固定2条件の複数chain実測です。証拠の役割と適用範囲を分けます。
+   構文確認はコードの文法と型を、複数chainの実測は指定条件での探索結果を確かめます。それぞれが答える問いを分けます。
 
 10. **仮想診断を実測値として引用する**
     教材内のケースA・Bは判断練習用です。第9節の保存runと明示的に分けます。
@@ -434,4 +434,4 @@ centeredとnon-centeredのコードを並べ、`tau`が小さいときの`theta`
 - [CmdStan Guide: Diagnose utility](https://mc-stan.org/docs/cmdstan-guide/diagnose_utility.html)
 - [Stan Reference Manual: Posterior Analysis](https://mc-stan.org/docs/reference-manual/analysis.html)
 
-L40の原稿、理解問題、構文証拠、弱・強情報の複数chain比較はGitHub上でレビュー可能ですが、学習アプリへはまだ公開しません。ローカル実測はStan Release GateのSRG05を満たす証拠になりますが、対象commitの静的検証・クリーンCI・runtime再検証・公開範囲確認・最終判断は別途必要です。第三者フィードバック、初学者観察、遅延保持は公開を止めない改善証拠として継続します。
+L40を終えたら、centeredとnon-centeredのどちらかを無条件に選ぶのではなく、群ごとの情報量を変えて診断、MCSE、ESS/secを比べてみてください。表現を変えても同じ生成モデルを保てているか、数式と事後予測の両方から説明しましょう。
