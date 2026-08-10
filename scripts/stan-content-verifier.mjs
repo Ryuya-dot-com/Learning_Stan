@@ -211,7 +211,7 @@ export function validateCmdStanRunner(source) {
 export function validateGrammarDrills(drills) {
   const errors = [];
   if (drills?.schemaVersion !== 1) errors.push("grammar-drills.schemaVersionは1である必要があります");
-  if (drills?.status !== "draft-unpublished") errors.push("文法ドリルは公開ゲート通過までdraft-unpublishedである必要があります");
+  if (drills?.status !== "beta-public") errors.push("文法ドリルはbeta-publicである必要があります");
   if (drills?.practiceOrder?.join("|") !== EXPECTED_PRACTICE_STAGES.join("|")) {
     errors.push("文法ドリルは写経・変更・白紙再現・転移の順である必要があります");
   }
@@ -261,9 +261,9 @@ export function validateGrammarDrills(drills) {
 export function validateFoundationLessons(curriculum, assessments, manuscripts) {
   const errors = [];
   const delivery = curriculum?.lessonDelivery;
-  if (delivery?.status !== "draft-unpublished" ||
+  if (delivery?.status !== "beta-public" ||
       delivery?.assessmentArtifact !== "foundation-assessments.json") {
-    errors.push("L34–L41の受講用原稿と理解問題が非公開教材契約へ接続されていません");
+    errors.push("L34–L41の受講用原稿と理解問題がベータ公開契約へ接続されていません");
   }
   if (delivery?.authoredLessonIds?.join("|") !== EXPECTED_AUTHORED_LESSON_IDS.join("|")) {
     errors.push("受講用原稿の完成範囲はL34–L41である必要があります");
@@ -273,8 +273,8 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
     errors.push("L34–L41の必須見出しまたは6接触設計が不足しています");
   }
 
-  if (assessments?.schemaVersion !== 1 || assessments?.status !== "draft-unpublished") {
-    errors.push("foundation-assessmentsはschemaVersion 1の非公開ドラフトである必要があります");
+  if (assessments?.schemaVersion !== 1 || assessments?.status !== "beta-public") {
+    errors.push("foundation-assessmentsはschemaVersion 1のbeta-publicである必要があります");
   }
   const designRules = assessments?.designRules;
   if (designRules?.questionsPerLesson !== 5 ||
@@ -362,8 +362,8 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
     if (!manuscript.startsWith(`# ${lessonId.toUpperCase()}`)) {
       errors.push(`${lessonId}: 原稿見出しがレッスンIDで始まっていません`);
     }
-    if (!manuscript.includes("状態: 非公開ドラフト")) {
-      errors.push(`${lessonId}: 原稿が公開前ドラフトであることを明示していません`);
+    if (!manuscript.includes("状態: ベータ公開中")) {
+      errors.push(`${lessonId}: 原稿がベータ公開中であることを明示していません`);
     }
     for (const section of delivery.requiredSections || []) {
       if (!manuscript.includes(`## ${section}`)) errors.push(`${lessonId}: 必須見出し「${section}」がありません`);
@@ -1358,7 +1358,7 @@ export function validateExistingRuntimeRevalidation(evidence, sources) {
 export function validateCurriculum(curriculum) {
   const errors = [];
   if (curriculum?.schemaVersion !== 1) errors.push("curriculum.schemaVersionは1である必要があります");
-  if (curriculum?.status !== "draft-unpublished") errors.push("Stan教材は公開ゲート通過までdraft-unpublishedである必要があります");
+  if (curriculum?.status !== "beta-public") errors.push("Stan教材はbeta-publicである必要があります");
   if (!Array.isArray(curriculum?.lessons)) return [...errors, "curriculum.lessonsがありません"];
 
   const grammarPractice = curriculum?.grammarPractice;
@@ -1447,7 +1447,7 @@ export function validateCurriculum(curriculum) {
   if (!caseStudy) {
     errors.push("切断モデルの実行ケーススタディがカリキュラムにありません");
   } else {
-    if (caseStudy.status !== "draft-unpublished") errors.push("切断ケースは公開ゲート通過まで非公開である必要があります");
+    if (caseStudy.status !== "beta-public") errors.push("切断ケースはbeta-publicである必要があります");
     if (caseStudy.manuscript !== "truncation-case-study.md" ||
         caseStudy.runner !== "examples/run-distribution-models.R" ||
         caseStudy.evidence !== "scenario-validation.json") {
@@ -1466,8 +1466,8 @@ export function validateCurriculum(curriculum) {
   if (!linkCase) {
     errors.push("リンク関数とLOOの実行ケーススタディがカリキュラムにありません");
   } else {
-    if (linkCase.status !== "draft-unpublished") {
-      errors.push("リンク関数・LOOケースは公開ゲート通過まで非公開である必要があります");
+    if (linkCase.status !== "beta-public") {
+      errors.push("リンク関数・LOOケースはbeta-publicである必要があります");
     }
     if (linkCase.manuscript !== "link-functions-model-comparison.md" ||
         linkCase.runner !== "examples/run-link-model-comparison.R" ||
@@ -1489,8 +1489,8 @@ export function validateCurriculum(curriculum) {
   if (!reparameterizationCase) {
     errors.push("中心化・非中心化の実行ケーススタディがカリキュラムにありません");
   } else {
-    if (reparameterizationCase.status !== "draft-unpublished") {
-      errors.push("再パラメータ化ケースは公開ゲート通過まで非公開である必要があります");
+    if (reparameterizationCase.status !== "beta-public") {
+      errors.push("再パラメータ化ケースはbeta-publicである必要があります");
     }
     if (reparameterizationCase.manuscript !== "lessons/l40-reparameterization-geometry.md" ||
         reparameterizationCase.runner !== "examples/run-reparameterization-comparison.R" ||
@@ -1834,7 +1834,7 @@ function runCli() {
     return;
   }
   console.log(
-    `Stan content: PASS (${content.curriculum.lessons.length} draft lessons, ` +
+    `Stan content: PASS (${content.curriculum.lessons.length} beta lessons, ` +
     `${content.curriculum.lessonDelivery.authoredLessonIds.length} authored lesson manuscripts, ` +
     `${content.foundationAssessments.lessons.reduce((sum, lesson) => sum + lesson.questions.length, 0)} foundation assessments, ` +
     `${content.grammarDrills.units.length} grammar units, ` +

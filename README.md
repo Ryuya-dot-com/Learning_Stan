@@ -1,23 +1,23 @@
 # はじめてのRとStan — 研究室のためのベイズ統計入門
 
-プログラミング未経験の学生のための、日本語のR自習教材です。
-最初はインストール不要の短い体験から始め、その後にRとRStudioを準備して、研究データの読み込み・整形・要約・保存までを自分のPCで確かめます。
+プログラミング未経験の学生のための日本語R自習教材と、ベイズ統計を学習済みの方向けのStanベータ教材です。
+最初はインストール不要の短い体験から始め、その後にRとRStudioを準備して、研究データの読み込み・整形・要約・保存までを自分のPCで確かめます。Stan編ではCmdStanRを使い、実装・診断・予測検査・報告まで進みます。
 
 **教材はこちら → https://ryuya-dot-com.github.io/Learning_Stan/**
 
-- 体験 → STEP 0（環境構築）→ R基礎8レッスン → Foundation Check → STEP 1（データ操作6レッスン）の一本道を公開中
+- 体験 → STEP 0（環境構築）→ R基礎8レッスン → Foundation Check → STEP 1（データ操作6レッスン）を公開中。加えて、ベイズ統計を別途学習済みの方向けにSTEP 6 Stan（L34〜L41）をベータ公開中
 - 各レッスンは、説明の後に「まねる → ひとつ変える → 見ずに作る → 別の場面で使う」を順番に反復してから理解問題へ進みます
 - STEP 1は「認知課題のパイロットデータで、正答試行のincong−cong差を参加者ごとに記述し、再生成可能なCSVと限界付き結果メモを納品する」という1つの分析依頼で全6レッスンを接続しています
 - STEP 1には、CSV 3件（問題入りの品質検査用を含む）・TSV 1件・区切りTXT 1件・Excel 3件、読み込みから成果物の再生成までを一周する[Quarto演習ノート](https://ryuya-dot-com.github.io/Learning_Stan/notebooks/nb1-data.qmd)、実務形式の[完成版Rスクリプト](https://ryuya-dot-com.github.io/Learning_Stan/scripts/step1_analysis.R)があります
 - STEP 1の各レッスン冒頭から、展開するだけでProject構成が揃う[一括スターターZIP](https://ryuya-dot-com.github.io/Learning_Stan/downloads/learning-stan-step1.zip)、その回で使う個別データ、演習ノートをダウンロードできます。CSV・TSV・任意区切りテキスト・Excel・複数Excelの一括読込に加え、rawを上書きしない品質検査とprocessedへの保存を扱います
 - L16修了後には、列名・条件名・参加者を入れ替えた[独立転移課題](https://ryuya-dot-com.github.io/Learning_Stan/challenges/step1-transfer.qmd)があります。完成コードは載せず、別シナリオで同じ品質判断と集計を再構成し、付属チェッカーで成果物だけを自己採点します
-- 続編（可視化・シミュレーション・ベイズ推定・brms・Stan）の構想は [学習ロードマップ](https://ryuya-dot-com.github.io/Learning_Stan/roadmap.html) を参照
+- 整備中のSTEP 2〜5（可視化・シミュレーション・ベイズ推定・brms）と全体構想は [学習ロードマップ](https://ryuya-dot-com.github.io/Learning_Stan/roadmap.html) を参照
 - 品質改善・検証基盤・段階公開の実行計画は [改善・発展ロードマップ](ROADMAP.md) を参照
 - GitHubで公開するソース、学習アプリへ出す教材、実観察で非公開にする記録の境界は [公開範囲ポリシー](PUBLICATION_SCOPE.md) を参照
 - 実機アクセシビリティ監査・初学者観察・公開判定の手順は [Foundation Gate実施キット](quality/foundation-gate/README.md) を参照
 - L12→L13で「読込成功」と「分析可能な品質」を区別できるかの観察手順は [STEP 1 Data Quality Gate](quality/step1-data-gate/README.md) を参照
 - L16修了後に、中心課題を見ず別データへ品質検査・集計・解釈を移せるかの観察手順は [STEP 1独立転移観察キット](quality/step1-transfer-gate/README.md) を参照
-- Stan編は [教材パック](content/stan/README.md) でL34「実行経路とデータ契約」からL41「自分のモデルを設計・診断・報告する」までの受講用原稿8本と理解問題40問を実装しました。対象commitの静的検証・クリーンCI、単回帰・切断・PSIS-LOOの再検証、L40の弱・強情報比較、所有者の公開範囲確認と最終判断が完了し、[Stan Release Gate](quality/stan-release-gate/README.md)は必須6/6で`PASS`です。学習アプリへの導線有効化は別commitで行います。第三者から得た「練習問題の反復を増やしてほしい」という感想は次候補の改善項目として記録し、初学者観察・遅延保持とともに公開後も追跡します
+- Stan編は [教材パック](content/stan/README.md) のL34「実行経路とデータ契約」からL41「自分のモデルを設計・診断・報告する」までを学習アプリへ接続しました。受講用原稿8本、理解問題40問、各レッスンの4段階反復練習（計32段階）、成果物チェック、[Stan演習ノート](https://ryuya-dot-com.github.io/Learning_Stan/notebooks/nb6-stan.qmd)を公開します。[Stan Release Gate](quality/stan-release-gate/README.md)は必須6/6で`PASS`です。初学者観察と遅延保持は未実施の改善証拠として追跡し、学習効果・保持効果を確認済みとは主張しません
 - STEP 2は [非公開教材パック](content/step2/README.md) でL17–L20の意味ID・依存関係・成果物契約、L17記述統計、L18分布図、L19参加者内対応図、L20一括再生成・限界報告、20件の診断的理解問題を検証中です。[初心者観察ゲート](quality/step2-observation-gate/README.md)の通過前は公開アプリへ含めません
 - 4段階練習・理解問題・実機チェックの進みぐあいは、版付きデータとしてブラウザ内に保存されます（サーバには何も送信しません）。4段階練習は自己記録であり、それだけでは理解済みになりません。記述回答の本文は保存せず、JSONの書き出し・読み込み・明示的なリセットができます
 

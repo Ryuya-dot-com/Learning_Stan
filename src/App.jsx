@@ -229,7 +229,7 @@ export default function RStanLearningApp() {
           nextView?.name === "foundation"
             ? "Foundation Checkへすすむ"
             : nextView?.name === "home"
-              ? "STEP 1の成果を確認する"
+              ? "Stanベータの成果を確認する"
               : "次の段階へすすむ"
         }
         resources={pathMeta?.resources || []}

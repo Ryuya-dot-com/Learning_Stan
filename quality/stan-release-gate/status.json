@@ -168,7 +168,7 @@
       "artifacts": [
         "quality/stan-release-gate/feedback-2026-08-10.md"
       ],
-      "note": "練習問題の反復を増やしてほしいという感想を匿名要約し、次の教材候補で扱う改善項目として記録した"
+      "note": "練習問題の反復を増やしてほしいという感想を匿名要約し、L34〜L41へ各4段階・計32段階の反復練習を追加した"
     },
     {
       "id": "SRG07",
@@ -204,10 +204,11 @@
     {
       "id": "SRG-IMPROVEMENT-001",
       "severity": "P3",
-      "status": "OPEN",
+      "status": "CLOSED",
       "summary": "Stan編の練習問題の反復を増やす",
       "owner": "CODEX",
-      "retest": "次の教材候補で反復課題を追加し、Stan教材静的検証と理解問題対応を再確認する"
+      "retest": "L34〜L41の各4段階練習、既存40問、成果物チェックをnpm testとStan教材静的検証で再確認する",
+      "resolutionArtifact": "src/data/practiceLadders.js"
     }
   ]
 }

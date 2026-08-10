@@ -8,7 +8,7 @@ import {
 import { dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-export const PUBLIC_SCOPE_AUDIT_SCHEMA_VERSION = 1;
+export const PUBLIC_SCOPE_AUDIT_SCHEMA_VERSION = 2;
 
 const PRIVATE_PATH_RULES = [
   {
@@ -65,16 +65,10 @@ const PERSONAL_DATA_RULES = [
 // secret規則はpackage-lock.jsonにも引き続き適用する。
 const PERSONAL_DATA_EXCLUDED_PATHS = new Set(["package-lock.json"]);
 
-const APP_SOURCE_PATH_PATTERN = /^src\/data\/lessons\/7-stan(?:\/|$)/i;
-const APP_SOURCE_CONTENT_RULES = [
-  { id: "stan-lesson-id", pattern: /\bid\s*:\s*["'](?:l(?:3[4-9]|4[01])|stan-l(?:3[4-9]|4[01])[^"']*)["']/gi },
-  { id: "stan-content-import", pattern: /content\/stan\/(?:lessons|examples)\//gi },
-];
-const APP_BUILD_CONTENT_RULES = [
-  { id: "built-stan-assessment", pattern: /stan-l(?:3[4-9]|4[01])-/gi },
-  { id: "built-stan-lesson-source", pattern: /l(?:3[4-9]|4[01])-[a-z0-9-]+\.md/gi },
-  { id: "built-stan-first-lesson", pattern: /L34 RからStanへ/g },
-];
+const APPROVED_STAN_LESSON_IDS = Object.freeze([
+  "l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41",
+]);
+const APPROVED_STAN_SOURCE_PATH = /^src\/data\/lessons\/7-stan\/(l\d+)-[a-z0-9-]+\.js$/i;
 
 function normalizePath(path) {
   return path.replaceAll("\\", "/");
@@ -133,11 +127,11 @@ export function auditTrackedEntries(entries) {
       findings.push(...findingsForRules(path, text, PERSONAL_DATA_RULES, "personal-data"));
     }
 
-    if (path.startsWith("src/")) {
-      if (APP_SOURCE_PATH_PATTERN.test(path)) {
-        findings.push({ category: "app-scope", rule: "stan-lesson-source-path", path, line: null });
+    if (path.startsWith("src/data/lessons/7-stan/")) {
+      const lessonId = path.match(APPROVED_STAN_SOURCE_PATH)?.[1]?.toLowerCase();
+      if (!lessonId || !APPROVED_STAN_LESSON_IDS.includes(lessonId)) {
+        findings.push({ category: "app-scope", rule: "unapproved-stan-lesson-source", path, line: null });
       }
-      findings.push(...findingsForRules(path, text, APP_SOURCE_CONTENT_RULES, "app-scope"));
     }
   }
 
@@ -167,18 +161,29 @@ export function auditBuiltApp(root) {
 
   const findings = [];
   let filesScanned = 0;
+  let builtText = "";
   for (const absolutePath of walkFiles(distRoot)) {
     const path = normalizePath(relative(root, absolutePath));
     const distRelative = normalizePath(relative(distRoot, absolutePath));
-    if (distRelative === "roadmap.html") continue;
-    if (/(^|\/)stan(?:\/|$)/i.test(distRelative) || extname(distRelative).toLowerCase() === ".stan") {
-      findings.push({ category: "app-scope", rule: "built-stan-path", path, line: null });
-    }
 
     const buffer = readFileSync(absolutePath);
     if (isProbablyBinary(buffer)) continue;
     filesScanned += 1;
-    findings.push(...findingsForRules(path, buffer.toString("utf8"), APP_BUILD_CONTENT_RULES, "app-scope"));
+    if (distRelative !== "roadmap.html") builtText += `\n${buffer.toString("utf8")}`;
+  }
+
+  for (const lessonId of APPROVED_STAN_LESSON_IDS) {
+    if (!builtText.includes(`stan-${lessonId}-q1-`)) {
+      findings.push({
+        category: "app-scope",
+        rule: "missing-built-stan-lesson",
+        path: `dist:${lessonId}`,
+        line: null,
+      });
+    }
+  }
+  if (!builtText.includes("NB6: Stanモデルを実装・診断・報告する")) {
+    findings.push({ category: "app-scope", rule: "missing-stan-notebook", path: "dist/notebooks/nb6-stan.qmd", line: null });
   }
 
   return { findings, filesScanned };

@@ -1,3 +1,5 @@
+import { STAN_OUTCOMES } from "./stanLesson.js";
+
 // 到達目標―評価対応表の正本。
 // exerciseIndex は0始まり。direct は目標動詞を直接測る証拠、supporting は前提知識の確認。
 export const OUTCOMES = [
@@ -197,4 +199,5 @@ export const OUTCOMES = [
       { kind: "practice", itemId: "reproduce-output", method: "self-attested-performance", strength: "direct", dimensions: ["reproduction"], criterion: "Rを再起動して同じ成果物を再生成する" },
     ],
   },
+  ...STAN_OUTCOMES,
 ];

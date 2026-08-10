@@ -1,6 +1,6 @@
 # L38 推定値より先に診断を読む
 
-状態: 非公開ドラフト（`draft-unpublished`）
+状態: ベータ公開中（`beta-public`）
 
 L37では、環境・入力・sampling設定・出力を1つのrunへ結び付けました。L38では、そのrunから得たdrawを使って推定値を解釈してよいか判断します。係数の符号やcredible intervalを見る前に、HMCが指定した`target`を探索できたか、複数chainが整合したか、研究上必要な精度があるかを順番に確認します。
 

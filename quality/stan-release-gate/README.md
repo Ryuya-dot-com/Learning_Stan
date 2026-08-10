@@ -43,7 +43,7 @@ npm run gate:stan-release:require-pass
 
 `SRG02`は`staticVerification`に対象commit、`npm test`と`npm run test:stan-content`、証拠リンクを記録し、すべてが`target.commit`と一致する場合だけ`PASS`にできます。`SRG03`は`cleanCi`に対象commit、GitHub Actions run URL、イベント、`build`・`r-verify`・`stan-verify`の状態を記録し、3 jobが同じ対象commitで成功した場合だけ`PASS`にできます。
 
-`SRG09`の自動検査は`npm run build`と`npm run audit:stan-public-scope`です。Git管理対象に非公開観察path、credentialファイル、代表的なsecret、メールアドレス、実ユーザー名を含む絶対pathがないことを検査し、`roadmap.html`を除くビルド成果物へL34〜L41の教材が混入していないことを確認します。自動検査が判断できない公開権限や自由記述の匿名性は、リポジトリ所有者が確認日とコードを`publicScopeConfirmation`へ記録します。独立署名は求めません。
+`SRG09`の自動検査は`npm run build`と`npm run audit:stan-public-scope`です。Git管理対象に非公開観察path、credentialファイル、代表的なsecret、メールアドレス、実ユーザー名を含む絶対pathがないことを検査します。アプリ範囲については、承認済みL34〜L41以外のStanレッスンを拒否し、ビルド成果物に8レッスンとNB6がすべて含まれることを確認します。自動検査が判断できない公開権限や自由記述の匿名性は、リポジトリ所有者が確認日とコードを`publicScopeConfirmation`へ記録します。独立署名は求めません。
 
 CI workflow自体はbase branchを問わずpull requestを検証し、Node・一般R・固定版CmdStanの3 jobを分離します。Node jobはビルド後に公開範囲自動監査も実行します。手動dispatchは検証だけを行い、Pagesへのupload・deployは`main`へのpushに限定します。公開候補を[`cbc6ef2`](https://github.com/Ryuya-dot-com/Learning_Stan/commit/cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff)へ固定し、クリーンなworktreeで必須静的検証を再実行しました。さらに、同じSHAへの[pull request run 31349208141](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31349208141)で`build`・`r-verify`・`stan-verify`がすべて成功したため、`SRG02`と`SRG03`は`PASS`です。
 
@@ -51,7 +51,7 @@ CI workflow自体はbase branchを問わずpull requestを検証し、Node・一
 
 ## 第三者の感想を得たとき
 
-[短いフィードバック・メモ](FEEDBACK_NOTES.md)を使います。正式な審査や署名は不要で、全3 scopeを一人に確認してもらう必要もありません。感想を教材の正しさや学習効果の証明へ格上げせず、改善した点と見送った点を残します。`SRG06`は完了判定の`PASS`ではなく、感想を要約したことを示す`RECORDED`として扱います。現在は「練習問題の反復を増やしてほしい」という[匿名要約](feedback-2026-08-10.md)を記録し、次候補のP3改善項目へ結び付けています。
+[短いフィードバック・メモ](FEEDBACK_NOTES.md)を使います。正式な審査や署名は不要で、全3 scopeを一人に確認してもらう必要もありません。感想を教材の正しさや学習効果の証明へ格上げせず、改善した点と見送った点を残します。`SRG06`は完了判定の`PASS`ではなく、感想を要約したことを示す`RECORDED`として扱います。「練習問題の反復を増やしてほしい」という[匿名要約](feedback-2026-08-10.md)を記録し、L34〜L41の各レッスンへ4段階練習を追加する形で反映しました。
 
 ## 状態
 

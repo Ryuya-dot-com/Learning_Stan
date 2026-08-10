@@ -1,6 +1,6 @@
 # リンク関数と予測モデル比較――尺度をつなぎ、比較できるものだけを比べる
 
-状態: `draft-unpublished`。この原稿はFoundation Gate通過前の非公開教材です。
+状態: `beta-public`。Foundation Gateと初学者観察は未実施の改善証拠として明記したうえで公開します。
 
 ## この回のダウンロード
 

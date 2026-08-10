@@ -11,12 +11,13 @@ describe("Stan公開範囲監査", () => {
   it("公開可能なソースと合成データを通す", () => {
     const result = auditTrackedEntries([
       { path: "src/data/lessons/2-data/l16-reshape-save.js", content: "export default { id: 'l16' };" },
+      { path: "src/data/lessons/7-stan/l34-execution-data-contract.js", content: "export default { id: 'l34' };" },
       { path: "public/data/synthetic.csv", content: "participant,condition\nP01,A\n" },
       { path: "quality/stan-release-gate/README.md", content: "secretをコミットしない。" },
     ]);
 
     expect(result.findings).toEqual([]);
-    expect(result.textFilesScanned).toBe(3);
+    expect(result.textFilesScanned).toBe(4);
   });
 
   it("非公開pathと代表的なcredentialを値を露出せず検出する", () => {
@@ -60,26 +61,26 @@ describe("Stan公開範囲監査", () => {
     ]);
   });
 
-  it("Stanレッスンのアプリsource混入を検出する", () => {
+  it("承認範囲外のStanレッスンだけを拒否する", () => {
     const result = auditTrackedEntries([
-      { path: "src/data/lessons/7-stan/l34-execution.js", content: "export default { id: 'l34' };" },
+      { path: "src/data/lessons/7-stan/l42-future.js", content: "export default { id: 'l42' };" },
     ]);
 
-    expect(result.findings.map(({ rule }) => rule)).toEqual(expect.arrayContaining([
-      "stan-lesson-source-path",
-      "stan-lesson-id",
-    ]));
+    expect(result.findings.map(({ rule }) => rule)).toEqual(["unapproved-stan-lesson-source"]);
   });
 
-  it("roadmapは許可し、通常のビルドassetへ混入したStan教材だけを拒否する", () => {
+  it("ビルドにL34〜L41とStan演習ノートが揃っていることを確認する", () => {
     const root = mkdtempSync(join(tmpdir(), "learning-stan-public-scope-"));
     mkdirSync(join(root, "dist", "assets"), { recursive: true });
+    mkdirSync(join(root, "dist", "notebooks"), { recursive: true });
     writeFileSync(join(root, "dist", "roadmap.html"), "<h3>L34 RからStanへ</h3>");
-    writeFileSync(join(root, "dist", "assets", "index.js"), "const id = 'stan-l34-q1-contract';");
+    writeFileSync(
+      join(root, "dist", "assets", "index.js"),
+      [34, 35, 36, 37, 38, 39, 40, 41].map((id) => `stan-l${id}-q1-marker`).join("\n"),
+    );
+    writeFileSync(join(root, "dist", "notebooks", "nb6-stan.qmd"), "NB6: Stanモデルを実装・診断・報告する");
 
     const result = auditBuiltApp(root);
-    expect(result.findings).toEqual([
-      expect.objectContaining({ category: "app-scope", rule: "built-stan-assessment" }),
-    ]);
+    expect(result.findings).toEqual([]);
   });
 });

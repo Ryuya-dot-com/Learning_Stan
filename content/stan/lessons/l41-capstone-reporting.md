@@ -1,6 +1,6 @@
 # L41 自分のモデルを設計・診断・報告する
 
-状態: 非公開ドラフト（`draft-unpublished`）
+状態: ベータ公開中（`beta-public`）
 
 L34からL40までに、RとStanの境界、生成過程、再現可能な実行、HMC診断、事後予測、予測比較、再パラメータ化を一つずつ扱いました。L41では、それらを自分の研究課題へ統合し、第三者が「何を意図し、何を実行し、どの証拠から何を主張したか」を追跡できる卒業制作にします。
 
@@ -470,4 +470,4 @@ L41修了後の`sr41d`で、7〜14日を置いて別の応答型へ移します�
 - [CmdStanR: Save output files](https://mc-stan.org/cmdstanr/reference/fit-method-save_output_files.html)
 - [loo: Efficient approximate leave-one-out cross-validation](https://mc-stan.org/loo/reference/loo.html)
 
-L41の原稿と理解問題が揃うと、L34–L41の受講用原稿系列は完成します。ただし、これはStan編の公開ゲート通過や、学習者の卒業制作・遅延保持が実測済みという意味ではありません。GitHub上ではレビュー可能な非公開ドラフトとして扱い、学習アプリにはまだ掲載しません。
+L34–L41の受講用原稿系列と理解問題は完成し、Stan Release Gateの必須6/6を満たしてベータ公開しています。ただし、学習者の卒業制作・初学者観察・遅延保持が実測済みという意味ではありません。未実施の学習効果を一般化せず、公開後の改善証拠として継続します。

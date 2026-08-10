@@ -125,6 +125,21 @@ describe("レッスンデータ", () => {
     expect(prerequisiteText).toContain("Foundation Checkの後に進むSTEP 1");
     expect(indexHtml).toContain("CSV・Excelの読み込み、品質検査、要約、保存までを公開中");
   });
+
+  it("StanベータはL34〜L41を各5問・4段階練習・3成果物で公開する", () => {
+    const stanLessons = LESSONS.filter((lesson) => lesson.section === "7-stan");
+
+    expect(stanLessons.map((lesson) => lesson.id)).toEqual([
+      "l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41",
+    ]);
+    for (const lesson of stanLessons) {
+      expect(lesson.ex).toHaveLength(5);
+      expect(lesson.practiceLadder.steps).toHaveLength(4);
+      expect(lesson.practice.items).toHaveLength(3);
+      const text = lesson.pages.flatMap((page) => [...page.b, ...page.a]).join("\n");
+      expect(text).not.toContain("非公開ドラフト");
+    }
+  });
 });
 
 describe("到達目標―評価対応", () => {
@@ -178,10 +193,13 @@ describe("到達目標―評価対応", () => {
 describe("実践チェック", () => {
   const practiceLessons = LESSONS.filter((lesson) => lesson.practice);
 
-  it("Foundation CheckとSTEP 1成果物を、それぞれ実機で確認する", () => {
-    expect(practiceLessons.map((lesson) => lesson.id)).toEqual(["l10", "l16"]);
+  it("Foundation Check・STEP 1成果物・Stan成果物を実機で確認する", () => {
+    expect(practiceLessons.map((lesson) => lesson.id)).toEqual([
+      "l10", "l16", "l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41",
+    ]);
     expect(practiceLessons[0].practice.items).toHaveLength(5);
     expect(practiceLessons[1].practice.items).toHaveLength(4);
+    for (const lesson of practiceLessons.slice(2)) expect(lesson.practice.items).toHaveLength(3);
   });
 
   it.each(practiceLessons.map((lesson) => [lesson.id, lesson]))("%s: ID・説明・コード検証方法が完全", (_, lesson) => {

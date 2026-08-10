@@ -22,8 +22,8 @@ function understood(ids) {
 }
 
 describe("初心者向け学習パス", () => {
-  it("公開中の番号付きレッスンを、体験→準備→R基礎→データ操作の順で一度ずつ扱う", () => {
-    expect(LEARNING_LESSON_IDS).toEqual(["l1", "l10", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l11", "l12", "l13", "l14", "l15", "l16"]);
+  it("公開中の番号付きレッスンを、R基礎・データ操作・Stanベータの順で一度ずつ扱う", () => {
+    expect(LEARNING_LESSON_IDS).toEqual(["l1", "l10", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l11", "l12", "l13", "l14", "l15", "l16", "l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41"]);
     expect([...LEARNING_LESSON_IDS].sort()).toEqual(
       LESSONS.filter((lesson) => lesson.num != null).map((lesson) => lesson.id).sort()
     );
@@ -57,7 +57,7 @@ describe("初心者向け学習パス", () => {
     expect(nextLessonInPath(LESSONS.find((lesson) => lesson.id === "l9"))).toBeNull();
   });
 
-  it("Foundation後はSTEP 1へ進み、STEP 1成果物まで満たすと公開中トラックを修了する", () => {
+  it("Foundation後はSTEP 1へ進み、STEP 1後はStanベータへ進む", () => {
     const foundationPractice = LESSONS.find((lesson) => lesson.id === FOUNDATION_LESSON_ID).practice.items.map((item) => item.id);
     const dataPractice = LESSONS.find((lesson) => lesson.id === "l16").practice.items.map((item) => item.id);
     const afterFoundation = {
@@ -74,8 +74,22 @@ describe("初心者向け学習パス", () => {
     };
     expect(foundationIsComplete(progress)).toBe(true);
     expect(lessonPracticeIsComplete(progress, "l16")).toBe(true);
-    expect(getJourneyState(progress).complete).toBe(true);
-    expect(JOURNEY_STAGES).toHaveLength(5);
+    expect(getJourneyState(progress)).toMatchObject({
+      complete: false,
+      stage: { id: "stan" },
+      targetView: { name: "lesson", id: "l34" },
+    });
+
+    const stanPractice = Object.fromEntries(
+      LESSONS.filter((lesson) => /^l(?:3[4-9]|4[01])$/.test(lesson.id))
+        .map((lesson) => [lesson.id, lesson.practice.items.map((item) => item.id)])
+    );
+    const complete = {
+      ...progress,
+      practice: { ...progress.practice, ...stanPractice },
+    };
+    expect(getJourneyState(complete).complete).toBe(true);
+    expect(JOURNEY_STAGES).toHaveLength(6);
   });
 
   it("L16の理解問題だけ終えても成果物チェックが残っていればL16を案内する", () => {
@@ -97,6 +111,8 @@ describe("初心者向け学習パス", () => {
     expect(getLessonPathMeta("l10").eyebrow).toBe("STEP 0");
     expect(getLessonPathMeta("l2").eyebrow).toBe("R基礎 1 / 8");
     expect(getLessonPathMeta("l11").eyebrow).toBe("STEP 1 1 / 6");
+    expect(getLessonPathMeta("l34").eyebrow).toBe("STEP 6 1 / 8");
+    expect(getLessonPathMeta("l41").badge).toBe("S8");
   });
 
   it("STEP 1の6レッスンを、同じ分析依頼と固有の作業で接続する", () => {

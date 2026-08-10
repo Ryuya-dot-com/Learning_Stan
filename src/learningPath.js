@@ -80,6 +80,17 @@ export const JOURNEY_STAGES = Object.freeze([
       { label: "発展: 独立転移課題", path: "challenges/step1-transfer.qmd", destination: "Project直下", lessonIds: ["l16"] },
     ],
   },
+  {
+    id: "stan",
+    label: "STEP 6",
+    title: "Stanでモデルを実装・診断・報告する",
+    description: "L34〜L41を、4段階の反復練習と成果物チェック付きで学ぶベータ版です。未公開のSTEP 2〜5に相当するベイズ統計は別途学習済みであることを前提にします。",
+    time: "8〜12時間",
+    install: "R / CmdStanR / CmdStanを使用",
+    lessonIds: ["l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41"],
+    requiredPracticeLessonIds: ["l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41"],
+    notebook: "nb6-stan.qmd",
+  },
 ]);
 
 export const LEARNING_LESSON_IDS = Object.freeze(
@@ -117,7 +128,9 @@ export function lessonPracticeIsComplete(progress, lessonOrId) {
 export function stageIsComplete(stage, progress) {
   if (stage.kind === "foundation") return foundationIsComplete(progress);
   const understood = stage.lessonIds.every((id) => lessonIsUnderstood(progress, id));
-  return understood && (!stage.practiceLessonId || lessonPracticeIsComplete(progress, stage.practiceLessonId));
+  const requiredPracticeLessonIds = stage.requiredPracticeLessonIds
+    || (stage.practiceLessonId ? [stage.practiceLessonId] : []);
+  return understood && requiredPracticeLessonIds.every((id) => lessonPracticeIsComplete(progress, id));
 }
 
 function stageCta(stage, progress) {
@@ -126,6 +139,7 @@ function stageCta(stage, progress) {
   if (stage.id === "setup") return hasProgress ? "環境準備のつづきから" : "R / RStudioの準備へ";
   if (stage.id === "basics") return hasProgress ? "R基礎のつづきから" : "R基礎を始める";
   if (stage.id === "data") return hasProgress ? "STEP 1のつづきから" : "STEP 1を始める";
+  if (stage.id === "stan") return hasProgress ? "Stanベータのつづきから" : "Stanベータを始める";
   return "Foundation Checkへ";
 }
 
@@ -134,9 +148,12 @@ export function getJourneyState(progress) {
     const stage = JOURNEY_STAGES[stageIndex];
     if (stageIsComplete(stage, progress)) continue;
 
+    const requiredPracticeLessonIds = stage.requiredPracticeLessonIds
+      || (stage.practiceLessonId ? [stage.practiceLessonId] : []);
     const lessonId = stage.kind === "foundation"
       ? null
-      : stage.lessonIds.find((id) => !lessonIsUnderstood(progress, id)) || stage.practiceLessonId;
+      : stage.lessonIds.find((id) => !lessonIsUnderstood(progress, id))
+        || requiredPracticeLessonIds.find((id) => !lessonPracticeIsComplete(progress, id));
     const targetView = stage.kind === "foundation"
       ? { name: "foundation" }
       : { name: "lesson", id: lessonId };
@@ -199,7 +216,9 @@ export function getLessonPathMeta(lessonOrId) {
         ? "準備"
         : stage.id === "basics"
           ? `R${index + 1}`
-          : `D${index + 1}`,
+          : stage.id === "stan"
+            ? `S${index + 1}`
+            : `D${index + 1}`,
   };
 }
 

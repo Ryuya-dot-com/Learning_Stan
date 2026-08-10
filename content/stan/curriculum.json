@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "status": "draft-unpublished",
+  "status": "beta-public",
   "entryPrerequisite": "l33",
   "releasePolicy": "対象commitの技術検証・runtime証拠・公開範囲確認・所有者判断を満たしてベータ公開し、Foundation観察・第三者感想・初学者観察・遅延保持は改善証拠として継続する",
   "lessonDelivery": {
-    "status": "draft-unpublished",
+    "status": "beta-public",
     "authoredLessonIds": ["l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41"],
     "assessmentArtifact": "foundation-assessments.json",
     "requiredSections": [
@@ -140,7 +140,7 @@
   "caseStudies": [
     {
       "id": "stan-case-truncation-01",
-      "status": "draft-unpublished",
+      "status": "beta-public",
       "title": "採用範囲のある測定器――診断が良い誤答を見抜く",
       "manuscript": "truncation-case-study.md",
       "runner": "examples/run-distribution-models.R",
@@ -157,7 +157,7 @@
     },
     {
       "id": "stan-case-link-loo-01",
-      "status": "draft-unpublished",
+      "status": "beta-public",
       "title": "リンク関数と予測モデル比較――比較できるものだけを比べる",
       "manuscript": "link-functions-model-comparison.md",
       "runner": "examples/run-link-model-comparison.R",
@@ -174,7 +174,7 @@
     },
     {
       "id": "stan-case-reparameterization-01",
-      "status": "draft-unpublished",
+      "status": "beta-public",
       "title": "群情報量で変わる階層モデルの幾何――中心化と非中心化を実測で選ぶ",
       "manuscript": "lessons/l40-reparameterization-geometry.md",
       "runner": "examples/run-reparameterization-comparison.R",
@@ -195,7 +195,7 @@
       "title": "RからStanへ――実行経路とデータ契約",
       "manuscript": "lessons/l34-execution-data-contract.md",
       "prerequisites": ["l33"],
-      "outcome": "R、CmdStanR、コンパイル済みStanモデル、サンプル出力の役割を区別し、Rのlistをdataブロックへ対応付けられる",
+      "outcome": "R、CmdStanR、コンパイル済みStanモデル、サンプル出力の役割を区別し、Rのlistをdataブロックへ対応付けることができる",
       "outcomeDimensions": ["execution-responsibility", "data-contract", "pipeline-boundaries", "transfer"],
       "assessmentIds": [
         "stan-l34-q1-responsibility",
