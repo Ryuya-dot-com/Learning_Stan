@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "draft-unpublished",
+  "status": "beta-public",
   "practiceOrder": ["imitate", "modify", "recall", "transfer"],
   "rules": [
     "各段階でコードを実行または構文確認してから次へ進む",

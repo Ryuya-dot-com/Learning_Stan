@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "draft-unpublished",
+  "status": "beta-public",
   "designRules": {
     "questionsPerLesson": 5,
     "requiredKinds": [

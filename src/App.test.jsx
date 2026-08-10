@@ -340,6 +340,16 @@ describe("レッスン遷移", () => {
 
     expect(screen.getByRole("heading", { name: "体験 修了!" })).toBeTruthy();
   });
+
+  it("Stanベータを共有URLから開き、段階・本文・反復練習を表示する", () => {
+    window.history.replaceState(null, "", "#/lesson/l34");
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "RからStanへ――実行経路とデータ契約", level: 1 })).toBeTruthy();
+    expect(screen.getByText("STEP 6 1 / 8")).toBeTruthy();
+    expect(screen.getByText(/R、CmdStanR、コンパイル済みStanモデル/)).toBeTruthy();
+  });
+
 });
 
 describe("初心者向けホーム導線", () => {
@@ -382,25 +392,29 @@ describe("初心者向けホーム導線", () => {
     expect(screen.queryByText("先にR基礎まで終えるのがおすすめです")).toBeNull();
   });
 
-  it("STEP 1の成果物確認まで終えると復習と演習ノートを示す", () => {
+  it("Stanベータの成果物確認まで終えると復習と演習ノートを示す", () => {
     const foundationPractice = LESSONS.find((lesson) => lesson.id === "l10").practice.items.map((item) => item.id);
     const dataPractice = LESSONS.find((lesson) => lesson.id === "l16").practice.items.map((item) => item.id);
+    const stanPractice = Object.fromEntries(
+      LESSONS.filter((lesson) => /^l(?:3[4-9]|4[01])$/.test(lesson.id))
+        .map((lesson) => [lesson.id, lesson.practice.items.map((item) => item.id)])
+    );
     window.localStorage.setItem(
       "learning-stan.progress",
       serializeProgress({
         done: completedExercises(LESSONS.map((lesson) => lesson.id)),
         first: {},
         missed: {},
-        practice: { l10: foundationPractice, l16: dataPractice },
+        practice: { l10: foundationPractice, l16: dataPractice, ...stanPractice },
       })
     );
 
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: "公開中のSTEP 1まで修了しました" })).toBeTruthy();
-    expect(screen.getByText("L11〜L16の理解問題と、再実行・成果物の自己確認を完了しました。演習ノートで一連の手順を復習できます。")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "STEP 1を復習する" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "演習ノートをダウンロード" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "公開中のStanベータまで修了しました" })).toBeTruthy();
+    expect(screen.getByText("L34〜L41の理解問題、4段階の反復練習、成果物チェックまで完了しました。Stan演習ノートで実装・診断・報告の流れを復習できます。")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Stan編を復習する" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Stan演習ノートをダウンロード" })).toBeTruthy();
   });
 });
 

@@ -1,0 +1,96 @@
+---
+title: "NB6: Stanモデルを実装・診断・報告する"
+subtitle: "L34〜L41 ベータ版ワークブック"
+format: html
+execute:
+  eval: false
+---
+
+## このノートの使い方
+
+このノートは、学習アプリのL34〜L41で行う反復練習と成果物チェックを、一つのrunへまとめるための作業台です。STEP 2〜5に相当する確率・ベイズ統計は別途学習済みであることを前提にします。
+
+各節で、最初の試行、エラー、修正版、修正理由を消さずに残してください。理解問題の正解だけでは実行証拠になりません。Stanモデル、入力、sampling設定、診断、予測検査、報告を同じrun IDで対応付けます。
+
+## L34: 実行経路とデータ契約
+
+```{r}
+study <- data.frame(
+  x = 1:8,
+  y = c(-0.7, 0.1, 0.4, 1.4, 2.1, 2.5, 3.4, 3.7)
+)
+
+stan_data <- list(
+  N = nrow(study),
+  x = study$x,
+  y = study$y
+)
+```
+
+名前・R側の型・Stan側の型・大きさ・値域・欠損規則を表にし、長さ不一致を1件作って、Stanへ渡す前に止めてください。
+
+## L35〜L36: 文法と生成過程
+
+`data`、`parameters`、`model`を持つ最小単回帰を書き、次を記録してください。
+
+1. 各変数のスコープと支持範囲
+2. 生成過程・数式・Stanコードの対応
+3. distribution statementと`target +=`の対応
+4. 0/1応答へ移したときに変える型・リンク・尤度
+
+## L37: 再現可能なCmdStanR実行
+
+```{r}
+library(cmdstanr)
+
+stan_file <- file.path("content", "stan", "examples", "linear-regression.stan")
+model <- cmdstan_model(stan_file, compile = FALSE)
+model$check_syntax()
+model$compile()
+
+fit <- model$sample(
+  data = stan_data,
+  seed = 20260801,
+  chains = 4,
+  parallel_chains = 4,
+  iter_warmup = 1000,
+  iter_sampling = 1000
+)
+```
+
+R、CmdStanR、CmdStan、OS、source hash、data hash、seed、chain ID、iteration、出力CSVの保存先をrun manifestへ記録してください。
+
+## L38: 推定値より先に診断する
+
+次の順で判定し、どこかで停止条件を満たしたら推定値の解釈を止めます。
+
+1. divergence、最大treedepth、E-BFMI
+2. R-hat
+3. bulk ESS・tail ESS
+4. 報告量のMCSEと研究上必要な精度
+
+一般的な推奨線と、この分析で必要な精度を別の列に記録してください。
+
+## L39: 予測検査と比較
+
+`generated quantities`で観測ごとの`log_lik`と`y_rep`を役割分離します。観測値と各複製へ同じ統計量を適用し、再現できない特徴と対応するモデル仮定を記録してください。
+
+PSIS-LOOを使う場合は、予測課題、pointwise単位、Pareto k、ELPD差とその不確実性を、順位より先に確認します。
+
+## L40: parameterizationを比較する
+
+centeredとnon-centeredで生成モデル、データ、seed、chain数、iterationをそろえます。弱い群情報と強い群情報を分け、診断、MCSE、ESS/sec、モデル尺度の事後分布が同じかを比較してください。
+
+## L41: claim–evidence–limit
+
+最終報告を次の3列で作ります。
+
+| claim | evidence | limit |
+|---|---|---|
+| 何が言えるか | どのrun・図・表・診断が支えるか | 何は言えないか |
+
+最後にclean environmentから一つの入口で再実行し、manifestに記録した成果物がすべて再生成されることを確認してください。
+
+## 7〜14日後の再確認
+
+完成例を見ず、別の応答型でデータ契約、最小Stanモデル、4 chain実行、診断、予測検査、claim–evidence–limitを再構成します。この遅延課題は公開を止める条件ではなく、保持を改善するための記録です。

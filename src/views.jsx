@@ -44,7 +44,7 @@ function ChoiceEx({ ex, seedKey, solved, onMiss, onCorrect }) {
       <p className="mb-1 text-base font-bold leading-relaxed" style={{ color: C.ink }}>
         <T>{ex.q}</T>
       </p>
-      {ex.code && <CodeBlock code={ex.code} />}
+      {ex.code && <CodeBlock code={ex.code} lang={ex.lang} />}
       <div className="mt-4 flex flex-col gap-2.5">
         {order.map((oi, pos) => {
           const o = ex.opts[oi];
@@ -116,7 +116,7 @@ function FillEx({ ex, solved, onMiss, onCorrect }) {
       <p className="mb-1 text-base font-bold leading-relaxed" style={{ color: C.ink }}>
         <T>{ex.q}</T>
       </p>
-      {ex.code && <CodeBlock code={ex.code} />}
+      {ex.code && <CodeBlock code={ex.code} lang={ex.lang} />}
       <div className="mt-4 flex items-stretch gap-2">
         <input
           value={val}
@@ -177,6 +177,7 @@ function ReflectEx({ ex, solved, onCorrect }) {
       <p className="mb-3 text-base font-bold leading-relaxed" style={{ color: C.ink }}>
         <T>{ex.q}</T>
       </p>
+      {ex.code && <CodeBlock code={ex.code} lang={ex.lang} />}
       {!solved && (
         <>
           <label htmlFor="reflection-answer" className="mb-1 block text-xs font-bold" style={{ color: C.sub }}>
@@ -283,7 +284,7 @@ function TfEx({ ex, solved, missed, onMiss, onCorrect }) {
       <p className="mb-1 text-base font-bold leading-relaxed" style={{ color: C.ink }}>
         <T>{ex.q}</T>
       </p>
-      {ex.code && <CodeBlock code={ex.code} />}
+      {ex.code && <CodeBlock code={ex.code} lang={ex.lang} />}
       <div className="mt-4 flex flex-col gap-3">
         {ex.items.map((it, i) => {
           const judged = checked || status === "correct";
@@ -989,7 +990,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         はじめてのRとStan
       </h1>
       <p className="mb-6 text-sm leading-6" style={{ color: C.sub }}>
-        プログラミング未経験から、研究データをRで読み、整え、再現可能な成果物として保存するところまで進みます。ベイズ統計とStanは今後の公開予定です。
+        プログラミング未経験からRの基礎とデータ操作へ進み、Stanベータ版ではモデルの実装・診断・報告まで学びます。STEP 2〜5は整備中のため、Stan編はベイズ統計を別途学習済みの方を対象にしています。
       </p>
 
       <section aria-labelledby="orientation-title" className="surface-card mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
@@ -999,7 +1000,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
             ["対象", "Rを初めて学ぶ人"],
             ["最初の体験", "5〜10分・準備不要"],
             ["練習の順番", "まねる→変える→見ずに作る→使う"],
-            ["公開範囲", "R基礎〜データ操作"],
+            ["公開範囲", "R基礎・STEP 1・Stanベータ"],
           ].map(([label, value]) => (
             <div key={label} className="rounded-xl p-3" style={{ background: C.accentSoft }}>
               <div className="text-xs font-bold" style={{ color: C.accentDeep }}>{label}</div>
@@ -1013,14 +1014,14 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         {journey.complete ? (
           <>
             <div className="mb-2 flex justify-center sm:justify-start"><LearningMark filled={3} size={14} /></div>
-            <h2 id="next-action-title" className="text-xl font-bold" style={{ color: C.okText }}>公開中のSTEP 1まで修了しました</h2>
+            <h2 id="next-action-title" className="text-xl font-bold" style={{ color: C.okText }}>公開中のStanベータまで修了しました</h2>
             <p className="mt-2 text-sm leading-6" style={{ color: C.okText }}>
-              L11〜L16の理解問題と、再実行・成果物の自己確認を完了しました。演習ノートで一連の手順を復習できます。
+              L34〜L41の理解問題、4段階の反復練習、成果物チェックまで完了しました。Stan演習ノートで実装・診断・報告の流れを復習できます。
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <Btn onClick={() => onOpen("l11")}>STEP 1を復習する</Btn>
-              <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + "notebooks/nb1-data.qmd"} download>
-                演習ノートをダウンロード
+              <Btn onClick={() => onOpen("l34")}>Stan編を復習する</Btn>
+              <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + "notebooks/nb6-stan.qmd"} download>
+                Stan演習ノートをダウンロード
               </a>
               <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + "roadmap.html"}>
                 この先の公開予定を見る

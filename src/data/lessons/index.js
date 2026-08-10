@@ -15,7 +15,7 @@ export const LESSONS = SECTIONS.flatMap((sec) =>
       const lesson = mods[p].default;
       return {
         ...lesson,
-        practiceLadder: PRACTICE_LADDERS[lesson.id] ?? null,
+        practiceLadder: PRACTICE_LADDERS[lesson.id] ?? lesson.practiceLadder ?? null,
         section: sec.dir,
         // 番号付きセクションはセクション横断の通し番号、番号なしは null(表示は mark+セクション内連番)
         num: sec.numbered ? ++n : null,

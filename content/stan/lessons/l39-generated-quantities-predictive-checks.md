@@ -1,6 +1,6 @@
 # L39 generated quantitiesでモデルを検査・比較する
 
-状態: 非公開ドラフト（`draft-unpublished`）
+状態: ベータ公開中（`beta-public`）
 
 L38では、推定値の前にHMC診断、R-hat、ESS、MCSEを読み、指定した`target`を計算上信頼してよいか判断しました。L39では、その`target`が観測データの重要な特徴を再現できるかを`y_rep`で調べ、比較可能な候補モデルだけを観測別`log_lik`とPSIS-LOOで比べます。
 

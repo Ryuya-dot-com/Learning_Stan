@@ -1,6 +1,6 @@
 # ケーススタディ：採用範囲のある測定器をStanで分析する
 
-状態: `draft-unpublished`。このケースは、`distribution-grammar-lab.md`のg04〜g06を終えた後に実施します。
+状態: `beta-public`。このケースは、`distribution-grammar-lab.md`のg04〜g06を終えた後に実施します。
 
 ## 1. 分析依頼
 
