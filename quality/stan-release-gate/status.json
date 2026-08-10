@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "gateId": "SRG-CURRENT",
   "updatedAt": "2026-08-10",
-  "decision": "BLOCKED",
+  "decision": "PASS",
   "primaryImplementerCode": "CODEX",
   "target": {
     "commit": "cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff",
@@ -85,11 +85,13 @@
     "artifactsChecked": true
   },
   "externalFeedback": {
-    "status": "NOT RUN",
-    "receivedAt": null,
-    "contributorProfile": null,
-    "scopes": [],
-    "summaryArtifact": null
+    "status": "RECORDED",
+    "receivedAt": "2026-08-10",
+    "contributorProfile": "教材利用者または閲覧者（詳細属性は未記録）",
+    "scopes": [
+      "learner-material"
+    ],
+    "summaryArtifact": "quality/stan-release-gate/feedback-2026-08-10.md"
   },
   "learnerObservation": {
     "eligibleComplete": 0,
@@ -102,8 +104,8 @@
     "records": []
   },
   "publicScopeConfirmation": {
-    "confirmedByCode": null,
-    "confirmedAt": null,
+    "confirmedByCode": "OWNER-01",
+    "confirmedAt": "2026-08-10T11:42:02+09:00",
     "commit": "cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff",
     "commands": [
       "npm run build",
@@ -114,7 +116,7 @@
     "personalDataScan": "PASS",
     "appScopeConfirmed": "PASS"
   },
-  "decisionRecord": null,
+  "decisionRecord": "quality/stan-release-gate/DECISION_CBC6EF2.md",
   "evidence": [
     {
       "id": "SRG01",
@@ -162,9 +164,11 @@
     },
     {
       "id": "SRG06",
-      "status": "NOT RUN",
-      "artifacts": [],
-      "note": "第三者から口頭または文書で感想を得た場合、属性・範囲・要点・対応だけを短く記録する任意の改善証拠"
+      "status": "RECORDED",
+      "artifacts": [
+        "quality/stan-release-gate/feedback-2026-08-10.md"
+      ],
+      "note": "練習問題の反復を増やしてほしいという感想を匿名要約し、次の教材候補で扱う改善項目として記録した"
     },
     {
       "id": "SRG07",
@@ -180,18 +184,30 @@
     },
     {
       "id": "SRG09",
-      "status": "NOT RUN",
+      "status": "PASS",
       "artifacts": [
-        "https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31349208141"
+        "https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31349208141",
+        "quality/stan-release-gate/DECISION_CBC6EF2.md"
       ],
-      "note": "対象commitの自動監査3項目は成功済み。リポジトリ所有者による公開範囲確認待ち"
+      "note": "対象commitの自動監査3項目が成功し、リポジトリ所有者が全公開範囲を2026-08-10に確認した"
     },
     {
       "id": "SRG10",
-      "status": "NOT RUN",
-      "artifacts": [],
-      "note": "必須6項目、既知の限界、問題トリアージを参照する所有者の最終公開判断待ち"
+      "status": "PASS",
+      "artifacts": [
+        "quality/stan-release-gate/DECISION_CBC6EF2.md"
+      ],
+      "note": "所有者が必須6項目、既知の限界、未解決問題を確認し、Stan編のベータ公開を承認した"
     }
   ],
-  "issues": []
+  "issues": [
+    {
+      "id": "SRG-IMPROVEMENT-001",
+      "severity": "P3",
+      "status": "OPEN",
+      "summary": "Stan編の練習問題の反復を増やす",
+      "owner": "CODEX",
+      "retest": "次の教材候補で反復課題を追加し、Stan教材静的検証と理解問題対応を再確認する"
+    }
+  ]
 }

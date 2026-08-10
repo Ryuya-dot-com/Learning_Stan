@@ -17,7 +17,7 @@
 - 実機アクセシビリティ監査・初学者観察・公開判定の手順は [Foundation Gate実施キット](quality/foundation-gate/README.md) を参照
 - L12→L13で「読込成功」と「分析可能な品質」を区別できるかの観察手順は [STEP 1 Data Quality Gate](quality/step1-data-gate/README.md) を参照
 - L16修了後に、中心課題を見ず別データへ品質検査・集計・解釈を移せるかの観察手順は [STEP 1独立転移観察キット](quality/step1-transfer-gate/README.md) を参照
-- Stan編は [非公開教材パック](content/stan/README.md) でL34「実行経路とデータ契約」からL41「自分のモデルを設計・診断・報告する」までの受講用原稿8本と理解問題40問を実装しました。対象commitの静的検証・クリーンCI、単回帰・切断・PSIS-LOOの再検証、L40の弱・強情報比較が完了し、[Stan Release Gate](quality/stan-release-gate/README.md)は必須6項目中`SRG02`〜`SRG05`が`PASS`（4/6）です。残る所有者の公開範囲確認と最終判断が未完了のため、全体は`BLOCKED`で公開アプリにはまだ含めません。第三者の感想・初学者観察・遅延保持は公開を止めない改善項目として継続します
+- Stan編は [教材パック](content/stan/README.md) でL34「実行経路とデータ契約」からL41「自分のモデルを設計・診断・報告する」までの受講用原稿8本と理解問題40問を実装しました。対象commitの静的検証・クリーンCI、単回帰・切断・PSIS-LOOの再検証、L40の弱・強情報比較、所有者の公開範囲確認と最終判断が完了し、[Stan Release Gate](quality/stan-release-gate/README.md)は必須6/6で`PASS`です。学習アプリへの導線有効化は別commitで行います。第三者から得た「練習問題の反復を増やしてほしい」という感想は次候補の改善項目として記録し、初学者観察・遅延保持とともに公開後も追跡します
 - STEP 2は [非公開教材パック](content/step2/README.md) でL17–L20の意味ID・依存関係・成果物契約、L17記述統計、L18分布図、L19参加者内対応図、L20一括再生成・限界報告、20件の診断的理解問題を検証中です。[初心者観察ゲート](quality/step2-observation-gate/README.md)の通過前は公開アプリへ含めません
 - 4段階練習・理解問題・実機チェックの進みぐあいは、版付きデータとしてブラウザ内に保存されます（サーバには何も送信しません）。4段階練習は自己記録であり、それだけでは理解済みになりません。記述回答の本文は保存せず、JSONの書き出し・読み込み・明示的なリセットができます
 
@@ -77,7 +77,7 @@ npm run test:step2-observation-pack  # STEP 2初心者観察用ZIPの非露出�
 npm run test:step2-observation-rehearsal  # 観察用ZIP展開から初回提出後の採点までをRで検査
 npm run gate:step2-observation:status  # 実観察状態を表示（現在はNOT RUN）
 npm run test:r   # Rコード例と期待出力の照合（R 4.6.1が必要）
-npm run test:stan-content  # 非公開Stan原稿・.stan・R実行コード・評価設計の同期検査
+npm run test:stan-content  # Stan原稿・.stan・R実行コード・評価設計の同期検査
 npm run test:stan-syntax-errors  # 固定版stanc3で壊れた8例の期待診断と修正版8例の成功を再検証
 npm run test:stan-model-review  # 両方ともコンパイルできる6モデル対の意味差・警告数・SHA証拠を検証
 npm run test:stan-retention  # L37・L40・L41後の10保持課題と未見lognormal参照モデルを検証
@@ -89,7 +89,7 @@ npm run run:stan-reparameterization  # L40の弱・強情報でcentered / non-ce
 npm run test:stan-reparameterization-runtime  # L40の全chain診断・ESS/sec・事後同値性・12成果物を再検査
 npm run run:stan-existing-runtime  # 単回帰・切断・リンク/LOOをplatform-native CmdStanで一括再実行
 npm run test:stan-existing-runtime # 3ケースのhash・診断・教材結論・22成果物を空の一時ディレクトリで再検査
-npm run gate:stan-release:status       # Stan公開の必須6項目と改善証拠4項目を検証（現在はBLOCKED）
+npm run gate:stan-release:status       # Stan公開の必須6項目と改善証拠4項目を検証（現在はPASS）
 npm run gate:stan-release:require-pass # 必須6項目が揃うまで公開workflowを停止
 npm run gate:status        # Foundation Gateの現在状態を表示
 npm run gate:require-pass  # 公開許可時のみ使用。現在はBLOCKEDのため失敗します

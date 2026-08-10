@@ -1,6 +1,6 @@
-# Stan教材パック（非公開ドラフト）
+# Stan教材パック（ベータ公開承認済み・導線準備中）
 
-このディレクトリは、STEP 6を公開アプリへ組み込む前の設計・実行・検証単位です。現在の状態は`draft-unpublished`であり、L1–L10のFoundation Gateを迂回して公開するためのものではありません。
+このディレクトリは、STEP 6を公開アプリへ組み込むための設計・実行・検証単位です。正本データの状態は導線実装まで`draft-unpublished`を維持しますが、対象`cbc6ef2`はStan Release Gateの必須6/6を満たし、ベータ公開が承認されています。実際の導線有効化は別commitで実装・CI検証します。
 
 ## 含まれるもの
 
@@ -132,7 +132,7 @@ npm run gate:stan-release:status
 npm run gate:stan-release:require-pass
 ```
 
-静的検証はL34–L41の原稿8本・理解問題40問、8単元32課題、構文エラー8組、コンパイル成功レビュー6組、保持・転移10課題、実行可能なStan例と8つの実行証拠を原稿・コード・canonical SHA-256まで同期します。個別のR検証器は構文エラー、モデルレビュー、保持課題、分布・リンク図、切断8成果物、リンク/LOO 13成果物、L40比較12成果物を検査します。既存runtime一括検証は単回帰、切断、リンク/LOOを空の一時ディレクトリで再実行し、全chain診断、教材上の統計的結論、合計22成果物を保存証拠と照合します。最後の2コマンドは[Stan Release Gate](../../quality/stan-release-gate/README.md)の状態表示と強制判定で、後者は現在の`BLOCKED`に対して意図どおり失敗します。
+静的検証はL34–L41の原稿8本・理解問題40問、8単元32課題、構文エラー8組、コンパイル成功レビュー6組、保持・転移10課題、実行可能なStan例と8つの実行証拠を原稿・コード・canonical SHA-256まで同期します。個別のR検証器は構文エラー、モデルレビュー、保持課題、分布・リンク図、切断8成果物、リンク/LOO 13成果物、L40比較12成果物を検査します。既存runtime一括検証は単回帰、切断、リンク/LOOを空の一時ディレクトリで再実行し、全chain診断、教材上の統計的結論、合計22成果物を保存証拠と照合します。最後の2コマンドは[Stan Release Gate](../../quality/stan-release-gate/README.md)の状態表示と強制判定で、現在はいずれも`PASS`します。
 
 現行コードは2026-08-01にR 4.6.1、CmdStanR 0.9.0、CmdStan 2.39.0で構文確認・コンパイル・4 chainのサンプリングを実行済みです。divergenceと最大treedepth到達は全chainで0、報告R-hat最大1.00、bulk ESS最小1778、tail ESS最小1705でした。詳細と限界は`validation.json`に記録しています。
 
@@ -144,7 +144,7 @@ npm run gate:stan-release:require-pass
 
 L40比較は2026-08-09に同じR・CmdStanR・CmdStan版、Darwin arm64、Apple clang 21.0.0で実行済みです。各表現を4 chain・3反復した結果、弱情報ではcentered / non-centeredのdivergence合計が235 / 0、`tau` bulk ESS/sec中央値が341 / 16,233でした。強情報では0 / 0、ESS/secが27,624 / 3,500で、centeredを選びました。別の高精度runによる`mu`・`tau`・`theta[1:8]`の20比較はすべて4 combined MCSE以内でしたが、弱情報centeredには146 divergenceが残るため、その平均要約だけを探索妥当性の証拠にはしません。
 
-公開候補への昇格条件は`quality/stan-release-gate/status.json`を機械可読な正本とします。必須条件は、対象commitの静的検証とクリーンCI、既存runtime証拠の再検証、L40の弱情報・強情報centered / non-centered比較、所有者による公開範囲確認、最終判断の6項目です。Foundation Gate、第三者フィードバック、初学者観察、L41後7〜14日の保持は公開を止めない改善証拠として追跡し、未実施の効果を主張しません。現在は必須4/6が完了し、所有者確認と最終判断待ちのため`BLOCKED`です。
+公開候補への昇格条件は`quality/stan-release-gate/status.json`を機械可読な正本とします。必須条件は、対象commitの静的検証とクリーンCI、既存runtime証拠の再検証、L40の弱情報・強情報centered / non-centered比較、所有者による公開範囲確認、最終判断の6項目です。Foundation Gate、第三者フィードバック、初学者観察、L41後7〜14日の保持は公開を止めない改善証拠として追跡し、未実施の効果を主張しません。対象`cbc6ef2`は必須6/6で`PASS`です。反復練習を増やしてほしいという感想は、次の教材候補で扱う改善項目として記録しています。
 
 ## 執筆原則
 

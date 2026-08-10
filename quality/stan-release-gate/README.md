@@ -47,11 +47,11 @@ npm run gate:stan-release:require-pass
 
 CI workflow自体はbase branchを問わずpull requestを検証し、Node・一般R・固定版CmdStanの3 jobを分離します。Node jobはビルド後に公開範囲自動監査も実行します。手動dispatchは検証だけを行い、Pagesへのupload・deployは`main`へのpushに限定します。公開候補を[`cbc6ef2`](https://github.com/Ryuya-dot-com/Learning_Stan/commit/cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff)へ固定し、クリーンなworktreeで必須静的検証を再実行しました。さらに、同じSHAへの[pull request run 31349208141](https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31349208141)で`build`・`r-verify`・`stan-verify`がすべて成功したため、`SRG02`と`SRG03`は`PASS`です。
 
-同じrunで`npm run build`と`npm run audit:stan-public-scope`も成功し、`SRG09`の自動監査3項目は`PASS`になりました。リポジトリ所有者の確認が未記録なので、`SRG09`自体は`NOT RUN`です。
+同じrunで`npm run build`と`npm run audit:stan-public-scope`も成功し、`SRG09`の自動監査3項目は`PASS`になりました。2026-08-10にリポジトリ所有者が全公開範囲を確認したため、`SRG09`も`PASS`です。[公開判断記録](DECISION_CBC6EF2.md)に対象、限界、公開範囲、最終判断をまとめています。
 
 ## 第三者の感想を得たとき
 
-[短いフィードバック・メモ](FEEDBACK_NOTES.md)を使います。正式な審査や署名は不要で、全3 scopeを一人に確認してもらう必要もありません。感想を教材の正しさや学習効果の証明へ格上げせず、改善した点と見送った点を残します。`SRG06`は完了判定の`PASS`ではなく、感想を要約したことを示す`RECORDED`として扱います。
+[短いフィードバック・メモ](FEEDBACK_NOTES.md)を使います。正式な審査や署名は不要で、全3 scopeを一人に確認してもらう必要もありません。感想を教材の正しさや学習効果の証明へ格上げせず、改善した点と見送った点を残します。`SRG06`は完了判定の`PASS`ではなく、感想を要約したことを示す`RECORDED`として扱います。現在は「練習問題の反復を増やしてほしい」という[匿名要約](feedback-2026-08-10.md)を記録し、次候補のP3改善項目へ結び付けています。
 
 ## 状態
 
@@ -59,7 +59,7 @@ CI workflow自体はbase branchを問わずpull requestを検証し、Node・一
 - `FAIL`: 必須検査が失敗した、改善活動で重大問題が見つかった、またはP0・P1が未解決
 - `BLOCKED`: 必須6項目のうち未実施または証拠不足がある
 
-現在は`BLOCKED`です。必須6項目のうち`SRG02`〜`SRG05`は`PASS`（4/6）で、残るのは所有者による公開範囲確認`SRG09`と最終判断`SRG10`です。Foundation Gate、第三者フィードバック、初学者観察、遅延保持は改善証拠として継続します。`status.json`の`decision`だけを`PASS`へ書き換えても、判定器は必須証拠不足を拒否します。
+現在は`PASS`です。対象`cbc6ef2`について必須6項目がすべて`PASS`（6/6）で、未解決P0・P1・P2はありません。Foundation Gate、初学者観察、遅延保持は未実施の改善証拠として継続し、第三者フィードバック`SRG06`は`RECORDED`です。`status.json`の`decision`だけを`PASS`へ書き換えても、判定器は必須証拠不足を拒否します。
 
 ## 証拠の保存と公開範囲
 
@@ -74,6 +74,6 @@ GitHubへ置くのは、対象commit、再現コマンド、環境版、source h
 3. P0〜P3をトリアージする。未解決P2には所有者、期限、再検証条件を付ける。
 4. 所有者が公開範囲を確認し、[最終判断票](DECISION_RECORD.md)へ既知の限界と公開可否を記録する。
 5. 第三者の感想や観察を得られた場合は、公開可能な匿名要約を改善証拠として追加する。
-6. `npm run gate:stan-release:require-pass`が成功してから、別の変更としてアプリ導線を有効化する。
+6. `npm run gate:stan-release:require-pass`の成功を確認し、別の変更としてアプリ導線を有効化してCI検証する。
 
 `PASS`は教材の効果を一般化する証明ではなく、この公開候補が定義済みの最低証拠契約を満たしたという限定的な判断です。

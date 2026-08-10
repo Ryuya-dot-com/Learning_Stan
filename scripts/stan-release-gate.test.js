@@ -91,14 +91,21 @@ function passingStatus() {
       ? `${id}を対象commitで確認済み`
       : `${id}は任意の改善証拠として未実施`,
   }));
+  status.externalFeedback = {
+    status: "NOT RUN",
+    receivedAt: null,
+    contributorProfile: null,
+    scopes: [],
+    summaryArtifact: null,
+  };
   status.issues = [];
   return status;
 }
 
 describe("Stan Release Gateの機械判定", () => {
-  it("現在状態を正当なBLOCKEDとして読み取る", () => {
+  it("現在状態を正当なPASSとして読み取る", () => {
     expect(validateStanReleaseStatus(current)).toEqual([]);
-    expect(deriveStanReleaseDecision(current)).toBe("BLOCKED");
+    expect(deriveStanReleaseDecision(current)).toBe("PASS");
   });
 
   it("現在のSRG02証拠を対象commitと必須コマンドへ固定する", () => {
@@ -116,6 +123,8 @@ describe("Stan Release Gateの機械判定", () => {
     const dishonest = structuredClone(current);
     dishonest.decision = "PASS";
     dishonest.target.commit = null;
+    dishonest.publicScopeConfirmation.confirmedByCode = null;
+    dishonest.decisionRecord = null;
     const errors = validateStanReleaseStatus(dishonest).join("\n");
     expect(errors).toContain("decisionはBLOCKED");
     expect(errors).toContain("40桁commit SHA");
@@ -306,12 +315,12 @@ describe("Stan Release Gateの機械判定", () => {
     expect(validateStanReleaseStatus(p2).join("\n")).toContain("owner");
   });
 
-  it("CLIはBLOCKEDを報告し、require-passだけを失敗終了する", () => {
+  it("CLIはPASS 6/6と記録済みフィードバックを報告し、require-passも成功する", () => {
     const report = spawnSync(process.execPath, [scriptPath, statusPath], { encoding: "utf8" });
     expect(report.status).toBe(0);
-    expect(report.stdout).toContain("Stan Release Gate: BLOCKED");
-    expect(report.stdout).toContain("Required: PASS 4/6");
-    expect(report.stdout).toContain("Advisory: PASS 0/4");
+    expect(report.stdout).toContain("Stan Release Gate: PASS");
+    expect(report.stdout).toContain("Required: PASS 6/6");
+    expect(report.stdout).toContain("Advisory: PASS 0/4, RECORDED 1");
     expect(report.stdout).toContain("learners: 0/3");
     expect(report.stdout).toContain("delayed retention: 0/3");
 
@@ -320,7 +329,8 @@ describe("Stan Release Gateの機械判定", () => {
       [scriptPath, statusPath, "--require-pass"],
       { encoding: "utf8" },
     );
-    expect(gate.status).toBe(1);
+    expect(gate.status).toBe(0);
+    expect(gate.stdout).toContain("Stan Release Gate: PASS");
     expect(gate.stdout).toContain("Foundation: BLOCKED");
   });
 });
