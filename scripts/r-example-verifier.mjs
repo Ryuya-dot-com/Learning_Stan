@@ -14,6 +14,17 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const MODES = new Set(["exact", "numeric", "stochastic", "manual"]);
 const NUMBER_PATTERN = /[-+]?(?:(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?|Inf|NaN)/g;
 const EXPECTED_R_VERSION = "4.6.1";
+const R_LESSON_DIRECTORIES = new Set([
+  "0-basics",
+  "1-setup",
+  "2-data",
+  "3-stats",
+  "4-sim",
+  "5-bayes",
+  "6-brms",
+  "bridge",
+  "extra",
+]);
 
 function normalizeOutput(value) {
   return String(value ?? "")
@@ -127,7 +138,7 @@ function classifyBlock(block, id) {
 async function loadLessons(rootDir) {
   const lessonsDir = join(rootDir, "src", "data", "lessons");
   const paths = readdirSync(lessonsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
+    .filter((entry) => entry.isDirectory() && R_LESSON_DIRECTORIES.has(entry.name))
     .flatMap((section) =>
       readdirSync(join(lessonsDir, section.name), { withFileTypes: true })
         .filter((entry) => entry.isFile() && entry.name.endsWith(".js"))

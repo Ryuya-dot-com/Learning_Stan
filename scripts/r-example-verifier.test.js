@@ -1,3 +1,5 @@
+import { spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   classifyBlock,
@@ -24,6 +26,22 @@ describe("Rコード例の分類", () => {
     expect(examples.length).toBeGreaterThan(0);
     expect(examples.every((example) => example.verify?.mode)).toBe(true);
     expect(examples.filter((example) => example.verify.mode === "manual").every((example) => example.verify.reason)).toBe(true);
+  });
+
+  it("Viteを介さないNode.js実行でもR教材だけを読み込める", () => {
+    const verifierUrl = pathToFileURL(`${process.cwd()}/scripts/r-example-verifier.mjs`).href;
+    const script = [
+      `import { loadLessons } from ${JSON.stringify(verifierUrl)};`,
+      "const lessons = await loadLessons(process.cwd());",
+      "if (lessons.length === 0) throw new Error('R教材が見つかりません');",
+      "if (lessons.some(({ path }) => path.split(/[\\\\/]/).includes('7-stan'))) throw new Error('Stan教材を読み込んでいます');",
+    ].join("\n");
+    const result = spawnSync(process.execPath, ["--input-type=module", "--eval", script], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    });
+
+    expect(result.status, result.stderr).toBe(0);
   });
 });
 
