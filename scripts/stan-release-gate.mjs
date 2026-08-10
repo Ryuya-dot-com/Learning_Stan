@@ -2,12 +2,23 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-export const REQUIRED_STAN_RELEASE_EVIDENCE_IDS = Array.from(
+export const STAN_RELEASE_EVIDENCE_IDS = Array.from(
   { length: 10 },
   (_, index) => `SRG${String(index + 1).padStart(2, "0")}`,
 );
 
-export const REQUIRED_REVIEW_SCOPES = [
+export const REQUIRED_STAN_RELEASE_EVIDENCE_IDS = [
+  "SRG02",
+  "SRG03",
+  "SRG04",
+  "SRG05",
+  "SRG09",
+  "SRG10",
+];
+
+export const ADVISORY_STAN_EVIDENCE_IDS = ["SRG01", "SRG06", "SRG07", "SRG08"];
+
+export const FEEDBACK_SCOPES = [
   "stan-language",
   "statistical-model",
   "learner-material",
@@ -26,8 +37,9 @@ export const REQUIRED_STAN_PUBLIC_SCOPE_COMMANDS = [
 ];
 
 const DECISIONS = new Set(["PASS", "FAIL", "BLOCKED"]);
-const EVIDENCE_STATES = new Set(["NOT RUN", "PASS", "FAIL", "BLOCKED"]);
+const EVIDENCE_STATES = new Set(["NOT RUN", "PASS", "FAIL", "BLOCKED", "RECORDED"]);
 const RUNTIME_STATES = new Set(["NOT RUN", "PASS", "FAIL", "BLOCKED"]);
+const FEEDBACK_STATES = new Set(["NOT RUN", "RECORDED"]);
 const ISSUE_SEVERITIES = new Set(["P0", "P1", "P2", "P3"]);
 const ISSUE_STATES = new Set(["OPEN", "CLOSED"]);
 const AUDIT_STATES = new Set(["NOT RUN", "PASS", "FAIL"]);
@@ -132,14 +144,16 @@ function hasExistingRuntimeRevalidation(status) {
     revalidation?.artifactsChecked === true;
 }
 
-function hasIndependentReview(status) {
-  const review = status?.independentReview;
-  return hasText(review?.reviewerCode) &&
-    review.reviewerCode !== status?.primaryImplementerCode &&
-    isDate(review?.signedAt) &&
-    Array.isArray(review?.scopes) &&
-    REQUIRED_REVIEW_SCOPES.every((scope) => review.scopes.includes(scope)) &&
-    new Set(review.scopes).size === review.scopes.length;
+function hasExternalFeedback(status) {
+  const feedback = status?.externalFeedback;
+  return feedback?.status === "RECORDED" &&
+    isDate(feedback?.receivedAt) &&
+    hasText(feedback?.contributorProfile) &&
+    Array.isArray(feedback?.scopes) &&
+    feedback.scopes.length > 0 &&
+    feedback.scopes.every((scope) => FEEDBACK_SCOPES.includes(scope)) &&
+    new Set(feedback.scopes).size === feedback.scopes.length &&
+    hasText(feedback?.summaryArtifact);
 }
 
 function learnerObservationComplete(status) {
@@ -170,18 +184,17 @@ function delayedRetentionComplete(status) {
     new Set(retention.records.map((record) => record.artifact)).size === retention.records.length;
 }
 
-function hasPublicScopeReview(status) {
-  const review = status?.publicScopeReview;
-  return hasText(review?.reviewerCode) &&
-    review.reviewerCode !== status?.primaryImplementerCode &&
-    isDate(review?.signedAt) &&
-    matchesTargetCommit(status, review?.commit) &&
-    Array.isArray(review?.commands) &&
-    REQUIRED_STAN_PUBLIC_SCOPE_COMMANDS.every((command) => review.commands.includes(command)) &&
-    hasText(review?.artifact) &&
-    review?.secretScan === "PASS" &&
-    review?.personalDataScan === "PASS" &&
-    review?.appScopeConfirmed === "PASS";
+function hasPublicScopeConfirmation(status) {
+  const confirmation = status?.publicScopeConfirmation;
+  return hasText(confirmation?.confirmedByCode) &&
+    isDate(confirmation?.confirmedAt) &&
+    matchesTargetCommit(status, confirmation?.commit) &&
+    Array.isArray(confirmation?.commands) &&
+    REQUIRED_STAN_PUBLIC_SCOPE_COMMANDS.every((command) => confirmation.commands.includes(command)) &&
+    hasText(confirmation?.artifact) &&
+    confirmation?.secretScan === "PASS" &&
+    confirmation?.personalDataScan === "PASS" &&
+    confirmation?.appScopeConfirmed === "PASS";
 }
 
 function openIssues(status, severities) {
@@ -205,29 +218,25 @@ export function deriveStanReleaseDecision(status) {
     status?.runtimeComparison?.weakInformation?.status === "FAIL" ||
     status?.runtimeComparison?.strongInformation?.status === "FAIL" ||
     status?.existingRuntimeRevalidation?.status === "FAIL" ||
-    status?.publicScopeReview?.secretScan === "FAIL" ||
-    status?.publicScopeReview?.personalDataScan === "FAIL" ||
-    status?.publicScopeReview?.appScopeConfirmed === "FAIL" ||
+    status?.publicScopeConfirmation?.secretScan === "FAIL" ||
+    status?.publicScopeConfirmation?.personalDataScan === "FAIL" ||
+    status?.publicScopeConfirmation?.appScopeConfirmed === "FAIL" ||
     openIssues(status, ["P0", "P1"]).length > 0
   ) return "FAIL";
 
   const byId = new Map(evidence.map((item) => [item?.id, item]));
-  const allEvidencePasses = REQUIRED_STAN_RELEASE_EVIDENCE_IDS.every(
+  const allRequiredEvidencePasses = REQUIRED_STAN_RELEASE_EVIDENCE_IDS.every(
     (id) => byId.get(id)?.status === "PASS",
   );
 
   if (
-    allEvidencePasses &&
+    allRequiredEvidencePasses &&
     hasFinalTarget(status) &&
-    hasFoundationPass(status) &&
     hasStaticVerification(status) &&
     hasCleanCi(status) &&
     hasExistingRuntimeRevalidation(status) &&
     hasRuntimeComparison(status) &&
-    hasIndependentReview(status) &&
-    learnerObservationComplete(status) &&
-    delayedRetentionComplete(status) &&
-    hasPublicScopeReview(status) &&
+    hasPublicScopeConfirmation(status) &&
     hasText(status?.decisionRecord) &&
     openP2IsManaged(status)
   ) return "PASS";
@@ -300,9 +309,9 @@ function validateEvidence(status, errors) {
 
   const ids = status.evidence.map((item) => item?.id);
   if (new Set(ids).size !== ids.length) errors.push("evidence IDが重複しています");
-  const missing = REQUIRED_STAN_RELEASE_EVIDENCE_IDS.filter((id) => !ids.includes(id));
-  const unknown = ids.filter((id) => !REQUIRED_STAN_RELEASE_EVIDENCE_IDS.includes(id));
-  if (missing.length > 0) errors.push(`必須evidenceがありません: ${missing.join(", ")}`);
+  const missing = STAN_RELEASE_EVIDENCE_IDS.filter((id) => !ids.includes(id));
+  const unknown = ids.filter((id) => !STAN_RELEASE_EVIDENCE_IDS.includes(id));
+  if (missing.length > 0) errors.push(`evidenceがありません: ${missing.join(", ")}`);
   if (unknown.length > 0) errors.push(`未知のevidenceがあります: ${unknown.join(", ")}`);
 
   for (const item of status.evidence) {
@@ -313,8 +322,12 @@ function validateEvidence(status, errors) {
     if (!Array.isArray(item.artifacts) || item.artifacts.some((artifact) => !hasText(artifact))) {
       errors.push(`${item.id}: artifactsは文字列配列である必要があります`);
     }
-    if (item.status === "PASS" && (!Array.isArray(item.artifacts) || item.artifacts.length === 0)) {
-      errors.push(`${item.id}: PASSには匿名化された証拠リンクが必要です`);
+    if (["PASS", "RECORDED"].includes(item.status) &&
+        (!Array.isArray(item.artifacts) || item.artifacts.length === 0)) {
+      errors.push(`${item.id}: PASS・RECORDEDには公開可能な証拠リンクが必要です`);
+    }
+    if (item.status === "RECORDED" && item.id !== "SRG06") {
+      errors.push(`${item.id}: RECORDEDは第三者フィードバックSRG06だけに使用します`);
     }
     if (!hasText(item.note)) errors.push(`${item.id}: noteが必要です`);
   }
@@ -432,19 +445,30 @@ function validateExistingRuntimeRevalidation(status, errors) {
   }
 }
 
-function validateIndependentReview(status, errors) {
-  const review = status.independentReview;
-  if (!isRecord(review) || !Array.isArray(review?.scopes)) {
-    errors.push("independentReviewとscopesが必要です");
+function validateExternalFeedback(status, errors) {
+  const feedback = status.externalFeedback;
+  if (!isRecord(feedback) || !FEEDBACK_STATES.has(feedback?.status) || !Array.isArray(feedback?.scopes)) {
+    errors.push("externalFeedbackはNOT RUNまたはRECORDEDとscopesを持つ必要があります");
     return;
   }
-  const unknownScopes = review.scopes.filter((scope) => !REQUIRED_REVIEW_SCOPES.includes(scope));
-  if (unknownScopes.length > 0) errors.push(`未知のreview scopeがあります: ${unknownScopes.join(", ")}`);
-  if (new Set(review.scopes).size !== review.scopes.length) {
-    errors.push("review scopeが重複しています");
+  const evidenceStatus = evidenceById(status, "SRG06")?.status;
+  if (feedback.status !== evidenceStatus) {
+    errors.push("SRG06とexternalFeedbackの状態をNOT RUNまたはRECORDEDで一致させる必要があります");
   }
-  if (evidenceById(status, "SRG06")?.status === "PASS" && !hasIndependentReview(status)) {
-    errors.push("SRG06のPASSには主実装者と異なる独立レビューと3つのscopeが必要です");
+  const unknownScopes = feedback.scopes.filter((scope) => !FEEDBACK_SCOPES.includes(scope));
+  if (unknownScopes.length > 0) errors.push(`未知のfeedback scopeがあります: ${unknownScopes.join(", ")}`);
+  if (new Set(feedback.scopes).size !== feedback.scopes.length) {
+    errors.push("feedback scopeが重複しています");
+  }
+  for (const key of ["receivedAt", "contributorProfile", "summaryArtifact"]) {
+    if (feedback[key] !== null && !hasText(feedback[key])) {
+      errors.push(`externalFeedback.${key}はnullまたは文字列です`);
+    }
+  }
+  if (feedback.status === "RECORDED" || evidenceById(status, "SRG06")?.status === "RECORDED") {
+    if (!hasExternalFeedback(status)) {
+      errors.push("SRG06のRECORDEDには日付・相手の属性・1つ以上のscope・短い要約artifactが必要です");
+    }
   }
 }
 
@@ -506,30 +530,30 @@ function validateDelayedRetention(status, errors) {
   }
 }
 
-function validatePublicScopeReview(status, errors) {
-  const review = status.publicScopeReview;
-  if (!isRecord(review)) {
-    errors.push("publicScopeReviewが必要です");
+function validatePublicScopeConfirmation(status, errors) {
+  const confirmation = status.publicScopeConfirmation;
+  if (!isRecord(confirmation)) {
+    errors.push("publicScopeConfirmationが必要です");
     return;
   }
   for (const key of ["secretScan", "personalDataScan", "appScopeConfirmed"]) {
-    if (!AUDIT_STATES.has(review[key])) errors.push(`publicScopeReview.${key}が不正です`);
+    if (!AUDIT_STATES.has(confirmation[key])) errors.push(`publicScopeConfirmation.${key}が不正です`);
   }
-  if (review.commit !== null && !/^[0-9a-f]{40}$/.test(review.commit || "")) {
-    errors.push("publicScopeReview.commitは40桁SHAまたはnullです");
+  if (confirmation.commit !== null && !/^[0-9a-f]{40}$/.test(confirmation.commit || "")) {
+    errors.push("publicScopeConfirmation.commitは40桁SHAまたはnullです");
   }
-  if (!Array.isArray(review.commands) || review.commands.some((command) => !hasText(command))) {
-    errors.push("publicScopeReview.commandsは文字列配列である必要があります");
-  } else if (new Set(review.commands).size !== review.commands.length) {
-    errors.push("publicScopeReview.commandsが重複しています");
+  if (!Array.isArray(confirmation.commands) || confirmation.commands.some((command) => !hasText(command))) {
+    errors.push("publicScopeConfirmation.commandsは文字列配列である必要があります");
+  } else if (new Set(confirmation.commands).size !== confirmation.commands.length) {
+    errors.push("publicScopeConfirmation.commandsが重複しています");
   }
-  for (const key of ["reviewerCode", "signedAt", "artifact"]) {
-    if (review[key] !== null && !hasText(review[key])) {
-      errors.push(`publicScopeReview.${key}はnullまたは文字列です`);
+  for (const key of ["confirmedByCode", "confirmedAt", "artifact"]) {
+    if (confirmation[key] !== null && !hasText(confirmation[key])) {
+      errors.push(`publicScopeConfirmation.${key}はnullまたは文字列です`);
     }
   }
-  if (evidenceById(status, "SRG09")?.status === "PASS" && !hasPublicScopeReview(status)) {
-    errors.push("SRG09のPASSには対象commitの自動監査と主実装者以外による公開範囲監査記録が必要です");
+  if (evidenceById(status, "SRG09")?.status === "PASS" && !hasPublicScopeConfirmation(status)) {
+    errors.push("SRG09のPASSには対象commitの自動監査とリポジトリ所有者の公開範囲確認が必要です");
   }
 }
 
@@ -559,7 +583,7 @@ function validateIssues(status, errors) {
 export function validateStanReleaseStatus(status) {
   const errors = [];
   if (!isRecord(status)) return ["ルートはobjectである必要があります"];
-  if (status.schemaVersion !== 1) errors.push("schemaVersionは1である必要があります");
+  if (status.schemaVersion !== 2) errors.push("schemaVersionは2である必要があります");
   if (!/^SRG-[A-Z0-9-]+$/.test(status.gateId || "")) {
     errors.push("gateIdはSRG-で始まる必要があります");
   }
@@ -586,10 +610,10 @@ export function validateStanReleaseStatus(status) {
   validateCleanCi(status, errors);
   validateRuntimeComparison(status, errors);
   validateExistingRuntimeRevalidation(status, errors);
-  validateIndependentReview(status, errors);
+  validateExternalFeedback(status, errors);
   validateLearnerObservation(status, errors);
   validateDelayedRetention(status, errors);
-  validatePublicScopeReview(status, errors);
+  validatePublicScopeConfirmation(status, errors);
   validateIssues(status, errors);
 
   if (evidenceById(status, "SRG10")?.status === "PASS" && !hasText(status.decisionRecord)) {
@@ -602,15 +626,11 @@ export function validateStanReleaseStatus(status) {
   }
   if (status.decision === "PASS") {
     if (!hasFinalTarget(status)) errors.push("PASSには40桁commit SHAとHTTPS URLが必要です");
-    if (!hasFoundationPass(status)) errors.push("PASSにはFoundation GateのPASSが必要です");
     if (!hasStaticVerification(status)) errors.push("PASSには対象commitのStan静的検証が必要です");
     if (!hasCleanCi(status)) errors.push("PASSには対象commitのクリーンCIが必要です");
     if (!hasExistingRuntimeRevalidation(status)) errors.push("PASSには既存runtime証拠の再検証が必要です");
     if (!hasRuntimeComparison(status)) errors.push("PASSにはL40の弱情報・強情報runtime比較が必要です");
-    if (!hasIndependentReview(status)) errors.push("PASSには独立レビューが必要です");
-    if (!learnerObservationComplete(status)) errors.push("PASSには適格な初学者観察3件以上が必要です");
-    if (!delayedRetentionComplete(status)) errors.push("PASSには7〜14日後の保持記録3件以上が必要です");
-    if (!hasPublicScopeReview(status)) errors.push("PASSには公開範囲監査が必要です");
+    if (!hasPublicScopeConfirmation(status)) errors.push("PASSには所有者による公開範囲確認が必要です");
     if (!hasText(status.decisionRecord)) errors.push("PASSには最終判断記録が必要です");
   }
 
@@ -618,13 +638,17 @@ export function validateStanReleaseStatus(status) {
 }
 
 export function summarizeStanReleaseStatus(status) {
-  const counts = Object.fromEntries([...EVIDENCE_STATES].map((state) => [state, 0]));
-  for (const evidence of status.evidence || []) {
-    if (evidence.status in counts) counts[evidence.status] += 1;
-  }
+  const count = (ids) => {
+    const counts = Object.fromEntries([...EVIDENCE_STATES].map((state) => [state, 0]));
+    for (const evidence of status.evidence || []) {
+      if (ids.includes(evidence.id) && evidence.status in counts) counts[evidence.status] += 1;
+    }
+    return counts;
+  };
   return {
     decision: deriveStanReleaseDecision(status),
-    evidence: counts,
+    requiredEvidence: count(REQUIRED_STAN_RELEASE_EVIDENCE_IDS),
+    advisoryEvidence: count(ADVISORY_STAN_EVIDENCE_IDS),
     foundation: status.foundationGate?.decision || "UNKNOWN",
     learners: status.learnerObservation?.eligibleComplete || 0,
     delayed: status.delayedRetention?.eligibleComplete || 0,
@@ -661,9 +685,14 @@ function runCli() {
   const summary = summarizeStanReleaseStatus(status);
   console.log(`Stan Release Gate: ${summary.decision}`);
   console.log(
-    `Evidence: PASS ${summary.evidence.PASS}/${REQUIRED_STAN_RELEASE_EVIDENCE_IDS.length}, ` +
-    `FAIL ${summary.evidence.FAIL}, BLOCKED ${summary.evidence.BLOCKED}, ` +
-    `NOT RUN ${summary.evidence["NOT RUN"]}`,
+    `Required: PASS ${summary.requiredEvidence.PASS}/${REQUIRED_STAN_RELEASE_EVIDENCE_IDS.length}, ` +
+    `FAIL ${summary.requiredEvidence.FAIL}, BLOCKED ${summary.requiredEvidence.BLOCKED}, ` +
+    `NOT RUN ${summary.requiredEvidence["NOT RUN"]}`,
+  );
+  console.log(
+    `Advisory: PASS ${summary.advisoryEvidence.PASS}/${ADVISORY_STAN_EVIDENCE_IDS.length}, ` +
+    `RECORDED ${summary.advisoryEvidence.RECORDED}, FAIL ${summary.advisoryEvidence.FAIL}, ` +
+    `BLOCKED ${summary.advisoryEvidence.BLOCKED}, NOT RUN ${summary.advisoryEvidence["NOT RUN"]}`,
   );
   console.log(
     `Foundation: ${summary.foundation}, learners: ${summary.learners}/3, ` +

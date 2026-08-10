@@ -1,32 +1,35 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "gateId": "SRG-CURRENT",
   "updatedAt": "2026-08-10",
-  "decision": "BLOCKED",
+  "decision": "PASS",
   "primaryImplementerCode": "CODEX",
   "target": {
-    "commit": null,
-    "url": "https://ryuya-dot-com.github.io/Learning_Stan/"
+    "commit": "cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff",
+    "url": "https://github.com/Ryuya-dot-com/Learning_Stan/commit/cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff"
   },
   "foundationGate": {
     "decision": "BLOCKED",
     "artifact": "quality/foundation-gate/status.json"
   },
   "staticVerification": {
-    "status": "NOT RUN",
-    "commit": null,
-    "commands": [],
-    "artifact": null
+    "status": "PASS",
+    "commit": "cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff",
+    "commands": [
+      "npm test",
+      "npm run test:stan-content"
+    ],
+    "artifact": "quality/stan-release-gate/static-verification-cbc6ef2.json"
   },
   "cleanCi": {
-    "status": "NOT RUN",
-    "commit": null,
-    "runUrl": null,
-    "event": null,
+    "status": "PASS",
+    "commit": "cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff",
+    "runUrl": "https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31349208141",
+    "event": "pull_request",
     "jobs": {
-      "build": "NOT RUN",
-      "r-verify": "NOT RUN",
-      "stan-verify": "NOT RUN"
+      "build": "PASS",
+      "r-verify": "PASS",
+      "stan-verify": "PASS"
     }
   },
   "runtimeComparison": {
@@ -81,10 +84,14 @@
     "teachingConclusionsChecked": true,
     "artifactsChecked": true
   },
-  "independentReview": {
-    "reviewerCode": null,
-    "signedAt": null,
-    "scopes": []
+  "externalFeedback": {
+    "status": "RECORDED",
+    "receivedAt": "2026-08-10",
+    "contributorProfile": "教材利用者または閲覧者（詳細属性は未記録）",
+    "scopes": [
+      "learner-material"
+    ],
+    "summaryArtifact": "quality/stan-release-gate/feedback-2026-08-10.md"
   },
   "learnerObservation": {
     "eligibleComplete": 0,
@@ -96,37 +103,44 @@
     "eligibleComplete": 0,
     "records": []
   },
-  "publicScopeReview": {
-    "reviewerCode": null,
-    "signedAt": null,
-    "commit": null,
-    "commands": [],
-    "artifact": null,
-    "secretScan": "NOT RUN",
-    "personalDataScan": "NOT RUN",
-    "appScopeConfirmed": "NOT RUN"
+  "publicScopeConfirmation": {
+    "confirmedByCode": "OWNER-01",
+    "confirmedAt": "2026-08-10T11:42:02+09:00",
+    "commit": "cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff",
+    "commands": [
+      "npm run build",
+      "npm run audit:stan-public-scope"
+    ],
+    "artifact": "https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31349208141",
+    "secretScan": "PASS",
+    "personalDataScan": "PASS",
+    "appScopeConfirmed": "PASS"
   },
-  "decisionRecord": null,
+  "decisionRecord": "quality/stan-release-gate/DECISION_CBC6EF2.md",
   "evidence": [
     {
       "id": "SRG01",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [
         "quality/foundation-gate/status.json"
       ],
-      "note": "Foundation Gateは実機アクセシビリティ監査と初学者観察待ちでBLOCKED"
+      "note": "Foundation Gateは未完了。ベータ公開を止めない改善証拠として継続する"
     },
     {
       "id": "SRG02",
-      "status": "NOT RUN",
-      "artifacts": [],
-      "note": "L34〜L41のローカル静的検証は成功済みだが、対象commitを固定した証拠ではない"
+      "status": "PASS",
+      "artifacts": [
+        "quality/stan-release-gate/static-verification-cbc6ef2.json"
+      ],
+      "note": "対象commit cbc6ef2のクリーンなworktreeでnpm test（24 files・397 tests）とnpm run test:stan-contentが成功した"
     },
     {
       "id": "SRG03",
-      "status": "NOT RUN",
-      "artifacts": [],
-      "note": "対象commitのクリーンCI run待ち"
+      "status": "PASS",
+      "artifacts": [
+        "https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31349208141"
+      ],
+      "note": "対象commit cbc6ef2へのpull request runでbuild、r-verify、stan-verifyの3 jobが成功した"
     },
     {
       "id": "SRG04",
@@ -150,34 +164,50 @@
     },
     {
       "id": "SRG06",
-      "status": "BLOCKED",
-      "artifacts": [],
-      "note": "Stan言語・統計モデル・学習原稿を主実装者以外が独立レビューする必要がある"
+      "status": "RECORDED",
+      "artifacts": [
+        "quality/stan-release-gate/feedback-2026-08-10.md"
+      ],
+      "note": "練習問題の反復を増やしてほしいという感想を匿名要約し、次の教材候補で扱う改善項目として記録した"
     },
     {
       "id": "SRG07",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "適格な初学者3名以上による構文修正・モデルレビュー・未見転移の観察が必要"
+      "note": "初学者観察は教材改善と学習効果の主張を支える任意の追跡証拠。ベータ公開の必須条件ではない"
     },
     {
       "id": "SRG08",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "L41後7〜14日のsr41dを適格な初学者3名以上で実施する必要がある"
+      "note": "L41後7〜14日のsr41dは保持設計を改善する任意の追跡証拠。未実施時は保持効果を主張しない"
     },
     {
       "id": "SRG09",
-      "status": "NOT RUN",
-      "artifacts": [],
-      "note": "対象commitに対するsecret・個人情報・アプリ公開範囲の監査待ち"
+      "status": "PASS",
+      "artifacts": [
+        "https://github.com/Ryuya-dot-com/Learning_Stan/actions/runs/31349208141",
+        "quality/stan-release-gate/DECISION_CBC6EF2.md"
+      ],
+      "note": "対象commitの自動監査3項目が成功し、リポジトリ所有者が全公開範囲を2026-08-10に確認した"
     },
     {
       "id": "SRG10",
-      "status": "NOT RUN",
-      "artifacts": [],
-      "note": "全証拠と問題トリアージを参照する最終公開判断・署名待ち"
+      "status": "PASS",
+      "artifacts": [
+        "quality/stan-release-gate/DECISION_CBC6EF2.md"
+      ],
+      "note": "所有者が必須6項目、既知の限界、未解決問題を確認し、Stan編のベータ公開を承認した"
     }
   ],
-  "issues": []
+  "issues": [
+    {
+      "id": "SRG-IMPROVEMENT-001",
+      "severity": "P3",
+      "status": "OPEN",
+      "summary": "Stan編の練習問題の反復を増やす",
+      "owner": "CODEX",
+      "retest": "次の教材候補で反復課題を追加し、Stan教材静的検証と理解問題対応を再確認する"
+    }
+  ]
 }

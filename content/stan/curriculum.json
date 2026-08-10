@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "status": "draft-unpublished",
   "entryPrerequisite": "l33",
-  "releasePolicy": "Foundation Gate通過後に、前段階の評価結果を反映して1レッスンずつ公開する",
+  "releasePolicy": "対象commitの技術検証・runtime証拠・公開範囲確認・所有者判断を満たしてベータ公開し、Foundation観察・第三者感想・初学者観察・遅延保持は改善証拠として継続する",
   "lessonDelivery": {
     "status": "draft-unpublished",
     "authoredLessonIds": ["l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41"],

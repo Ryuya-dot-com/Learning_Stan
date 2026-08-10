@@ -434,4 +434,4 @@ centeredとnon-centeredのコードを並べ、`tau`が小さいときの`theta`
 - [CmdStan Guide: Diagnose utility](https://mc-stan.org/docs/cmdstan-guide/diagnose_utility.html)
 - [Stan Reference Manual: Posterior Analysis](https://mc-stan.org/docs/reference-manual/analysis.html)
 
-L40の原稿、理解問題、構文証拠、弱・強情報の複数chain比較はGitHub上でレビュー可能ですが、学習アプリへはまだ公開しません。ローカル実測はStan Release GateのSRG05を満たす証拠になりますが、対象commitのクリーンCI、独立専門レビュー、初学者観察、遅延保持など別ゲートを代替しません。
+L40の原稿、理解問題、構文証拠、弱・強情報の複数chain比較はGitHub上でレビュー可能ですが、学習アプリへはまだ公開しません。ローカル実測はStan Release GateのSRG05を満たす証拠になりますが、対象commitの静的検証・クリーンCI・runtime再検証・公開範囲確認・最終判断は別途必要です。第三者フィードバック、初学者観察、遅延保持は公開を止めない改善証拠として継続します。

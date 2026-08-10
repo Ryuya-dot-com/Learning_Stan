@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "SRG02",
+  "targetCommit": "cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff",
+  "targetUrl": "https://github.com/Ryuya-dot-com/Learning_Stan/commit/cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff",
+  "verifiedAt": "2026-08-10T11:13:14+09:00",
+  "executor": "local-clean-worktree",
+  "environment": {
+    "os": "Darwin 25.5.0 arm64",
+    "nodeVersion": "24.9.0",
+    "npmVersion": "11.6.0"
+  },
+  "commands": [
+    {
+      "command": "npm test",
+      "status": "PASS",
+      "summary": "24 test files and 397 tests passed"
+    },
+    {
+      "command": "npm run test:stan-content",
+      "status": "PASS",
+      "summary": "Stan content and compiler/runtime evidence passed"
+    }
+  ]
+}

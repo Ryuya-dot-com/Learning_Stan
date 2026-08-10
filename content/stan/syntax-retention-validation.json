@@ -10,7 +10,7 @@
   "flags": [
     "--warn-pedantic"
   ],
-  "planSha256": "2748a8db14bd5256e404bd84518b51686796ed3d89c9f6f6f1b87fe0c045bf16",
+  "planSha256": "902285595a82cd755bdae6a677ea9e5211bcbaabffa3319d33701aa65c24492b",
   "assessmentsSha256": "4b617360c367f232fd160aa0e86bae72123cff097bd98b5a79c713404920f50c",
   "reference": "retention/facilitator/positive-duration-reference.stan",
   "referenceSha256": "30c8ab9d954a1b623cd33553bf7015dbe5a92eb97e16faa6a60659577dc86b9d",

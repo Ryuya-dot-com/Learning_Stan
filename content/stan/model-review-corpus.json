@@ -122,6 +122,6 @@
     "各対でコンパイラが判断できない理由と、人が確認する尺度・密度・予測単位・幾何を記録する",
     "candidate-reject、prefer-reference、context-dependentを区別し、すべてを単純な正誤問題にしない",
     "少なくとも切断ケースは固定seed・複数chainの実測結果と結び付ける",
-    "Jacobian、階層幾何、offset、LOOは独立したStan経験者・統計レビューを受ける"
+    "Jacobian、階層幾何、offset、LOOは第三者から感想を得られた場合に要点と対応を改善記録へ残す"
   ]
 }

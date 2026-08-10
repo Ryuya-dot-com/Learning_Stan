@@ -14,7 +14,7 @@
     "content/stan/examples/poisson-log-exposure.stan": "5c4add7cfdc62a5626ba4843ab2fad9ab40e818688e314069e68aaebd8b313bc",
     "content/stan/examples/simulate-link-functions.R": "dd39f95cca748f640f433e6354dde392fb52a671a5430a702a02983abc753743",
     "content/stan/examples/run-link-model-comparison.R": "7ed4f28da6140f8edc093bfd77e12b1fa217cc2b3d2b24cd21274b6ebef2913f",
-    "content/stan/examples/run-existing-runtime-revalidation.R": "1fcd81e471945c10477ca7b1749d3d3d3b93e7948f40b4e7e5acfe323321fa24"
+    "content/stan/examples/run-existing-runtime-revalidation.R": "2e4dadce0f15a4323dea261bd048452236645124fea17b11b6a64a81c01959a9"
   },
   "environment": {
     "os": "Darwin",
@@ -218,6 +218,6 @@
     "固定seedの合成教材ケースに対する再検証であり、実データや別モデルへ一般化しない",
     "OS間でMCMC drawが完全一致することは要求せず、source hash、診断、教材上の統計的結論、成果物契約を検査する",
     "切断モデルは1,000 samplingで境界的なR-hatが観測されたため、再検証では各chain 2,000 samplingを用いる",
-    "独立専門レビューと初学者観察は別のStan Release Gate条件である"
+    "第三者フィードバックと初学者観察は公開を止めない改善証拠である"
   ]
 }

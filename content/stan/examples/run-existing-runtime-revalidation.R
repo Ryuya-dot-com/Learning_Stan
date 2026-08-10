@@ -389,7 +389,7 @@ run_existing_runtime_revalidation <- function(
       "固定seedの合成教材ケースに対する再検証であり、実データや別モデルへ一般化しない",
       "OS間でMCMC drawが完全一致することは要求せず、source hash、診断、教材上の統計的結論、成果物契約を検査する",
       "切断モデルは1,000 samplingで境界的なR-hatが観測されたため、再検証では各chain 2,000 samplingを用いる",
-      "独立専門レビューと初学者観察は別のStan Release Gate条件である"
+      "第三者フィードバックと初学者観察は公開を止めない改善証拠である"
     )
   )
 
