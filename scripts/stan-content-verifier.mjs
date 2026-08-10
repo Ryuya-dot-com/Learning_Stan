@@ -362,8 +362,18 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
     if (!manuscript.startsWith(`# ${lessonId.toUpperCase()}`)) {
       errors.push(`${lessonId}: 原稿見出しがレッスンIDで始まっていません`);
     }
-    if (!manuscript.includes("状態: ベータ公開中")) {
-      errors.push(`${lessonId}: 原稿がベータ公開中であることを明示していません`);
+    if (!manuscript.includes("Stanベータ編")) {
+      errors.push(`${lessonId}: 原稿がStanベータ編であることを読み手向けに明示していません`);
+    }
+    const internalCopyPatterns = [
+      ["sr41d", /\bsr41d\b/i],
+      ["pilot・facilitator・delayed retention", /\b(?:pilot|facilitator|delayed retention)\b/i],
+      ["制作側の公開判定・検証用語", /Stan Release Gate|対象commit|クリーンCI|runtime証拠|未解決P[01]|学習アプリへはまだ公開しません/],
+    ];
+    for (const [label, pattern] of internalCopyPatterns) {
+      if (pattern.test(manuscript)) {
+        errors.push(`${lessonId}: 読み手向け原稿に内部文言「${label}」が残っています`);
+      }
     }
     for (const section of delivery.requiredSections || []) {
       if (!manuscript.includes(`## ${section}`)) errors.push(`${lessonId}: 必須見出し「${section}」がありません`);
@@ -374,7 +384,7 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
       }
     }
     for (const phrase of ["読む・予測する", "穴埋めする", "一部を変える", "エラーを直す", "見本なし", "別文脈へ移す"]) {
-      if (!manuscript.includes(phrase)) errors.push(`${lessonId}: 6接触の「${phrase}」がありません`);
+      if (!manuscript.includes(phrase)) errors.push(`${lessonId}: 6回の練習に「${phrase}」がありません`);
     }
     const officialLinks = manuscript.match(/https:\/\/mc-stan\.org\//g) || [];
     if (officialLinks.length < 3) errors.push(`${lessonId}: Stan公式資料へのリンクが3件未満です`);
@@ -388,7 +398,7 @@ export function validateFoundationLessons(curriculum, assessments, manuscripts) 
     l38: ["diagnostic_summary()", "mcse_mean", "mcse_quantile", "R-hat < 1.01", "100 × chain数", "divergenceが1件でも", "E-BFMI 0.30未満", "計算診断が良い誤答モデル", "L40後"],
     l39: ["sampling済みparameterを変えない", "observed_stats", "replicated_by_bin", "pointwise `log_lik`", "予測単位", "relative_eff()", "pareto_k_table", "Pareto kをELPDより先に読む", "elpd_diff", "se_diff", "posterior model probability", "L41後"],
     l40: ["theta = mu + tau * z", "z ~ std_normal()", "centeredを常に誤り", "manual Jacobian", "弱い群情報", "強い群情報", "ESS/sec", "仮想診断", "構文成功・警告0件", "L41後"],
-    l41: ["estimand", "prediction task", "prior predictive", "診断停止規則", "artifact manifest", "claim–evidence–limit", "clean environment", "第三者再実行", "sr41d", "7〜14日", "合格閾値はpilot前に"],
+    l41: ["estimand", "prediction task", "prior predictive", "診断停止規則", "artifact manifest", "claim–evidence–limit", "clean environment", "第三者再実行", "1〜2週間後", "別の応答型", "完成例を見ず"],
   };
   for (const [lessonId, phrases] of Object.entries(requiredPhrases)) {
     for (const phrase of phrases) {
