@@ -21,9 +21,24 @@ function understood(ids) {
   }));
 }
 
+function completedPractice(ids) {
+  return Object.fromEntries(ids.map((id) => {
+    const lesson = LESSONS.find((item) => item.id === id);
+    return [id, lesson.practice?.items.map((item) => item.id) || []];
+  }));
+}
+
 describe("初心者向け学習パス", () => {
-  it("公開中の番号付きレッスンを、R基礎・データ操作・Stanベータの順で一度ずつ扱う", () => {
-    expect(LEARNING_LESSON_IDS).toEqual(["l1", "l10", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l11", "l12", "l13", "l14", "l15", "l16", "l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41"]);
+  it("公開中の番号付きレッスンを、R基礎からSTEP 6まで順に一度ずつ扱う", () => {
+    expect(LEARNING_LESSON_IDS).toEqual([
+      "l1", "l10", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9",
+      "l11", "l12", "l13", "l14", "l15", "l16",
+      "step2-describe-distributions", "step2-grammar-of-graphics",
+      "step2-show-individuals", "step2-report-and-transfer",
+      "l21", "l22", "l23", "l24", "l25", "l26",
+      "l27", "l28", "l29", "l30", "l31", "l32", "l33",
+      "l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41",
+    ]);
     expect([...LEARNING_LESSON_IDS].sort()).toEqual(
       LESSONS.filter((lesson) => lesson.num != null).map((lesson) => lesson.id).sort()
     );
@@ -57,9 +72,11 @@ describe("初心者向け学習パス", () => {
     expect(nextLessonInPath(LESSONS.find((lesson) => lesson.id === "l9"))).toBeNull();
   });
 
-  it("Foundation後はSTEP 1へ進み、STEP 1後はStanベータへ進む", () => {
+  it("Foundation後はSTEP 1からSTEP 6までを飛ばさず進む", () => {
     const foundationPractice = LESSONS.find((lesson) => lesson.id === FOUNDATION_LESSON_ID).practice.items.map((item) => item.id);
     const dataPractice = LESSONS.find((lesson) => lesson.id === "l16").practice.items.map((item) => item.id);
+    const dataIds = JOURNEY_STAGES.find((stage) => stage.id === "data").lessonIds;
+    const statsStage = JOURNEY_STAGES.find((stage) => stage.id === "stats");
     const afterFoundation = {
       ...empty,
       done: understood(FOUNDATION_PREREQUISITE_IDS),
@@ -67,29 +84,55 @@ describe("初心者向け学習パス", () => {
     };
     expect(getJourneyState(afterFoundation).targetView).toEqual({ name: "lesson", id: "l11" });
 
-    const progress = {
+    const afterData = {
       ...empty,
-      done: understood(LEARNING_LESSON_IDS),
+      done: understood([...FOUNDATION_PREREQUISITE_IDS, ...dataIds]),
       practice: { [FOUNDATION_LESSON_ID]: foundationPractice, l16: dataPractice },
     };
-    expect(foundationIsComplete(progress)).toBe(true);
-    expect(lessonPracticeIsComplete(progress, "l16")).toBe(true);
-    expect(getJourneyState(progress)).toMatchObject({
-      complete: false,
-      stage: { id: "stan" },
-      targetView: { name: "lesson", id: "l34" },
+    expect(getJourneyState(afterData)).toMatchObject({
+      stage: { id: "stats" },
+      targetView: { name: "lesson", id: "step2-describe-distributions" },
     });
 
-    const stanPractice = Object.fromEntries(
-      LESSONS.filter((lesson) => /^l(?:3[4-9]|4[01])$/.test(lesson.id))
-        .map((lesson) => [lesson.id, lesson.practice.items.map((item) => item.id)])
-    );
+    const afterStats = {
+      ...afterData,
+      done: understood([...FOUNDATION_PREREQUISITE_IDS, ...dataIds, ...statsStage.lessonIds]),
+      practice: { ...afterData.practice, ...completedPractice(statsStage.lessonIds) },
+    };
+    expect(getJourneyState(afterStats)).toMatchObject({
+      complete: false,
+      stage: { id: "simulation" },
+      targetView: { name: "lesson", id: "l21" },
+    });
+
+    let bridgeProgress = afterStats;
+    for (const stageId of ["simulation", "bayes", "brms"]) {
+      const stage = JOURNEY_STAGES.find((item) => item.id === stageId);
+      bridgeProgress = {
+        ...bridgeProgress,
+        done: { ...bridgeProgress.done, ...understood(stage.lessonIds) },
+        practice: { ...bridgeProgress.practice, ...completedPractice(stage.lessonIds) },
+      };
+      const nextStageId = { simulation: "bayes", bayes: "brms", brms: "stan" }[stageId];
+      const nextLessonId = { simulation: "l24", bayes: "l27", brms: "l34" }[stageId];
+      expect(getJourneyState(bridgeProgress)).toMatchObject({
+        stage: { id: nextStageId },
+        targetView: { name: "lesson", id: nextLessonId },
+      });
+    }
+
+    expect(foundationIsComplete(bridgeProgress)).toBe(true);
+    expect(lessonPracticeIsComplete(bridgeProgress, "l16")).toBe(true);
     const complete = {
-      ...progress,
-      practice: { ...progress.practice, ...stanPractice },
+      ...bridgeProgress,
+      done: understood(LEARNING_LESSON_IDS),
+      practice: {
+        ...bridgeProgress.practice,
+        ...completedPractice(LEARNING_LESSON_IDS),
+      },
     };
     expect(getJourneyState(complete).complete).toBe(true);
-    expect(JOURNEY_STAGES).toHaveLength(6);
+    expect(JOURNEY_STAGES).toHaveLength(10);
   });
 
   it("L16の理解問題だけ終えても成果物チェックが残っていればL16を案内する", () => {
@@ -111,6 +154,12 @@ describe("初心者向け学習パス", () => {
     expect(getLessonPathMeta("l10").eyebrow).toBe("STEP 0");
     expect(getLessonPathMeta("l2").eyebrow).toBe("R基礎 1 / 8");
     expect(getLessonPathMeta("l11").eyebrow).toBe("STEP 1 1 / 6");
+    expect(getLessonPathMeta("step2-describe-distributions").eyebrow).toBe("STEP 2 1 / 4");
+    expect(getLessonPathMeta("step2-report-and-transfer").badge).toBe("V4");
+    expect(getLessonPathMeta("l21").eyebrow).toBe("STEP 3 1 / 3");
+    expect(getLessonPathMeta("l24").eyebrow).toBe("STEP 4 1 / 3");
+    expect(getLessonPathMeta("l27").eyebrow).toBe("STEP 5 1 / 7");
+    expect(getLessonPathMeta("l33").badge).toBe("M7");
     expect(getLessonPathMeta("l34").eyebrow).toBe("STEP 6 1 / 8");
     expect(getLessonPathMeta("l41").badge).toBe("S8");
   });
@@ -127,6 +176,56 @@ describe("初心者向け学習パス", () => {
     expect(metas.at(-1).caseStudy.deliverable).toContain("analysis_note.txt");
     expect(metas.at(-1).caseStudy.caution).toContain("母集団への一般化");
     expect(getLessonPathMeta("l2").caseStudy).toBeNull();
+  });
+
+  it("STEP 2の4レッスンを、同じ探索依頼と学習者向けの作業で接続する", () => {
+    const ids = [
+      "step2-describe-distributions",
+      "step2-grammar-of-graphics",
+      "step2-show-individuals",
+      "step2-report-and-transfer",
+    ];
+    const metas = ids.map(getLessonPathMeta);
+
+    expect(new Set(metas.map((meta) => meta.caseStudy.label))).toEqual(
+      new Set(["STEP 2 ケーススタディ"])
+    );
+    expect(new Set(metas.map((meta) => meta.caseStudy.title))).toEqual(
+      new Set(["拡大パイロットの探索報告"])
+    );
+    expect(new Set(metas.map((meta) => meta.caseStudy.task)).size).toBe(4);
+    expect(metas[0].caseStudy.question).toContain("分布と参加者内の差");
+    expect(metas.at(-1).caseStudy.deliverable).toContain("2つのPNG");
+    expect(metas.at(-1).caseStudy.caution).toContain("因果効果");
+  });
+
+  it("STEP 2の冒頭から、そのレッスンで使う公開ファイルを取得できる", () => {
+    expect(getLessonPathMeta("step2-describe-distributions").resources.map((resource) => resource.path)).toEqual([
+      "data/step2/expanded_pilot_trials.csv",
+      "notebooks/nb2-stats.qmd",
+      "scripts/step2/step2_descriptive.R",
+    ]);
+    expect(getLessonPathMeta("step2-report-and-transfer").resources.map((resource) => resource.path)).toEqual([
+      "data/step2/expanded_pilot_trials.csv",
+      "notebooks/nb2-stats.qmd",
+      "scripts/step2/step2_descriptive.R",
+      "scripts/step2/step2_condition_plot.R",
+      "scripts/step2/step2_participant_differences_plot.R",
+      "scripts/step2/step2_report_and_transfer.R",
+    ]);
+  });
+
+  it("STEP 5の各レッスンから共通データと演習ノートを取得できる", () => {
+    const expectedPaths = [
+      "scripts/step5/step5_data.R",
+      "notebooks/nb5-brms.qmd",
+    ];
+
+    for (const lessonId of ["l27", "l28", "l29", "l30", "l31", "l32", "l33"]) {
+      expect(getLessonPathMeta(lessonId).resources.map((resource) => resource.path)).toEqual(
+        expectedPaths
+      );
+    }
   });
 
   it("STEP 1の冒頭には、そのレッスンで使うダウンロード教材だけを示す", () => {

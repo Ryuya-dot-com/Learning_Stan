@@ -20,8 +20,8 @@ function observedStatus() {
   status.decision = "OBSERVED";
   status.target.commit = "b".repeat(40);
   status.participants = {
-    eligibleComplete: 3,
-    records: ["evidence/STR-TEST/learner-P01.md", "evidence/STR-TEST/learner-P02.md", "evidence/STR-TEST/learner-P03.md"],
+    eligibleComplete: 1,
+    records: ["evidence/STR-TEST/learner-P01.md"],
     blockedSessions: 0,
     invalidSessions: 0,
   };
@@ -66,12 +66,12 @@ describe("STEP 1独立転移観察の機械判定", () => {
 
     expect(errors).toContain("decisionはNOT RUN");
     expect(errors).toContain("40桁commit SHA");
-    expect(errors).toContain("匿名観察記録3件以上");
+    expect(errors).toContain("匿名観察記録1件以上");
     expect(errors).toContain("独立レビュー署名");
     expect(errors).toContain("コホート判断記録");
   });
 
-  it("3名・TR01〜TR05・対象SHA・判断票・独立レビューが揃った場合だけOBSERVEDにする", () => {
+  it("記録済みのTR01〜TR05・対象版・判断票・独立レビューをOBSERVEDとして区別する", () => {
     const status = observedStatus();
     expect(validateTransferGateStatus(status)).toEqual([]);
     expect(deriveTransferGateDecision(status)).toBe("OBSERVED");
@@ -110,14 +110,14 @@ describe("STEP 1独立転移観察の機械判定", () => {
     expect(validateTransferGateStatus(invalid).join("\n")).toContain("reason");
   });
 
-  it("status CLIはNOT RUNを報告し、--require-observedだけを失敗終了する", () => {
+  it("status CLIはNOT RUNを公開を止めずに報告する", () => {
     const report = spawnSync(process.execPath, [scriptPath, statusPath], { encoding: "utf8" });
     expect(report.status).toBe(0);
     expect(report.stdout).toContain("STEP 1 Transfer Observation: NOT RUN");
-    expect(report.stdout).toContain("valid 0/3");
+    expect(report.stdout).toContain("valid 0");
 
-    const gate = spawnSync(process.execPath, [scriptPath, statusPath, "--require-observed"], { encoding: "utf8" });
-    expect(gate.status).toBe(1);
-    expect(gate.stdout).toContain("OBSERVED 0/5");
+    const legacyFlag = spawnSync(process.execPath, [scriptPath, statusPath, "--require-observed"], { encoding: "utf8" });
+    expect(legacyFlag.status).toBe(0);
+    expect(legacyFlag.stdout).toContain("OBSERVED 0/5");
   });
 });

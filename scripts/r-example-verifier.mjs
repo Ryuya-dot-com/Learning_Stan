@@ -18,7 +18,7 @@ const R_LESSON_DIRECTORIES = new Set([
   "0-basics",
   "1-setup",
   "2-data",
-  "3-stats",
+  // STEP 2はMarkdown原稿からViteで組み立て、4本の専用R実行検証で確認する。
   "4-sim",
   "5-bayes",
   "6-brms",

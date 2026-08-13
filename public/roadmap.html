@@ -229,10 +229,10 @@ html.js .reveal.in{opacity:1; transform:none}
 
   <header class="reveal">
     <p class="backlink"><a href="./">← アプリにもどる</a></p>
-    <p class="eyebrow">学習アプリ「はじめてのRとStan」構想</p>
+    <p class="eyebrow">学習アプリ「はじめてのRとStan」</p>
     <h1>学習ロードマップ</h1>
-    <p class="lede">Rの文法の土台から、tidyverseによるデータ操作・ggplot2による可視化・モンテカルロ・シミュレーション、そしてベイズ推定の考え方へ。前半はbrmsで「ベイズで分析できる」状態をつくり、後半は生のStanコードでその中身を開きます。事前分布の選び方から事後分布の要約(HDI・ROPE・pd)、モデル比較(LOO)、論文での報告まで——「ベイズで考え、ベイズで語る」を一本道で積み上げるロードマップです。</p>
-    <p class="meta"><span>R基礎〜STEP 1とStan L34〜L41を公開中</span><span class="sep">/</span><span>STEP 2〜5・ブリッジ・補講は構想/整備中</span><span class="sep">/</span><span>対象:プログラミング未経験〜</span></p>
+    <p class="lede">Rの文法の土台から、tidyverseによるデータ操作・ggplot2による可視化・モンテカルロ・シミュレーション、そしてベイズ推定の考え方へ。前半はbrmsで「ベイズで分析できる」状態をつくり、後半は生のStanコードでその中身を開きます。事前分布、事後分布、予測、計算診断、モデル比較、限界を含む報告まで——「ベイズで考え、ベイズで語る」を一本道で積み上げるロードマップです。</p>
+    <p class="meta"><span>R基礎〜STEP 6を公開中</span><span class="sep">/</span><span>全41レッスンを一本道で学習</span><span class="sep">/</span><span>対象:プログラミング未経験〜</span></p>
   </header>
 
   <div class="route">
@@ -348,31 +348,31 @@ html.js .reveal.in{opacity:1; transform:none}
     <section class="phase reveal" style="--pc:#2E7D1F; --ps:#EAF6E6;">
       <span class="node" aria-hidden="true"></span>
       <div>
-        <span class="pstep">STEP 2 / 統計・可視化編</span>
-        <h2>レッスン 17–20 <span class="psub">数字と図で、結果を語る</span></h2>
-        <p class="ptag">拡大した合成パイロットを1つの分析依頼として扱い、試行数と参加者数を区別して、分布・個人差・限界を追跡可能な図とCSVで報告します。公開前に、別のデバイス文脈へ図選択と限定付き報告を移せるか、適格な初学者3名以上で観察します。</p>
+        <span class="pstep">STEP 2 / 統計・可視化編・公開中</span>
+        <h2>4つのレッスン <span class="psub">数字と図で、結果を語る</span></h2>
+        <p class="ptag">拡大した合成パイロットを1つの分析依頼として扱い、試行数と参加者数を区別して、分布・個人差・限界を追跡可能な図とCSVで報告します。<a href="notebooks/nb2-stats.qmd" download>Quarto演習ノート NB2</a>と各レッスンの完成版Rスクリプトを利用できます。初学者の感想は公開後の改善へ反映します。</p>
       </div>
       <div class="lessons">
         <article class="lesson">
-          <span class="lnum">L17</span>
+          <span class="lnum">V1</span>
           <h3>分析単位を決めて分布を要約する</h3>
           <p>884正答試行を884人と数えず、24名×2条件の48行へ要約。中央値・四分位範囲と参加者内差を記述します。</p>
           <div class="chips"><code>group_by</code><code>median</code><code>IQR</code></div>
         </article>
         <article class="lesson">
-          <span class="lnum">L18</span>
+          <span class="lnum">V2</span>
           <h3>データ・対応付け・図形を重ねる</h3>
           <p>問いと変数型から対応付けと図形を選び、参加者の全点と分布要約を同じ図で読めるようにします。</p>
           <div class="chips"><code>ggplot</code><code>aes</code><code>geom_point</code></div>
         </article>
         <article class="lesson">
-          <span class="lnum">L19</span>
+          <span class="lnum">V3</span>
           <h3>平均の背後にある個人差を示す</h3>
           <p>同じ参加者の2条件を対応付け、平均値だけでは失われる差の方向とばらつきを図と文章で一致させます。</p>
           <div class="chips"><code>group</code><code>geom_line</code><code>facet_wrap</code></div>
         </article>
         <article class="lesson">
-          <span class="lnum">L20</span>
+          <span class="lnum">V4</span>
           <h3>図を保存し、選択理由と限界を報告する</h3>
           <p>寸法を固定した2図・3CSV・探索メモを再生成し、未見データでも図の選択理由と結論できないことを説明します。</p>
           <div class="chips"><code>ggsave</code><code>caption</code><code>transfer</code></div>
@@ -384,8 +384,8 @@ html.js .reveal.in{opacity:1; transform:none}
     <section class="phase reveal" style="--pc:#3F557A; --ps:#EAF0F8;">
       <span class="node" aria-hidden="true"></span>
       <div>
-        <span class="pstep">BRIDGE / 線形回帰</span>
-        <h2>表示番号は公開前に確定 <span class="psub">要約からモデルへ橋を架ける</span></h2>
+        <span class="pstep">NEXT / 線形回帰</span>
+        <h2>モデルへ進む準備 <span class="psub">要約からモデルへ橋を架ける</span></h2>
         <p class="ptag">STEP 2の図を式で表す前に、<code>lm()</code>のフォーミュラ、切片・係数・予測・残差・仮定を、同じ分析シナリオから順に読みます。</p>
       </div>
       <div class="lessons">
@@ -411,43 +411,28 @@ html.js .reveal.in{opacity:1; transform:none}
     <section class="phase reveal" style="--pc:#6D3E86; --ps:#F3ECF7;">
       <span class="node" aria-hidden="true"></span>
       <div>
-        <span class="pstep">STEP 3 / シミュレーションと確率</span>
-        <h2>レッスン 21–23 <span class="psub">乱数で統計を「体験」する土台</span></h2>
-        <p class="ptag">検定力分析を自作して、シミュレーションという道具を手に入れます。ベイズ統計は「確率でものを考える」統計——その足腰をここで鍛えます。</p>
+        <span class="pstep">STEP 3 / シミュレーションと確率・公開中</span>
+        <h2>レッスン 21–23 <span class="psub">回帰から確率モデルへ</span></h2>
+        <p class="ptag">係数と交互作用を予測値へ戻し、乱数で生成規則を確かめ、観測単位と支持範囲から尤度を選びます。</p>
       </div>
       <div class="lessons">
         <article class="lesson">
           <span class="lnum">L21</span>
-          <h3>乱数と再現性</h3>
-          <p>刺激リストのランダム化、カウンターバランス、シードの固定。実験心理の実務に直結する回です。</p>
-          <div class="chips"><code>set.seed</code><code>sample</code><code>rnorm</code></div>
+          <h3>回帰・因子・交互作用</h3>
+          <p>係数、予測値、残差を区別し、因子の参照水準と交互作用を条件別予測へ戻して読みます。</p>
+          <div class="chips"><code>lm</code><code>predict</code><code>model.matrix</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L22</span>
-          <h3>分布のカタログ</h3>
-          <p>d / p / q / r の4兄弟で、正規・二項・ポアソン・一様を自在に。ここでそろえた分布が、のちに「尤度」と「事前分布」の材料庫になります。</p>
-          <div class="chips"><code>dnorm</code><code>rbinom</code><code>qnorm</code></div>
+          <h3>確率とシミュレーション</h3>
+          <p>真の確率と観測割合を分け、試行数を一つ変えたときに標本変動がどう変わるかをRで確かめます。</p>
+          <div class="chips"><code>set.seed</code><code>rbinom</code><code>hist</code></div>
         </article>
         <article class="lesson featured">
-          <span class="badge">シミュレーションの型</span>
-          <h3>L23 モンテカルロ・シミュレーション</h3>
-          <p>「n=20・効果量 d=0.5 の実験、何%有意になる?」——1万回の仮想実験で検定力分析を自作します。この「生成→検定→集計」の型が、ベイズ編の「生成→推定→復元」につながる背骨です。</p>
-          <div class="code">
-            <div class="codehead"><span class="lang-r">R</span></div>
-            <pre>power_sim &lt;- <span class="kw">function</span>(n, d, nsim = <span class="num">10000</span>) {
-  hits &lt;- replicate(nsim, {
-    a &lt;- rnorm(n)              <span class="com"># 統制群</span>
-    b &lt;- rnorm(n) + d          <span class="com"># 実験群(効果量 d)</span>
-    t.test(a, b, var.equal = <span class="kw">TRUE</span>)$p.value &lt; <span class="num">0.05</span>
-  })
-  <span class="num">100</span> * mean(hits)
-}
-
-set.seed(<span class="num">2026</span>)                   <span class="com"># 再現性の確保</span>
-cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>, <span class="num">0.5</span>), <span class="str">"%\n"</span>)</pre>
-            <div class="result"><span class="rl">▶ 実行結果(R 4.6)</span><span class="rv">検定力: 32.98 %</span></div>
-          </div>
-          <p class="fnote">※ 理論値は <code>power.t.test</code> で 33.77%(実測)。乱数の結果はシードやバージョンによりわずかに変わります。関数に包んでおけば、n や d を変えて何度でも呼べます。</p>
+          <span class="badge">生成過程への橋</span>
+          <h3>L23 尤度と応答分布</h3>
+          <p>二値、成功数、件数、正の連続量を同じ分布へ押し込まず、観測単位・支持範囲・記録過程から尤度候補を選びます。</p>
+          <div class="chips"><code>dbinom</code><code>likelihood</code><code>support</code></div>
         </article>
       </div>
     </section>
@@ -456,28 +441,28 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
     <section class="phase reveal" style="--pc:#0A6570; --ps:#E4F2F3;">
       <span class="node" aria-hidden="true"></span>
       <div>
-        <span class="pstep">STEP 4 / ベイズ推定の考え方</span>
+        <span class="pstep">STEP 4 / ベイズ推定の考え方・公開中</span>
         <h2>レッスン 24–26 <span class="psub">事前 × 尤度 → 事後</span></h2>
         <p class="ptag">Stanを使う前に、ベイズ推定の心臓部を素のRコードで目撃します。最後に、満を持して第2の環境構築へ。</p>
       </div>
       <div class="lessons">
         <article class="lesson">
           <span class="lnum">L24</span>
-          <h3>ベイズの定理と事前・事後</h3>
-          <p>「40試行中28正答の参加者、ほんとうの正答率は?」——弱情報の事前分布 Beta(2,2) × 尤度 → 事後分布の掛け算を、グリッド近似の素のRコードで再現します(事後平均 0.682、実測)。</p>
-          <div class="chips"><code>dbeta</code><code>dbinom</code><code>seq</code></div>
+          <h3>ベイズ更新と事後分布</h3>
+          <p>priorと尤度を掛けて正規化する格子近似から、事後区間と確率的な主張の読み方を学びます。</p>
+          <div class="chips"><code>dnorm</code><code>likelihood</code><code>posterior</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L25</span>
-          <h3>MCMCってなに?</h3>
-          <p>事後分布が数式で解けないとき、「サンプルの山」で近似する。チェーン・ウォームアップ・トレースプロットという道具立てを、動くおもちゃのMCMCで体感します。</p>
-          <div class="chips"><code>chains</code><code>warmup</code><code>traceplot</code></div>
+          <h3>事前予測と感度分析</h3>
+          <p>priorを観測可能な得点へ戻して批判し、合理的な代替priorで結論がどの程度変わるかを記録します。</p>
+          <div class="chips"><code>prior predictive</code><code>sensitivity</code><code>scale</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L26</span>
-          <h3>Stanを手元に入れる</h3>
-          <p>第2の環境構築にして最大の山場。C++ツールチェーン(WindowsはRTools、macOSはコマンドラインツール)、cmdstanr(CRANではなくr-universeから)、CmdStan本体、そしてbrms。つまずきポイントを先回りして案内します。</p>
-          <div class="chips"><code>cmdstanr</code><code>install_cmdstan()</code><code>backend="cmdstanr"</code></div>
+          <h3>MCMCとbrmsの準備</h3>
+          <p>chain、warmup、draw、R-hat、ESS、divergenceの役割を区別し、次のSTEPで使うbrmsとCmdStan環境を確認します。</p>
+          <div class="chips"><code>chains</code><code>warmup</code><code>brms</code></div>
         </article>
       </div>
     </section>
@@ -486,52 +471,52 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
     <section class="phase reveal" style="--pc:#B0182D; --ps:#F9E9EB;">
       <span class="node" aria-hidden="true"></span>
       <div>
-        <span class="pstep">STEP 5 / brmsでベイズモデリング</span>
-        <h2>レッスン 27–33 <span class="psub">式を書けば、ベイズが動く</span></h2>
-        <p class="ptag">lme4風の式でベイズ回帰が動くbrmsを軸に、事前分布の設計 → 推定 → 事後分布の要約 → モデルチェック → 可視化と報告、というベイズワークフローを一周します。</p>
+        <span class="pstep">STEP 5 / brmsでベイズモデリング・公開中</span>
+        <h2>レッスン 27–33 <span class="psub">作り、疑い、比べる</span></h2>
+        <p class="ptag">brmsで連続応答から反復測定・GLMM・反応時間へ進み、診断、PPC、LOO、生成Stanコードの読解まで一周します。各レッスンを単独で始めるときは、<a href="scripts/step5/step5_data.R" download>STEP 5練習データ作成スクリプト</a>をProject直下へ保存します。</p>
       </div>
       <div class="lessons">
         <article class="lesson">
           <span class="lnum">L27</span>
-          <h3>brmsで単回帰</h3>
-          <p>lm とほぼ同じ式で、はじめてのベイズ回帰。Estimate・95%区間・R-hat・ESS——summary() の1行1行を読み解けるようにします。</p>
-          <div class="chips"><code>brm</code><code>summary()</code><code>Rhat</code></div>
+          <h3>brmsで連続応答を一周する</h3>
+          <p>formula、family、priorからfitを作り、平均応答と次の一人の予測を事後drawで分けます。</p>
+          <div class="chips"><code>brm</code><code>posterior_epred</code><code>posterior_predict</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L28</span>
-          <h3>事前分布を考える</h3>
-          <p>brmsのデフォルトは係数に「フラット」——まず get_prior でそれを確かめ、自分の事前分布に置き換えます。データを見る前にモデルから架空データを生成する prior predictive check で「その事前分布は本気か」を確認。</p>
+          <h3>事前分布を予測として確かめる</h3>
+          <p>get_priorで対象を確認し、proper priorから事前予測を生成して、尺度上あり得る値かを検討します。</p>
           <div class="chips"><code>get_prior</code><code>set_prior</code><code>sample_prior="only"</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L29</span>
-          <h3>事前分布の形状カタログ</h3>
-          <p>正規とStudent-t(裾の重さのちがい)、スケール用のhalf-t・half-normal、相関行列のLKJ。「本当の制約でない限り一様分布を使わない」——Stan公式の推奨に沿って、形の選び方を身につけます。</p>
-          <div class="chips"><code>normal</code><code>student_t</code><code>lkj(2)</code></div>
+          <h3>計算診断・PPC・LOO</h3>
+          <p>計算できたか、重要な特徴を再現するか、同じ予測課題でどちらが優れるかを別々に判断します。</p>
+          <div class="chips"><code>nuts_params</code><code>pp_check</code><code>loo</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L30</span>
-          <h3>事後分布を要約する</h3>
-          <p>点推定、HDIとETIという2種類の95%区間、「実質ゼロ」の範囲ROPE(線形モデルの既定は±0.1×SD)、効果の方向の確からしさpd。bayestestRで「効果があると言えるか」を多角的に言語化します。</p>
-          <div class="chips"><code>hdi</code><code>rope</code><code>p_direction</code></div>
+          <h3>反復測定と部分プーリング</h3>
+          <p>参加者ごとの基準値と条件効果を母集団分布へつなぎ、既存参加者と新参加者の予測を分けます。</p>
+          <div class="chips"><code>(1+x|participant)</code><code>ranef</code><code>pooling</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L31</span>
-          <h3>事後予測チェックとLOO</h3>
-          <p>モデルが生成するデータと現実のデータを重ねて見る pp_check(posterior predictive check)。そしてLOO交差検証によるモデル比較——elpd_diff の読み方(1行目が常に0)まで。</p>
-          <div class="chips"><code>pp_check</code><code>loo</code><code>loo_compare</code></div>
+          <h3>二値・順序・件数</h3>
+          <p>0/1、順序カテゴリ、曝露量の異なる件数を、それぞれの支持範囲と観測過程に合うモデルへ翻訳します。</p>
+          <div class="chips"><code>bernoulli</code><code>cumulative</code><code>offset</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L32</span>
-          <h3>モデルの可視化と報告</h3>
-          <p>conditional_effects の図は「他の共変量を連続なら平均値・因子なら第1水準(既定では参照水準)に固定した」条件付きの効果——この前提を知らずに貼ると解釈を誤ります。conditions引数での制御、sjPlot::tab_model による論文用の表、tidybayesによる事後分布の可視化まで。</p>
-          <div class="chips"><code>conditional_effects</code><code>tab_model</code><code>spread_draws</code></div>
+          <h3>反応時間と観測過程</h3>
+          <p>正の右裾、timeout、欠測、測定誤差を、外れ値処理ではなく記録過程と仮定の問題として扱います。</p>
+          <div class="chips"><code>lognormal</code><code>censoring</code><code>measurement error</code></div>
         </article>
         <article class="lesson">
           <span class="lnum">L33</span>
-          <h3>階層モデル・GLMM</h3>
-          <p>被験者と項目のランダム効果を入れて、試行レベルのデータをそのまま分析。正答/誤答は bernoulli、反応時間には shifted_lognormal——brmsが公式に「反応時間のモデリングに特に適する」と記す分布です(exgaussian も同じ扱い)。</p>
-          <div class="chips"><code>(1+x|subj)</code><code>bernoulli()</code><code>shifted_lognormal()</code></div>
+          <h3>生成Stanコードと検証単位</h3>
+          <p>stancodeを生成過程へ対応付け、予測対象に合うholdout、parameter recovery、SBCを区別してStan編へ進みます。</p>
+          <div class="chips"><code>stancode</code><code>holdout</code><code>SBC</code></div>
         </article>
       </div>
     </section>
@@ -542,7 +527,7 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
       <div>
         <span class="pstep">STEP 6 / Stan言語の世界・ベータ公開中</span>
         <h2>レッスン 34–41 <span class="psub">ブラックボックスを開ける</span></h2>
-        <p class="ptag">brmsの1行が裏で生成していたStanコードを、実行境界・型・対数密度・診断・予測へ分解します。コードが動くことではなく、モデルを読み、疑い、直せることがゴールです。STEP 2〜5は整備中のため、現在のベータ版はベイズ統計を別途学習済みの方向けです。<a href="notebooks/nb6-stan.qmd" download>Stan演習ノート NB6</a>も利用できます。</p>
+        <p class="ptag">STEP 3〜5で使ったモデルを、実行境界・型・対数密度・診断・予測へ分解します。コードが動くことではなく、モデルを読み、疑い、直せることがゴールです。<a href="notebooks/nb6-stan.qmd" download>Stan演習ノート NB6</a>も利用できます。</p>
       </div>
       <div class="lessons">
         <article class="lesson">
@@ -629,8 +614,8 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
         <article class="lesson">
           <span class="lnum">報告</span>
           <h3>論文でどう書くか</h3>
-          <p>事前分布の明示、R-hat・ESSの報告、HDIとROPEの書き方。Kruschkeのベイズ分析報告ガイドライン(BARG)に沿って、査読に耐える報告文を組み立てます。</p>
-          <div class="chips"><code>BARG</code><code>Rhat</code><code>95%HDI</code></div>
+          <p>推定対象、事前分布、実行設定、R-hat・ESS・MCSE、事後予測、感度分析を、主張・根拠・限界が対応する報告文へまとめます。</p>
+          <div class="chips"><code>claim</code><code>evidence</code><code>limit</code></div>
         </article>
       </div>
     </section>
@@ -672,7 +657,7 @@ cat(<span class="str">"検定力:"</span>, power_sim(<span class="num">20</span>
       <div class="goal-card">
         <span class="track-mark" aria-hidden="true"><i class="b"></i><i class="p"></i><i class="r"></i></span>
         <h2>ゴール:自分のデータを、ベイズで語れるように。</h2>
-        <p>どの回も「生成 → 推定 → 復元」の一本線。brmsで意味をつかみ、Stanで中身を開く二段構えです。アプリ(1画面1トピック・即時フィードバック)で読んで理解し、STEP 1〜6に1本ずつ用意するQuartoノートブック(計6本)の研究データ形式の演習で手を動かして仕上げます。</p>
+        <p>どの回も「生成 → 推定 → 復元」の一本線。brmsで意味をつかみ、Stanで中身を開く二段構えです。アプリ(1画面1トピック・即時フィードバック)で読み、各STEPの演習ノートで手を動かして仕上げます。</p>
       </div>
     </section>
 

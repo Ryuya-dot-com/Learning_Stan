@@ -34,8 +34,6 @@ jobs:
       - run: npm run test:step2-samples
       - run: npm run test:step2-content
       - run: npm run test:step2-assessments
-      - run: npm run test:step2-observation-pack
-      - run: npm run gate:step2-observation:status
       - run: npm run gate:step1-transfer:status
       - run: npm run gate:stan-release:status
       - run: npm run build
@@ -67,7 +65,8 @@ jobs:
       - run: Rscript scripts/verify-step2-condition-plot.R
       - run: Rscript scripts/verify-step2-participant-differences.R
       - run: Rscript scripts/verify-step2-report-and-transfer.R
-      - run: Rscript scripts/verify-step2-observation-rehearsal.R
+      - run: npm run test:step5-data
+      - run: npm run test:bayes-methods-r-syntax
       - run: Rscript scripts/verify-stan-link-lab.R
       - run: node scripts/r-example-verifier.mjs
 

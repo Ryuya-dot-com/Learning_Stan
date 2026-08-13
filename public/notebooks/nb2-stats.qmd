@@ -1,0 +1,106 @@
+---
+title: "NB2: 分布と個人差を図で確かめる"
+lang: ja
+format:
+  html:
+    toc: true
+    code-fold: false
+execute:
+  echo: true
+  warning: false
+---
+
+## このノートで行うこと
+
+24名分の合成パイロットデータを使い、STEP 2の成果物を空のRセッションから作り直します。
+
+1. 試行を参加者×条件へ要約する
+2. 中央値・四分位範囲・参加者内差を計算する
+3. 条件別分布図と参加者内対応図を保存する
+4. 観察結果と、まだ言えないことを探索メモへ分けて書く
+
+このデータは教材専用の合成データです。実在する参加者や研究結果ではありません。
+
+## Projectの準備
+
+学習ホームから次の5ファイルをダウンロードし、下の位置へ置いてください。
+
+```text
+Project/
+├── data/
+│   └── expanded_pilot_trials.csv
+├── step2_descriptive.R
+├── step2_condition_plot.R
+├── step2_participant_differences_plot.R
+├── step2_report_and_transfer.R
+└── nb2-stats.qmd
+```
+
+初回だけ、必要なパッケージをConsoleで導入します。
+
+```{r}
+#| eval: false
+install.packages(c("dplyr", "readr", "ggplot2"))
+```
+
+## 入力を確認する
+
+```{r}
+trials <- readr::read_csv(
+  "data/expanded_pilot_trials.csv",
+  show_col_types = FALSE
+)
+
+c(
+  rows = nrow(trials),
+  participants = dplyr::n_distinct(trials$id),
+  conditions = dplyr::n_distinct(trials$condition)
+)
+```
+
+960行、24名、2条件と表示されます。行数と参加者数は別の数量です。
+
+## 6つの成果物を作る
+
+```{r}
+source("step2_report_and_transfer.R", encoding = "UTF-8")
+```
+
+実行後、`output/`に3つのCSV、2つのPNG、1つの探索メモが作られます。
+
+```{r}
+list.files("output")
+```
+
+## 数値を読み直す
+
+```{r}
+descriptive_statistics <- readr::read_csv(
+  "output/descriptive_statistics.csv",
+  show_col_types = FALSE
+)
+participant_differences <- readr::read_csv(
+  "output/participant_differences.csv",
+  show_col_types = FALSE
+)
+
+descriptive_statistics
+summary(participant_differences$incong_minus_cong)
+```
+
+報告するときは、「24名から得た884正答試行を、参加者×条件の48行へ要約した」のように、数値の単位を明記します。
+
+## 図と探索メモを確認する
+
+```{r}
+knitr::include_graphics(c(
+  "output/condition_distributions.png",
+  "output/participant_differences.png"
+))
+```
+
+```{r}
+cat(readLines("output/exploratory_note.txt", encoding = "UTF-8"), sep = "\n")
+```
+
+条件別分布図は条件内の中央値・ばらつきを、参加者内対応図は同じ参加者の変化方向と差の大きさを示します。どちらも、この24名の合成標本を記述する図です。図だけから統計的有意差、母集団差、因果効果は結論しません。

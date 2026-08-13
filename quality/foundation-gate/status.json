@@ -1,23 +1,14 @@
 {
-  "schemaVersion": 1,
-  "gateId": "FG-CURRENT",
-  "updatedAt": "2026-08-01",
-  "decision": "BLOCKED",
-  "primaryImplementerCode": "CODEX",
-  "target": {
-    "commit": null,
-    "url": "https://ryuya-dot-com.github.io/Learning_Stan/"
-  },
+  "schemaVersion": 2,
+  "feedbackId": "FF-CURRENT",
+  "updatedAt": "2026-08-13",
+  "feedbackStatus": "NOT RUN",
+  "publicationPolicy": "公開・教材完成・品質判定を止める条件ではなく、公開後の改善に使う任意の記録です。",
   "participants": {
-    "eligibleComplete": 0,
     "records": []
   },
   "accessibility": {
     "records": []
-  },
-  "independentReview": {
-    "reviewerCode": null,
-    "signedAt": null
   },
   "evidence": [
     {
@@ -52,27 +43,27 @@
     },
     {
       "id": "G06",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "Windows + NVDAの実機監査者と操作可能なブラウザが必要"
+      "note": "公開後、必要に応じてWindows + NVDAの実機フィードバックを記録する"
     },
     {
       "id": "G07",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "macOS + VoiceOver実機が必要"
+      "note": "公開後、必要に応じてmacOS + VoiceOverの実機フィードバックを記録する"
     },
     {
       "id": "G08",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "モバイル + 読み上げ実機が必要"
+      "note": "公開後、必要に応じてモバイル読み上げの実機フィードバックを記録する"
     },
     {
       "id": "G09",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "適格な初学者3名以上の観察が必要"
+      "note": "公開後、任意の初学者フィードバックを匿名化して記録する"
     },
     {
       "id": "G10",
@@ -90,19 +81,19 @@
       "id": "G12",
       "status": "NOT RUN",
       "artifacts": [],
-      "note": "実機監査と学習者観察で得る問題のトリアージ待ち"
+      "note": "公開後の実機・学習者フィードバックで見つかった改善点を必要に応じて整理する"
     },
     {
       "id": "G13",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "初学者観察の基準値がないためD-001を確定できない"
+      "note": "初学者フィードバックが得られた場合にD-001の改善仮説を更新する"
     },
     {
       "id": "G14",
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "artifacts": [],
-      "note": "初学者観察の基準値がないためD-005を確定できない"
+      "note": "初学者フィードバックが得られた場合にD-005の改善仮説を更新する"
     }
   ],
   "issues": []

@@ -3,6 +3,7 @@ import { C, MONO } from "./theme.js";
 import { isCodey } from "./highlight.js";
 import { seededOrder } from "./shuffle.js";
 import { T, CodeBlock, LearningMark, Btn, ResetButton, Feedback } from "./components.jsx";
+import OptionalChallenge from "./OptionalChallenge.jsx";
 import { LESSONS } from "./data/lessons/index.js";
 import { SECTIONS } from "./data/sections.js";
 import { CHEATS } from "./data/cheats.js";
@@ -378,6 +379,45 @@ function TfEx({ ex, solved, missed, onMiss, onCorrect }) {
    レッスン画面
    ============================================================ */
 
+function buildLessonItems(lesson, includePractice) {
+  const items = lesson.pages.map((page) => ({ kind: "page", page }));
+
+  if (lesson.practiceLadder) {
+    items.push({ kind: "drill", drill: lesson.practiceLadder });
+  }
+  lesson.ex.forEach((exercise, index) => {
+    items.push({ kind: "exercise", exercise, index });
+  });
+  if (lesson.practice && includePractice) {
+    items.push({ kind: "practice", practice: lesson.practice });
+  }
+  if (lesson.challenge) {
+    items.push({ kind: "challenge", challenge: lesson.challenge });
+  }
+  items.push({ kind: "done" });
+
+  return items;
+}
+
+function lessonItemLabel(item, doneLabel) {
+  switch (item.kind) {
+    case "page":
+      return item.page.t;
+    case "drill":
+      return item.drill.title;
+    case "exercise":
+      return item.exercise.reviewLabel
+        ? `累積復習: ${item.exercise.reviewLabel}`
+        : `練習問題 ${item.index + 1}`;
+    case "practice":
+      return item.practice.title;
+    case "challenge":
+      return `任意チャレンジ: ${item.challenge.title}`;
+    default:
+      return doneLabel;
+  }
+}
+
 function LessonView({
   lesson,
   doneSet,
@@ -404,14 +444,7 @@ function LessonView({
   const sec = SECTIONS.find((s) => s.dir === lesson.section);
   const headLabel = pathLabel || (lesson.num != null ? `LESSON ${lesson.num}` : (sec ? sec.title : ""));
   const doneLabel = completionLabel || (lesson.num != null ? `レッスン${lesson.num} 修了!` : `${lesson.title} 修了!`);
-  const items = useMemo(() => {
-    const arr = lesson.pages.map((p) => ({ kind: "page", p }));
-    if (lesson.practiceLadder) arr.push({ kind: "drill", drill: lesson.practiceLadder });
-    lesson.ex.forEach((e, i) => arr.push({ kind: "ex", e, i }));
-    if (lesson.practice && includePractice) arr.push({ kind: "practice", practice: lesson.practice });
-    arr.push({ kind: "done" });
-    return arr;
-  }, [lesson, includePractice]);
+  const items = useMemo(() => buildLessonItems(lesson, includePractice), [lesson, includePractice]);
 
   const drillTotal = lesson.practiceLadder?.steps.length || 0;
   const drillCount = drillSet.size;
@@ -435,6 +468,8 @@ function LessonView({
 
   const cur = items[idx];
   const total = lesson.ex.length;
+  const coreExerciseTotal = lesson.ex.filter((exercise) => !exercise.reviewLabel).length;
+  const reviewTotal = total - coreExerciseTotal;
   const solvedCount = doneSet.size;
   const pct = Math.round((idx / (items.length - 1)) * 100);
 
@@ -474,17 +509,7 @@ function LessonView({
         ref={contentRef}
         tabIndex={-1}
         role="region"
-        aria-label={
-          cur.kind === "page"
-            ? cur.p.t
-            : cur.kind === "drill"
-              ? cur.drill.title
-            : cur.kind === "ex"
-              ? `練習問題 ${cur.i + 1}`
-              : cur.kind === "practice"
-                ? cur.practice.title
-                : doneLabel
-        }
+        aria-label={lessonItemLabel(cur, doneLabel)}
         key={idx}
         className="lesson-card rise rounded-2xl bg-white p-5 focus:outline-none sm:p-7"
         style={{ border: "1px solid " + C.line, boxShadow: "0 1px 2px rgba(42,39,51,0.04)" }}
@@ -495,7 +520,9 @@ function LessonView({
               このレッスンで使うファイル
             </h2>
             <p className="mt-1 text-xs leading-5" style={{ color: C.sub }}>
-              初回は一括ZIPを展開すると、必要なフォルダとファイルが揃います。個別に取得する場合は、表示したProject内の保存先へ置いてください。
+{resources.some((resource) => resource.primary)
+                ? "初回は一括ZIPを展開すると、必要なフォルダとファイルが揃います。個別に取得する場合は、表示したProject内の保存先へ置いてください。"
+                : "必要なファイルをダウンロードし、表示したProject内の保存先へ置いてください。"}
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {resources.map((resource) => (
@@ -520,7 +547,7 @@ function LessonView({
         {idx === 0 && caseStudy && (
           <section aria-labelledby={`case-study-${lesson.id}`} className="mb-5 rounded-xl p-4" style={{ background: C.caseSoft, border: `1px solid ${C.caseLine}` }}>
             <div className="text-[10px] font-bold tracking-widest" style={{ color: C.caseText, fontFamily: MONO }}>
-              STEP 1 ケーススタディ
+              {caseStudy.label || "ケーススタディ"}
             </div>
             <h2 id={`case-study-${lesson.id}`} className="mt-1 text-base font-bold" style={{ color: C.ink }}>
               {caseStudy.title}
@@ -547,15 +574,15 @@ function LessonView({
               {headLabel}
             </div>
             <h2 className="mb-4 text-xl font-bold" style={{ color: C.ink }}>
-              {cur.p.t}
+              {cur.page.t}
             </h2>
-            {(cur.p.b || []).map((s, i) => (
+            {(cur.page.b || []).map((s, i) => (
               <p key={i} className="mb-3 text-sm leading-7" style={{ color: C.body }}>
                 <T>{s}</T>
               </p>
             ))}
-            {cur.p.code && <CodeBlock code={cur.p.code} output={cur.p.out} error={cur.p.err} lang={cur.p.lang} />}
-            {(cur.p.a || []).map((s, i) => (
+            {cur.page.code && <CodeBlock code={cur.page.code} output={cur.page.out} error={cur.page.err} lang={cur.page.lang} />}
+            {(cur.page.a || []).map((s, i) => (
               <p key={i} className="mb-3 text-sm leading-7" style={{ color: C.body }}>
                 <T>{s}</T>
               </p>
@@ -563,53 +590,55 @@ function LessonView({
           </div>
         )}
 
-        {cur.kind === "ex" && (
+        {cur.kind === "exercise" && (
           <div>
             <div className="mb-4 flex items-center gap-2">
               <span
                 className="rounded-full px-3 py-1 text-xs font-bold"
                 style={{ background: C.accentSoft, color: C.accentDeep }}
               >
-                練習問題 {cur.i + 1} / {total}
+                {cur.exercise.reviewLabel
+                  ? `累積復習: ${cur.exercise.reviewLabel}`
+                  : `練習問題 ${cur.index + 1} / ${coreExerciseTotal}`}
               </span>
-              {doneSet.has(cur.i) && (
+              {doneSet.has(cur.index) && (
                 <span className="text-xs font-bold" style={{ color: C.okText }}>
                   クリア済み ✓
                 </span>
               )}
             </div>
-            {cur.e.k === "choice" ? (
+            {cur.exercise.k === "choice" ? (
               <ChoiceEx
-                key={lesson.id + "-" + cur.i}
-                ex={cur.e}
-                seedKey={lesson.id + ":" + cur.i}
-                solved={doneSet.has(cur.i)}
-                onMiss={() => onMiss(cur.i)}
-                onCorrect={() => onSolve(cur.i)}
+                key={lesson.id + "-" + cur.index}
+                ex={cur.exercise}
+                seedKey={lesson.id + ":" + cur.index}
+                solved={doneSet.has(cur.index)}
+                onMiss={() => onMiss(cur.index)}
+                onCorrect={() => onSolve(cur.index)}
               />
-            ) : cur.e.k === "tf" ? (
+            ) : cur.exercise.k === "tf" ? (
               <TfEx
-                key={lesson.id + "-" + cur.i}
-                ex={cur.e}
-                solved={doneSet.has(cur.i)}
-                missed={missedSet.has(cur.i)}
-                onMiss={() => onMiss(cur.i)}
-                onCorrect={() => onSolve(cur.i)}
+                key={lesson.id + "-" + cur.index}
+                ex={cur.exercise}
+                solved={doneSet.has(cur.index)}
+                missed={missedSet.has(cur.index)}
+                onMiss={() => onMiss(cur.index)}
+                onCorrect={() => onSolve(cur.index)}
               />
-            ) : cur.e.k === "reflect" ? (
+            ) : cur.exercise.k === "reflect" ? (
               <ReflectEx
-                key={lesson.id + "-" + cur.i}
-                ex={cur.e}
-                solved={doneSet.has(cur.i)}
-                onCorrect={() => onSolve(cur.i)}
+                key={lesson.id + "-" + cur.index}
+                ex={cur.exercise}
+                solved={doneSet.has(cur.index)}
+                onCorrect={() => onSolve(cur.index)}
               />
             ) : (
               <FillEx
-                key={lesson.id + "-" + cur.i}
-                ex={cur.e}
-                solved={doneSet.has(cur.i)}
-                onMiss={() => onMiss(cur.i)}
-                onCorrect={() => onSolve(cur.i)}
+                key={lesson.id + "-" + cur.index}
+                ex={cur.exercise}
+                solved={doneSet.has(cur.index)}
+                onMiss={() => onMiss(cur.index)}
+                onCorrect={() => onSolve(cur.index)}
               />
             )}
           </div>
@@ -738,6 +767,10 @@ function LessonView({
           </div>
         )}
 
+        {cur.kind === "challenge" && (
+          <OptionalChallenge challenge={cur.challenge} lessonId={lesson.id} />
+        )}
+
         {cur.kind === "done" && (
           <div className="py-4 text-center">
             {solvedCount === total ? (
@@ -749,7 +782,8 @@ function LessonView({
                   {lesson.practice && practiceComplete ? `${lesson.title} 実践完了!` : doneLabel}
                 </h2>
                 <p className="mb-6 text-sm" style={{ color: C.sub }}>
-                  練習問題 {total} 問、すべてクリアしました。
+                  練習問題 {coreExerciseTotal} 問
+                  {reviewTotal > 0 && `と累積復習 ${reviewTotal} 問`}、すべてクリアしました。
                   {firstSet && firstSet.size > 0 && ` うち ${firstSet.size} 問は一発クリアです!`}
                 </p>
                 <div className="flex flex-col items-center gap-3">
@@ -775,14 +809,16 @@ function LessonView({
                   おつかれさまでした
                 </h2>
                 <p className="mb-5 text-sm" style={{ color: C.sub }}>
-                  未クリアの練習問題が {total - solvedCount} 問あります。もう一度チャレンジしてみましょう。
+                  未クリアの問題が {total - solvedCount} 問あります。もう一度チャレンジしてみましょう。
                 </p>
                 <div className="mb-5 flex flex-col items-center gap-2">
                   {lesson.ex.map(
                     (e, i) =>
                       !doneSet.has(i) && (
                         <Btn key={i} kind="ghost" onClick={() => setIdx(exerciseStartIndex + i)}>
-                          練習問題 {i + 1} にもどる
+                          {e.reviewLabel
+                            ? `累積復習（${e.reviewLabel}）にもどる`
+                            : `練習問題 ${i + 1} にもどる`}
                         </Btn>
                       )
                   )}
@@ -990,7 +1026,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         はじめてのRとStan
       </h1>
       <p className="mb-6 text-sm leading-6" style={{ color: C.sub }}>
-        プログラミング未経験からRの基礎とデータ操作へ進み、Stanベータ版ではモデルの実装・診断・報告まで学びます。STEP 2〜5は整備中のため、Stan編はベイズ統計を別途学習済みの方を対象にしています。
+        プログラミング未経験からRの基礎、データ操作、回帰、確率、ベイズ推定、brmsへ進みます。最後はStanコードを開き、モデルの実装・診断・予測・報告まで一つの道筋で学びます。
       </p>
 
       <section aria-labelledby="orientation-title" className="surface-card mb-6 rounded-2xl bg-white p-5" style={{ border: "1px solid " + C.line }}>
@@ -1000,7 +1036,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
             ["対象", "Rを初めて学ぶ人"],
             ["最初の体験", "5〜10分・準備不要"],
             ["練習の順番", "まねる→変える→見ずに作る→使う"],
-            ["公開範囲", "R基礎・STEP 1・Stanベータ"],
+            ["公開範囲", "R基礎・STEP 1〜6"],
           ].map(([label, value]) => (
             <div key={label} className="rounded-xl p-3" style={{ background: C.accentSoft }}>
               <div className="text-xs font-bold" style={{ color: C.accentDeep }}>{label}</div>
@@ -1014,9 +1050,9 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
         {journey.complete ? (
           <>
             <div className="mb-2 flex justify-center sm:justify-start"><LearningMark filled={3} size={14} /></div>
-            <h2 id="next-action-title" className="text-xl font-bold" style={{ color: C.okText }}>公開中のStanベータまで修了しました</h2>
+            <h2 id="next-action-title" className="text-xl font-bold" style={{ color: C.okText }}>R基礎からStanまで修了しました</h2>
             <p className="mt-2 text-sm leading-6" style={{ color: C.okText }}>
-              L34〜L41の理解問題、4段階の反復練習、成果物チェックまで完了しました。Stan演習ノートで実装・診断・報告の流れを復習できます。
+              STEP 1〜6の理解問題、4段階の反復練習、成果物チェックまで完了しました。Stan演習ノートで実装・診断・報告の流れを復習できます。
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Btn onClick={() => onOpen("l34")}>Stan編を復習する</Btn>
@@ -1024,7 +1060,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
                 Stan演習ノートをダウンロード
               </a>
               <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + "roadmap.html"}>
-                この先の公開予定を見る
+                学習ロードマップを見る
               </a>
             </div>
           </>
@@ -1201,7 +1237,7 @@ function Home({ progress, storageNotice, exportText, onImport, onImportError, on
             {storageNotice}
           </p>
         )}
-        <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + "roadmap.html"}>この先の公開予定を見る</a>
+        <a className="inline-flex min-h-11 items-center text-xs font-bold underline" style={{ color: C.accentDeep }} href={import.meta.env.BASE_URL + "roadmap.html"}>学習ロードマップを見る</a>
         <ResetButton onReset={onReset} />
       </div>
     </div>
@@ -1310,7 +1346,7 @@ function Sidebar({ progress, currentId, viewName, onOpen, onFoundation, onCheat,
           className="inline-flex min-h-11 items-center rounded-lg px-2 text-xs font-bold"
           style={{ color: C.accentDeep }}
         >
-          この先の公開予定
+          学習ロードマップ
         </a>
       </div>
     </nav>

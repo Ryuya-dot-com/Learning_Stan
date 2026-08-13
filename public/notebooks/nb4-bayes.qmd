@@ -1,0 +1,174 @@
+---
+title: "NB4: ベイズ更新からMCMCまで"
+lang: ja
+format:
+  html:
+    toc: true
+    code-fold: false
+execute:
+  echo: true
+  warning: false
+---
+
+## このノートで行うこと
+
+このノートでは、参加者内の得点差を格子近似で更新し、回帰のprior predictiveを確認し、brmsとCmdStanを使うMCMC実行へ進みます。
+
+1. 同じ未知の平均についてprior・尤度・posteriorを作る
+2. 得点尺度に照らしてprior predictiveを確認する
+3. 代替priorで感度分析を行う
+4. MCMCのchain・warmup・drawを記録し、診断を最初に読む
+
+このノートのデータは教材用の小さな例です。観察された関連から因果効果は結論しません。
+
+## 最小データを作る
+
+```{r}
+diff <- c(3, -1, 5, 2, 4, 0, 1, 6, 2, 3, -2, 4,
+          1, 5, 0, 2, 3, 1, 4, -1, 2, 5, 0, 3)
+
+dat <- data.frame(
+  sleep_h = c(6.5, 8, 9, 7, 8.5, 7.5, 9.5, 6, 8, 7, 9, 8.5),
+  score = c(63, 72, 76, 66, 74, 69, 82, 59, 72, 65, 79, 75)
+)
+dat$sleep_c <- dat$sleep_h - 8
+```
+
+## 格子近似によるベイズ更新
+
+```{r}
+mu_grid <- seq(-8, 8, length.out = 2001)
+prior <- dnorm(mu_grid, mean = 0, sd = 4)
+log_lik <- sapply(mu_grid, function(mu) {
+  sum(dnorm(diff, mean = mu, sd = 4, log = TRUE))
+})
+likelihood_shape <- exp(log_lik - max(log_lik))
+posterior_raw <- prior * likelihood_shape
+grid_width <- mu_grid[2] - mu_grid[1]
+posterior_density <- posterior_raw /
+  sum(posterior_raw * grid_width)
+posterior_weight <- posterior_density * grid_width
+likelihood_for_plot <- likelihood_shape /
+  sum(likelihood_shape * grid_width)
+
+matplot(
+  mu_grid,
+  cbind(prior, likelihood_for_plot, posterior_density),
+  type = "l", lty = 1, lwd = 2,
+  col = c("grey40", "steelblue", "firebrick"),
+  xlab = "母平均差 mu（点）", ylab = "密度"
+)
+legend(
+  "topright", c("muのprior", "likelihood（表示用）", "muのposterior"),
+  col = c("grey40", "steelblue", "firebrick"), lty = 1, lwd = 2
+)
+
+set.seed(2026)
+draws <- sample(mu_grid, 100000, replace = TRUE, prob = posterior_weight)
+interval_90 <- quantile(draws, c(.05, .5, .95))
+interval_90
+mean(draws > 2)
+
+hist(draws, breaks = 40, probability = TRUE,
+     col = "grey90", border = "white",
+     xlab = "母平均差 mu（点）", main = "muの事後分布")
+abline(v = interval_90[c(1, 3)], lty = 2)
+abline(v = 2, col = "firebrick", lwd = 2)
+legend("topright", c("90%区間", "実用上の基準: 2点"),
+       col = c("black", "firebrick"), lty = c(2, 1), lwd = c(1, 2))
+```
+
+横軸は参加者ごとの得点差ではなく、母平均差`mu`というparameterです。`posterior_density`は図の高さ、`posterior_weight`は格子点をdrawするときの確率です。青い尤度は形を比べるためだけに縦方向を調整しており、muの確率ではありません。ここでの区間と確率は、正規生成過程、指定したprior、教材データに条件づく要約です。
+
+## prior predictive
+
+初回だけ、brmsとCmdStanRを導入します。CmdStanの導入にはC++コンパイラが必要で、完了まで時間がかかります。
+
+```{r}
+#| eval: false
+install.packages("brms")
+install.packages(
+  "cmdstanr",
+  repos = c("https://stan-dev.r-universe.dev", getOption("repos"))
+)
+library(cmdstanr)
+check_cmdstan_toolchain()
+install_cmdstan()
+```
+
+```{r}
+#| eval: false
+library(brms)
+
+priors <- c(
+  set_prior("normal(70, 15)", class = "Intercept"),
+  set_prior("normal(0, 5)", class = "b"),
+  set_prior("exponential(1/15)", class = "sigma")
+)
+
+prior_fit <- brm(
+  score ~ sleep_c, data = dat, family = gaussian(), prior = priors,
+  sample_prior = "only", chains = 4, iter = 1000, seed = 123,
+  backend = "cmdstanr"
+)
+
+new_dat <- data.frame(sleep_h = seq(4, 12, length.out = 50))
+new_dat$sleep_c <- new_dat$sleep_h - 8
+prior_means <- posterior_epred(
+  prior_fit, newdata = new_dat, ndraws = 50
+)
+matplot(
+  new_dat$sleep_h, t(prior_means), type = "l", lty = 1,
+  col = adjustcolor("steelblue", alpha.f = 0.15),
+  xlab = "睡眠時間", ylab = "平均得点"
+)
+abline(h = c(0, 100), lty = 2)
+```
+
+50本の線はpriorが許す平均関係であり、一人ひとりの得点の散らばりはまだ含みません。
+
+```{r}
+#| eval: false
+pp_check(prior_fit, type = "dens_overlay", ndraws = 50)
+```
+
+こちらはsigmaによる散らばりも含む複製得点です。0〜100の外へ頻繁に出るなら、prior、正規の観測モデル、得点尺度を検討します。観測値に似せること自体を目的にpriorを調整しません。
+
+## MCMCを実行し、診断と事後予測を確認する
+
+```{r}
+#| eval: false
+fit <- update(
+  prior_fit,
+  sample_prior = "no",
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  seed = 2026
+)
+
+summary(fit)
+nuts_params(fit)
+pp_check(fit, type = "dens_overlay")
+```
+
+4 chain・`iter = 2000`・`warmup = 1000`なら、warmup後のdrawは合計4,000です。推定値の前にdivergence、R-hat、ESSを確認します。診断が良くても、尤度・prior・観測過程の妥当性や因果主張は別に検討します。
+
+## 感度分析と実行記録
+
+```{r}
+#| eval: false
+wide_priors <- c(
+  set_prior("normal(70, 30)", class = "Intercept"),
+  set_prior("normal(0, 10)", class = "b"),
+  set_prior("exponential(1/30)", class = "sigma")
+)
+fit_wide <- update(fit, prior = wide_priors)
+posterior_summary(fit, pars = "b_sleep_c")
+posterior_summary(fit_wide, pars = "b_sleep_c")
+
+sessionInfo()
+cmdstanr::cmdstan_version()
+```
+
+感度分析では、何を一つだけ変え、何を変えなかったかを記録します。近い結論ならこの範囲のprior変更に頑健と限定して書けます。違うなら、データだけでの識別の弱さや、仮定への依存を報告します。

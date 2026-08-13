@@ -81,10 +81,96 @@ export const JOURNEY_STAGES = Object.freeze([
     ],
   },
   {
+    id: "stats",
+    label: "STEP 2",
+    title: "分布と個人差を図で確かめる",
+    description: "試行と参加者を区別し、数値要約・分布図・対応図を使って、観察結果と限界を報告します。各レッスン末に任意の発展問題があります。",
+    time: "3〜4時間",
+    install: "RStudioとtidyverseを使用",
+    lessonIds: [
+      "step2-describe-distributions",
+      "step2-grammar-of-graphics",
+      "step2-show-individuals",
+      "step2-report-and-transfer",
+    ],
+    requiredPracticeLessonIds: [
+      "step2-describe-distributions",
+      "step2-grammar-of-graphics",
+      "step2-show-individuals",
+      "step2-report-and-transfer",
+    ],
+    notebook: "nb2-stats.qmd",
+    caseStudy: {
+      label: "STEP 2 ケーススタディ",
+      title: "拡大パイロットの探索報告",
+      context: "24名分の合成データについて、正答試行の反応時間を参加者単位で要約し、条件別の分布と一人ひとりの違いが分かる図を作ります。",
+      question: "この24名では、2条件の分布と参加者内の差にどのような特徴が見られるか。",
+      deliverable: "3つのCSV・2つのPNG・限界を記した探索メモ",
+      caution: "教材用の合成データです。図と記述統計だけから、統計的有意差・母集団差・因果効果は結論しません。",
+      tasks: {
+        "step2-describe-distributions": "試行数と参加者数を区別し、参加者×条件の48行から中央値・四分位範囲・参加者内差を要約します。",
+        "step2-grammar-of-graphics": "箱ひげと全参加者の点を重ね、条件ごとの分布を隠さず示します。",
+        "step2-show-individuals": "同じ参加者の2条件を線で結び、変化方向と差の大きさを示します。",
+        "step2-report-and-transfer": "2図・3CSV・探索メモを一括再生成し、観察結果と解釈の限界を分けて報告します。",
+      },
+    },
+    resources: [
+      { label: "拡大パイロットCSV", path: "data/step2/expanded_pilot_trials.csv", destination: "data/expanded_pilot_trials.csv" },
+      { label: "Quarto演習ノート", path: "notebooks/nb2-stats.qmd", destination: "Project直下" },
+      { label: "記述統計の完成版Rスクリプト", path: "scripts/step2/step2_descriptive.R", destination: "Project直下", lessonIds: ["step2-describe-distributions", "step2-report-and-transfer"] },
+      { label: "条件分布図の完成版Rスクリプト", path: "scripts/step2/step2_condition_plot.R", destination: "Project直下", lessonIds: ["step2-grammar-of-graphics", "step2-report-and-transfer"] },
+      { label: "参加者内差図の完成版Rスクリプト", path: "scripts/step2/step2_participant_differences_plot.R", destination: "Project直下", lessonIds: ["step2-show-individuals", "step2-report-and-transfer"] },
+      { label: "STEP 2一括再生成スクリプト", path: "scripts/step2/step2_report_and_transfer.R", destination: "Project直下", lessonIds: ["step2-report-and-transfer"] },
+    ],
+  },
+  {
+    id: "simulation",
+    label: "STEP 3",
+    title: "回帰から確率モデルへ進む",
+    description: "係数と交互作用を予測値へ戻し、乱数による生成と尤度を、短いRコードで確かめます。",
+    time: "3〜4時間",
+    install: "RStudioを使用",
+    lessonIds: ["l21", "l22", "l23"],
+    requiredPracticeLessonIds: ["l21", "l22", "l23"],
+    notebook: "nb3-sim.qmd",
+    resources: [
+      { label: "STEP 3演習ノート", path: "notebooks/nb3-sim.qmd", destination: "Project直下" },
+    ],
+  },
+  {
+    id: "bayes",
+    label: "STEP 4",
+    title: "ベイズ更新を生成過程として理解する",
+    description: "prior・尤度・posteriorを図とdrawで結び、事前予測、感度分析、MCMCの役割を区別します。",
+    time: "3〜5時間",
+    install: "RStudioを使用。最後にbrms環境を確認",
+    lessonIds: ["l24", "l25", "l26"],
+    requiredPracticeLessonIds: ["l24", "l25", "l26"],
+    notebook: "nb4-bayes.qmd",
+    resources: [
+      { label: "STEP 4演習ノート", path: "notebooks/nb4-bayes.qmd", destination: "Project直下" },
+    ],
+  },
+  {
+    id: "brms",
+    label: "STEP 5",
+    title: "brmsでモデルを作り、疑い、比べる",
+    description: "連続・反復測定・二値・順序・件数・反応時間を扱い、診断、PPC、LOOから生成Stanコードの読解まで進みます。",
+    time: "8〜12時間",
+    install: "R / brms / CmdStanを使用",
+    lessonIds: ["l27", "l28", "l29", "l30", "l31", "l32", "l33"],
+    requiredPracticeLessonIds: ["l27", "l28", "l29", "l30", "l31", "l32", "l33"],
+    notebook: "nb5-brms.qmd",
+    resources: [
+      { label: "STEP 5共通データ（先にダウンロード）", path: "scripts/step5/step5_data.R", destination: "Project直下（step5_data.R）" },
+      { label: "STEP 5演習ノート", path: "notebooks/nb5-brms.qmd", destination: "Project直下" },
+    ],
+  },
+  {
     id: "stan",
     label: "STEP 6",
     title: "Stanでモデルを実装・診断・報告する",
-    description: "L34〜L41を、4段階の反復練習と成果物チェック付きで学ぶベータ版です。未公開のSTEP 2〜5に相当するベイズ統計は別途学習済みであることを前提にします。",
+    description: "STEP 3〜5で使ったモデルをStanコードへ展開し、実装・計算診断・予測検査・報告を自分で行います。",
     time: "8〜12時間",
     install: "R / CmdStanR / CmdStanを使用",
     lessonIds: ["l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41"],
@@ -139,6 +225,10 @@ function stageCta(stage, progress) {
   if (stage.id === "setup") return hasProgress ? "環境準備のつづきから" : "R / RStudioの準備へ";
   if (stage.id === "basics") return hasProgress ? "R基礎のつづきから" : "R基礎を始める";
   if (stage.id === "data") return hasProgress ? "STEP 1のつづきから" : "STEP 1を始める";
+  if (stage.id === "stats") return hasProgress ? "STEP 2のつづきから" : "STEP 2を始める";
+  if (stage.id === "simulation") return hasProgress ? "STEP 3のつづきから" : "STEP 3を始める";
+  if (stage.id === "bayes") return hasProgress ? "STEP 4のつづきから" : "STEP 4を始める";
+  if (stage.id === "brms") return hasProgress ? "STEP 5のつづきから" : "STEP 5を始める";
   if (stage.id === "stan") return hasProgress ? "Stanベータのつづきから" : "Stanベータを始める";
   return "Foundation Checkへ";
 }
@@ -218,7 +308,15 @@ export function getLessonPathMeta(lessonOrId) {
           ? `R${index + 1}`
           : stage.id === "stan"
             ? `S${index + 1}`
-            : `D${index + 1}`,
+            : stage.id === "stats"
+              ? `V${index + 1}`
+              : stage.id === "simulation"
+                ? `P${index + 1}`
+                : stage.id === "bayes"
+                  ? `B${index + 1}`
+                  : stage.id === "brms"
+                    ? `M${index + 1}`
+                    : `D${index + 1}`,
   };
 }
 

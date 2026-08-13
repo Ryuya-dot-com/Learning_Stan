@@ -1,0 +1,133 @@
+---
+title: "NB5: brmsで研究質問から予測と点検へ進む"
+format: html
+execute:
+  echo: true
+---
+
+```{r}
+#| label: setup
+# install.packages("brms")  # 初回だけ実行する
+library(brms)
+set.seed(2026)
+```
+
+このノートでは、小さな合成データで連続応答をモデル化します。実データの結論ではなく、式・prior・予測・点検の流れを練習するための例です。
+
+```{r}
+#| label: data
+n <- 60
+dat <- data.frame(
+  practice_h = runif(n, 0, 4),
+  baseline = rnorm(n, 70, 10)
+)
+dat$practice_c <- dat$practice_h - mean(dat$practice_h)
+dat$baseline_c <- dat$baseline - mean(dat$baseline)
+dat$practice_group <- factor(
+  ifelse(dat$practice_h < median(dat$practice_h), "短い", "長い"),
+  levels = c("短い", "長い")
+)
+dat$memory <- rnorm(
+  n,
+  72 + 3 * dat$practice_c + 0.4 * dat$baseline_c,
+  8
+)
+head(dat)
+```
+
+まず観測データを見ます。これは未調整の全体像であり、基礎得点を同じにした比較や因果効果を示す図ではありません。
+
+```{r}
+#| label: observed-data
+plot(
+  dat$practice_h, dat$memory,
+  xlab = "練習時間（時間）", ylab = "記憶得点",
+  pch = 16, col = "grey40"
+)
+```
+
+## 事前予測
+
+```{r}
+#| label: prior-predictive
+priors <- c(
+  set_prior("normal(70, 15)", class = "Intercept"),
+  set_prior("normal(0, 8)", class = "b"),
+  set_prior("exponential(1 / 15)", class = "sigma")
+)
+
+prior_fit <- brm(
+  memory ~ practice_c + baseline_c,
+  data = dat,
+  family = gaussian(),
+  prior = priors,
+  sample_prior = "only",
+  chains = 4, iter = 1000, seed = 2026
+)
+pp_check(prior_fit, type = "dens_overlay", ndraws = 50)
+```
+
+この図の細い線はparameterそのものではなく、priorから描いたparameterと観測モデルで生成した複製得点です。観測得点は尺度を比べる参照として重なりますが、priorの更新には使われていません。
+
+## fit、診断、事後予測
+
+```{r}
+#| label: fit-and-check
+fit <- update(prior_fit, sample_prior = "no")
+summary(fit)
+nuts_params(fit)
+pp_check(
+  fit,
+  type = "stat_grouped",
+  group = "practice_group",
+  stat = "median"
+)
+```
+
+`summary()`ではR-hatとESSを、`nuts_params()`ではdivergenceを確かめます。PPCは計算診断とは別に、モデルがデータの特徴を再現できるかを調べます。ここでは「練習時間が短い・長い人の典型的な得点を再現できるか」という問いに、条件別中央値の一図で答えます。この分け方は説明のためであり、因果的な条件を作ったわけではありません。
+
+```{r}
+#| label: predictions
+new_dat <- data.frame(
+  practice_c = c(-1, 0, 1),
+  baseline_c = 0
+)
+
+mean_draws <- posterior_epred(fit, newdata = new_dat)
+person_draws <- posterior_predict(fit, newdata = new_dat)
+
+interval_90 <- function(draws) {
+  t(apply(draws, 2, quantile, probs = c(.05, .5, .95)))
+}
+mean_90 <- interval_90(mean_draws)
+person_90 <- interval_90(person_draws)
+practice_h <- new_dat$practice_c + mean(dat$practice_h)
+
+y_lim <- range(mean_90[, c(1, 3)], person_90[, c(1, 3)])
+plot(practice_h, mean_90[, 2], type = "n", ylim = y_lim,
+  xlab = "練習時間（時間）", ylab = "予測される記憶得点"
+)
+segments(
+  practice_h - 0.04, mean_90[, 1],
+  practice_h - 0.04, mean_90[, 3], lwd = 3
+)
+points(practice_h - 0.04, mean_90[, 2], pch = 16)
+segments(
+  practice_h + 0.04, person_90[, 1],
+  practice_h + 0.04, person_90[, 3], lty = 2
+)
+points(practice_h + 0.04, person_90[, 2], pch = 1, cex = 1.2)
+legend("topleft",
+  legend = c("平均応答", "次に来る一人"),
+  pch = c(16, 1), lty = c(1, 2), bty = "n"
+)
+```
+
+塗りつぶした丸と実線は平均応答、白丸と破線は次に来る一人の得点です。同じ練習時間でも後者の区間が広いのは、個人ごとの揺れも含むからです。どちらを使うかは、集団の平均を知りたいのか、個人への予測が必要かで決めます。
+
+## 次の一歩
+
+- 同じ参加者の複数試行なら、`(1 + condition | participant)`のような階層構造を検討する。
+- 正答なら`bernoulli()`、評定なら`cumulative()`、件数なら`poisson()`や`negbinomial()`を候補にする。
+- 予測比較では、同じデータ・観測単位・将来の予測課題をそろえて`loo()`を使う。
+- 良い診断や予測性能は、観察データからの因果効果を自動で示すものではない。

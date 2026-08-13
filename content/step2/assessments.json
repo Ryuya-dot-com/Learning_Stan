@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "draft-unpublished",
+  "status": "published",
   "designRules": {
     "questionsPerLesson": 5,
     "requiredKinds": [
@@ -27,7 +27,9 @@
           "kind": "output-prediction",
           "cognitiveProcess": "apply",
           "evidenceStrength": "supporting",
-          "targetDimensions": ["analysis-unit"],
+          "targetDimensions": [
+            "analysis-unit"
+          ],
           "prompt": "正答試行をgroup_by(id, condition)して1行へsummariseすると、結果は何行になりますか。コードを実行する前に選んでください。",
           "code": "correct_trials |>\n  dplyr::group_by(id, condition) |>\n  dplyr::summarise(mean_rt = mean(rt_ms), .groups = \"drop\") |>\n  nrow()",
           "choices": [
@@ -61,7 +63,9 @@
           "kind": "selected-response",
           "cognitiveProcess": "analyze",
           "evidenceStrength": "direct",
-          "targetDimensions": ["analysis-unit"],
+          "targetDimensions": [
+            "analysis-unit"
+          ],
           "prompt": "participant_conditionの1行を最も正確に説明しているものはどれですか。",
           "choices": [
             {
@@ -94,7 +98,9 @@
           "kind": "selected-response",
           "cognitiveProcess": "explain",
           "evidenceStrength": "supporting",
-          "targetDimensions": ["descriptive-summary"],
+          "targetDimensions": [
+            "descriptive-summary"
+          ],
           "prompt": "cong条件の参加者平均についてIQRが48.80 msでした。この値の説明として適切なのはどれですか。",
           "choices": [
             {
@@ -127,7 +133,10 @@
           "kind": "constructed-response",
           "cognitiveProcess": "explain",
           "evidenceStrength": "direct",
-          "targetDimensions": ["analysis-unit", "interpretation-limits"],
+          "targetDimensions": [
+            "analysis-unit",
+            "interpretation-limits"
+          ],
           "prompt": "884正答試行を884人の独立した観測として扱えない理由を、3文以内で説明してください。",
           "rubric": [
             {
@@ -152,7 +161,10 @@
           "responseMode": "constructed",
           "cognitiveProcess": "transfer",
           "evidenceStrength": "direct",
-          "targetDimensions": ["analysis-unit", "transfer"],
+          "targetDimensions": [
+            "analysis-unit",
+            "transfer"
+          ],
           "scenario": "30名の学生が7日間、1日1回ストレス得点を記録しました。平日と週末の分布を学生単位で比較します。",
           "prompt": "最初の要約表のgroup_by列と、その表の1行の意味を書いてください。210日誌行を210名として扱えない理由も添えてください。",
           "rubric": [
@@ -172,7 +184,25 @@
           "modelAnswer": "student_idとday_typeでグループ化する。1行は、ある学生の平日または週末におけるストレス得点の要約を表す。210行は30名が7日間提供した反復記録なので、210名の独立標本とは扱わない。",
           "retryHint": "列名が変わっても、『誰の』『どの条件の』値を1行にしたいかから逆算します。"
         }
-      ]
+      ],
+      "challenge": {
+        "title": "欠測と試行数の違いを見落とさない",
+        "scenario": "24名を2条件で20試行ずつ測る計画でしたが、P07にはincong条件がなく、正答試行数も参加者ごとに12〜20試行です。",
+        "task": "条件別の分布と参加者内差を報告する前に、何を確認し、どの参加者をどの表へ含めるかを決めてください。P07を黙って除外したり、存在しない値を0で補ったりしない手順を、必要なRコードとともに説明してください。",
+        "code": "trials |>\n  dplyr::filter(correct) |>\n  dplyr::count(id, condition, name = \"n_correct\")",
+        "hints": [
+          "まず、各IDに2条件があるかと、ID×条件ごとの正答試行数を別々に確認します。",
+          "条件別分布は利用できる値を人数付きで示せますが、参加者内差は2条件がそろう人だけで計算します。2つの分析対象を混同しないでください。"
+        ],
+        "rubric": [
+          "ID×条件の件数表から、欠けた条件と試行数のばらつきを確認している",
+          "条件別要約と参加者内差で、含められる参加者が異なることを説明している",
+          "P07を黙って除外せず、欠測として人数と理由を報告している",
+          "0による補完や、日誌行・試行行を独立した人数として扱っていない"
+        ],
+        "example": "count(id, condition)で各セルの正答試行数を確認し、complete(id, condition)相当の一覧でP07のincong欠測を明示する。条件別分布はcong 24名、incong 23名として人数を併記できるが、参加者内差は2条件がそろう23名だけで計算する。P07の差を0とは置かず、除外数と理由を探索メモへ書く。試行数12〜20の違いも表へ残し、平均の安定性が同じとは限らないことを限界として報告する。"
+      },
+      "reviewQuestions": []
     },
     {
       "lessonId": "step2-grammar-of-graphics",
@@ -189,7 +219,9 @@
           "kind": "selected-response",
           "cognitiveProcess": "explain",
           "evidenceStrength": "supporting",
-          "targetDimensions": ["aesthetic-mapping"],
+          "targetDimensions": [
+            "aesthetic-mapping"
+          ],
           "prompt": "aes(x = condition, y = mean_rt)が図へ伝える内容として最も適切なものはどれですか。",
           "choices": [
             {
@@ -222,7 +254,10 @@
           "kind": "output-prediction",
           "cognitiveProcess": "apply",
           "evidenceStrength": "supporting",
-          "targetDimensions": ["layer-composition", "distribution-visibility"],
+          "targetDimensions": [
+            "layer-composition",
+            "distribution-visibility"
+          ],
           "prompt": "48行のparticipant_conditionを使って次の図を作るとき、geom_point層が受け取る点は何個ですか。",
           "code": "ggplot2::ggplot(participant_condition,\n  ggplot2::aes(x = condition, y = mean_rt)) +\n  ggplot2::geom_boxplot(outlier.shape = NA) +\n  ggplot2::geom_point(\n    position = ggplot2::position_jitter(width = 0.08, height = 0, seed = 20260802)\n  )",
           "choices": [
@@ -256,7 +291,9 @@
           "kind": "selected-response",
           "cognitiveProcess": "analyze",
           "evidenceStrength": "direct",
-          "targetDimensions": ["aesthetic-mapping"],
+          "targetDimensions": [
+            "aesthetic-mapping"
+          ],
           "prompt": "条件ごとに点の色を変えたいのに、aes(color = \"condition\")と書きました。問題と修正の組合せはどれですか。",
           "choices": [
             {
@@ -289,7 +326,11 @@
           "kind": "constructed-response",
           "cognitiveProcess": "explain",
           "evidenceStrength": "direct",
-          "targetDimensions": ["layer-composition", "distribution-visibility", "reporting-context"],
+          "targetDimensions": [
+            "layer-composition",
+            "distribution-visibility",
+            "reporting-context"
+          ],
           "prompt": "条件平均の棒グラフだけでなく、箱ひげと参加者点を重ねる理由を3文以内で説明してください。",
           "rubric": [
             {
@@ -314,7 +355,12 @@
           "responseMode": "constructed",
           "cognitiveProcess": "transfer",
           "evidenceStrength": "direct",
-          "targetDimensions": ["aesthetic-mapping", "distribution-visibility", "reporting-context", "transfer"],
+          "targetDimensions": [
+            "aesthetic-mapping",
+            "distribution-visibility",
+            "reporting-context",
+            "transfer"
+          ],
           "scenario": "3品種それぞれ15区画で収量kgを測定した合成データがあります。品種別分布を区画の点を残して比較します。",
           "prompt": "aesのxとy、重ねるgeom、最低限必要な軸・注記を提案し、選択理由を書いてください。",
           "rubric": [
@@ -338,6 +384,57 @@
           "modelAnswer": "aes(x = variety, y = yield_kg)とし、geom_boxplot(outlier.shape = NA)へjitterしたgeom_pointを重ねる。横軸を品種、縦軸を収量(kg)と明記し、合成データであることをcaptionへ書く。品種別の中央値・ばらつきと15区画すべての値を同時に確認するためである。",
           "retryHint": "カテゴリ変数、連続変数、1行の観測、測定単位、データ由来を順番に対応付けます。"
         }
+      ],
+      "challenge": {
+        "title": "歪んだ分布と外れた点を隠さず示す",
+        "scenario": "3条件の所要時間には強い右の歪みがあり、3000 msを超える少数の値も入力記録と一致していました。条件平均だけの棒グラフでは形が見えません。",
+        "task": "値を機械的に削除せず、中心・ばらつき・歪み・個々の値を読める図を設計してください。少なくとも2つの層または補助図を選び、aes、geom、軸の単位、caption、図だけでは決められないことを書いてください。",
+        "hints": [
+          "1枚目では全点を残し、中央値と四分位を示す層を重ねられないか考えます。",
+          "点が重なって形を読めない場合は、条件ごとのヒストグラムをfacetで分ける案もあります。外れた点の妥当性判断は図だけでは完了しません。"
+        ],
+        "rubric": [
+          "xに条件、yに所要時間を対応付け、全観測を残す層を含めている",
+          "箱ひげと点、またはfacetしたヒストグラムなど、異なる役割の表示を組み合わせている",
+          "軸へms単位、captionへデータ由来と点の単位を書いている",
+          "外れた値を図だけで誤りと断定せず、入力記録や測定手順の確認を求めている",
+          "平均棒だけでは歪みや個々の値を隠すと説明している"
+        ],
+        "example": "aes(x = condition, y = duration_ms)で、outlier.shape = NAの箱ひげと、横方向だけjitterした全点を重ねる。補助図としてgeom_histogram()を条件ごとにfacetし、右裾の形を確認する。縦軸または横軸にms、captionに観測単位とデータ由来を書く。3000 ms超の値は表示したまま入力記録と測定手順を確認し、除外規則は図を見た後に都合よく決めない。この図だけから測定誤り、条件効果、母集団差は結論しない。"
+      },
+      "reviewQuestions": [
+        {
+          "id": "step2-review-analysis-unit-for-plot",
+          "reviewLabel": "V1の復習",
+          "kind": "selected-response",
+          "cognitiveProcess": "apply",
+          "prompt": "960試行から条件別の箱ひげと参加者点を描きます。図の1点を「1参加者×1条件の平均」にするには、作図前にどの処理を行いますか。",
+          "choices": [
+            {
+              "id": "participant-condition",
+              "text": "正答試行をidとconditionでグループ化し、参加者×条件ごとの平均を作る",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "condition-only",
+              "text": "正答試行をconditionだけでグループ化し、条件平均を2行だけ作る",
+              "diagnostic": "参加者ごとの点が消え、条件平均しか残らない"
+            },
+            {
+              "id": "raw-trials",
+              "text": "960試行を要約せず、そのまま参加者点として描く",
+              "diagnostic": "1点の意味が参加者平均ではなく1試行になる"
+            },
+            {
+              "id": "participant-only",
+              "text": "idだけでグループ化し、2条件を混ぜた参加者平均を作る",
+              "diagnostic": "条件の区別が失われる"
+            }
+          ],
+          "correctChoiceId": "participant-condition",
+          "correctFeedback": "idとconditionでグループ化すると、24名×2条件の48行になります。各点を1参加者の1条件における平均として描けます。",
+          "retryHint": "図の1点を『誰の、どの条件の値』にしたいかから、group_by()の列を決めます。"
+        }
       ]
     },
     {
@@ -355,7 +452,9 @@
           "kind": "selected-response",
           "cognitiveProcess": "analyze",
           "evidenceStrength": "direct",
-          "targetDimensions": ["pairing-key"],
+          "targetDimensions": [
+            "pairing-key"
+          ],
           "prompt": "geom_line(aes(group = id))でgroup = idが果たす役割として最も適切なものはどれですか。",
           "choices": [
             {
@@ -388,7 +487,10 @@
           "kind": "output-prediction",
           "cognitiveProcess": "apply",
           "evidenceStrength": "supporting",
-          "targetDimensions": ["pairing-key", "within-participant-change"],
+          "targetDimensions": [
+            "pairing-key",
+            "within-participant-change"
+          ],
           "prompt": "24名×2条件の48行を次のコードで描くとき、参加者の線と点はそれぞれいくつになりますか。",
           "code": "ggplot2::ggplot(participant_condition,\n  ggplot2::aes(x = condition, y = mean_rt)) +\n  ggplot2::geom_line(ggplot2::aes(group = id)) +\n  ggplot2::geom_point()",
           "choices": [
@@ -422,7 +524,9 @@
           "kind": "selected-response",
           "cognitiveProcess": "analyze",
           "evidenceStrength": "supporting",
-          "targetDimensions": ["pairing-key"],
+          "targetDimensions": [
+            "pairing-key"
+          ],
           "prompt": "横軸conditionが離散変数の図でgeom_line()からgroup = idを省きました。最も重要な問題はどれですか。",
           "choices": [
             {
@@ -455,16 +559,20 @@
           "kind": "constructed-response",
           "cognitiveProcess": "explain",
           "evidenceStrength": "direct",
-          "targetDimensions": ["within-participant-change", "individual-heterogeneity", "interpretation-limits"],
-          "prompt": "L18の箱ひげ＋全点図と、L19の参加者内対応図で分かることの違いを4文以内で説明してください。",
+          "targetDimensions": [
+            "within-participant-change",
+            "individual-heterogeneity",
+            "interpretation-limits"
+          ],
+          "prompt": "条件分布を示す箱ひげ＋全点図と、参加者内対応図で分かることの違いを4文以内で説明してください。",
           "rubric": [
             {
               "id": "distribution-role",
-              "criterion": "L18は条件ごとの中央値・四分位・参加者間のばらつきを読みやすいと説明する"
+              "criterion": "条件分布図は条件ごとの中央値・四分位・参加者間のばらつきを読みやすいと説明する"
             },
             {
               "id": "paired-role",
-              "criterion": "L19は同じ参加者の変化方向と差の大小を追跡できると説明する"
+              "criterion": "参加者内対応図は同じ参加者の変化方向と差の大小を追跡できると説明する"
             },
             {
               "id": "heterogeneity",
@@ -475,7 +583,7 @@
               "criterion": "どちらの図も有意差・母集団差・因果効果を証明しないと区別する"
             }
           ],
-          "modelAnswer": "L18の図は、各条件の中央値、中央50%の範囲、参加者平均の分布を比較しやすい。L19の図は同じ参加者の2点を結ぶため、一人ずつの変化方向と差の大きさを追える。したがって全体傾向と個人差を別々の図で補完できる。ただし、どちらも標本内の記述であり、有意差や母集団差、因果効果を証明しない。",
+          "modelAnswer": "条件分布図は、各条件の中央値、中央50%の範囲、参加者平均の分布を比較しやすい。参加者内対応図は同じ参加者の2点を結ぶため、一人ずつの変化方向と差の大きさを追える。したがって全体傾向と個人差を別々の図で補完できる。ただし、どちらも標本内の記述であり、有意差や母集団差、因果効果を証明しない。",
           "retryHint": "『条件内の分布』『同じ人の変化』『まだ結論できないこと』を1つずつ書きます。"
         },
         {
@@ -484,7 +592,12 @@
           "responseMode": "constructed",
           "cognitiveProcess": "transfer",
           "evidenceStrength": "direct",
-          "targetDimensions": ["pairing-key", "within-participant-change", "interpretation-limits", "transfer"],
+          "targetDimensions": [
+            "pairing-key",
+            "within-participant-change",
+            "interpretation-limits",
+            "transfer"
+          ],
           "scenario": "18名について介入前と4週間後の収縮期血圧mmHgを測定した観察データがあります。",
           "prompt": "参加者内対応図のaesとgeomを提案し、線が結ぶ単位、軸の単位、この図だけでは結論できないことを書いてください。",
           "rubric": [
@@ -508,18 +621,78 @@
           "modelAnswer": "aes(x = time, y = systolic_bp, group = participant_id)とし、geom_line()とgeom_point()を重ねる。線は同じ参加者の介入前と4週間後だけを結び、縦軸は収縮期血圧(mmHg)とする。この観察図は18名の前後変化を示すが、比較対照やモデルなしに介入の因果効果や母集団効果を結論しない。",
           "retryHint": "前後で変わらないID、変わる時点、測定値と単位、観察図の限界を順番に対応付けます。"
         }
+      ],
+      "challenge": {
+        "title": "欠けた対応と重複行を見つける",
+        "scenario": "18名の介入前後データを受け取りました。3名は介入後が欠測し、1名の介入前が重複しています。行順はランダムです。",
+        "task": "対応図を描く前に必要な検査と、図へ含める行の作り方を提案してください。欠測者を線で結んだように見せず、重複を平均で隠さず、図と報告文の人数を一致させてください。",
+        "code": "measurements |>\n  ggplot2::ggplot(ggplot2::aes(time, score, group = participant_id)) +\n  ggplot2::geom_line() +\n  ggplot2::geom_point()",
+        "hints": [
+          "描画前にparticipant_id×timeの行数を数え、0件・1件・2件以上を区別します。行順を整えるだけでは重複は解決しません。",
+          "完全な15組の対応図と、全18名の各時点分布は分析対象が異なります。どちらを示す場合も人数を明記します。"
+        ],
+        "rubric": [
+          "participant_id×timeをcountし、欠測3名と重複1名を描画前に検出している",
+          "重複の原因を確認し、根拠なく平均または先頭行へ潰していない",
+          "対応図は前後が1行ずつそろう15名に限定し、その人数を明記している",
+          "欠測者の観測値を別途残し、対応図から消えた事実を報告している",
+          "group = participant_id、時点順、点と線の役割を正しく指定している"
+        ],
+        "example": "まずcount(participant_id, time)で0件と2件以上を検出し、重複した介入前記録は原票へ戻って原因を確認する。根拠が得られるまで平均して1行にはしない。前後が各1行そろう15名だけをpaired_dataとして対応図へ使い、subtitleへ15 complete pairsと書く。3名の観測済みの介入前値は捨てず、全時点分布または欠測一覧で示す。報告文では全登録18名、完全対応15名、欠測3名、要確認の重複1名を区別する。"
+      },
+      "reviewQuestions": [
+        {
+          "id": "step2-review-summary-and-mapping",
+          "reviewLabel": "V1・V2の復習",
+          "kind": "selected-response",
+          "cognitiveProcess": "analyze",
+          "prompt": "参加者×条件の48行から、同じ参加者の2条件を線で結ぶ図を作ります。分析単位と対応付けの両方が正しいコードはどれですか。",
+          "choices": [
+            {
+              "id": "paired-id",
+              "text": "aes(x = condition, y = mean_rt, group = id)にgeom_line()とgeom_point()を重ねる",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "condition-group",
+              "text": "aes(x = condition, y = mean_rt, group = condition)にgeom_line()を重ねる",
+              "diagnostic": "同じ条件内の別参加者を線で結ぶ可能性がある"
+            },
+            {
+              "id": "raw-trial-line",
+              "text": "960試行を使い、aes(x = trial, y = rt_ms, group = condition)で線を描く",
+              "diagnostic": "参加者×条件の要約と参加者内対応という問いから外れている"
+            },
+            {
+              "id": "condition-mean",
+              "text": "条件平均2行だけを使い、2点を1本の線で結ぶ",
+              "diagnostic": "参加者ごとの差と方向がすべて失われる"
+            }
+          ],
+          "correctChoiceId": "paired-id",
+          "correctFeedback": "48行の各点を残し、group = idで同じ参加者の2条件だけを結びます。V1の分析単位とV2のaesの役割を同時に使っています。",
+          "retryHint": "点の1行の意味と、1本の線が結ぶ単位を別々に確認します。"
+        }
       ]
     },
     {
       "lessonId": "step2-report-and-transfer",
-      "outcomeDimensions": ["reproducible-execution", "figure-export-contract", "evidence-matched-reporting", "interpretation-limits", "transfer"],
+      "outcomeDimensions": [
+        "reproducible-execution",
+        "figure-export-contract",
+        "evidence-matched-reporting",
+        "interpretation-limits",
+        "transfer"
+      ],
       "questions": [
         {
           "id": "step2-l20-q1-pixel-contract",
           "kind": "output-prediction",
           "cognitiveProcess": "apply",
           "evidenceStrength": "supporting",
-          "targetDimensions": ["figure-export-contract"],
+          "targetDimensions": [
+            "figure-export-contract"
+          ],
           "prompt": "次のコードで保存されるPNGの横×縦ピクセル数を、実行前に予測してください。",
           "code": "ggsave(\"figure.png\", plot = p, width = 7, height = 5, units = \"in\", dpi = 300)",
           "choices": [
@@ -553,8 +726,11 @@
           "kind": "selected-response",
           "cognitiveProcess": "analyze",
           "evidenceStrength": "direct",
-          "targetDimensions": ["evidence-matched-reporting", "interpretation-limits"],
-          "prompt": "L17〜L20の最終成果物が直接支える記述はどれですか。",
+          "targetDimensions": [
+            "evidence-matched-reporting",
+            "interpretation-limits"
+          ],
+          "prompt": "STEP 2の最終成果物が直接支える記述はどれですか。",
           "choices": [
             {
               "id": "population-effect",
@@ -586,7 +762,10 @@
           "kind": "selected-response",
           "cognitiveProcess": "analyze",
           "evidenceStrength": "supporting",
-          "targetDimensions": ["reproducible-execution", "figure-export-contract"],
+          "targetDimensions": [
+            "reproducible-execution",
+            "figure-export-contract"
+          ],
           "prompt": "分析者がRStudioのExportボタンで2図を保存し、PNGだけを共有しました。第三者による再生成で最も直接的に欠けているものは何ですか。",
           "choices": [
             {
@@ -619,7 +798,11 @@
           "kind": "constructed-response",
           "cognitiveProcess": "explain",
           "evidenceStrength": "direct",
-          "targetDimensions": ["reproducible-execution", "evidence-matched-reporting", "interpretation-limits"],
+          "targetDimensions": [
+            "reproducible-execution",
+            "evidence-matched-reporting",
+            "interpretation-limits"
+          ],
           "prompt": "STEP 2の最終報告を6文以内で書いてください。分析対象、2図の選択理由、標本内の観察、非主張事項、再生成方法を含めます。",
           "rubric": [
             {
@@ -652,7 +835,12 @@
           "responseMode": "constructed",
           "cognitiveProcess": "transfer",
           "evidenceStrength": "direct",
-          "targetDimensions": ["figure-export-contract", "evidence-matched-reporting", "interpretation-limits", "transfer"],
+          "targetDimensions": [
+            "figure-export-contract",
+            "evidence-matched-reporting",
+            "interpretation-limits",
+            "transfer"
+          ],
           "scenario": "同じ20名が通常睡眠日と睡眠制限日に回答した覚醒度得点があります。列はparticipant_id、sleep_condition、alertness_scoreで、観察データです。",
           "prompt": "条件内分布と参加者内変化を報告する2図を選び、aes・対応キー・保存仕様・caption・このデータだけでは結論できないことを提案してください。",
           "rubric": [
@@ -679,6 +867,57 @@
           ],
           "modelAnswer": "両図でaes(x = sleep_condition, y = alertness_score)とする。条件別分布図は全20名の点と箱ひげを重ね、参加者内対応図はaes(group = participant_id)を追加してgeom_line()とgeom_point()を使う。縦軸へ覚醒度得点の尺度、captionへ観察データであること、点と線の単位を書く。各plotを明示し、例えば7×5 inch、300 dpiで別名のPNGへ保存する。この2図は20名の観察分布と参加者内変化を示すが、睡眠制限の因果効果、母集団効果、統計的有意差を証明しない。",
           "retryHint": "分布を見る図、同じ人を結ぶ図、保存の6引数、データ由来、非主張事項の順に設計します。"
+        }
+      ],
+      "challenge": {
+        "title": "新旧の成果物が混ざったフォルダを診断する",
+        "scenario": "分析フォルダには24名と書かれた探索メモ、23名から作られたPNG、24名のCSVがあります。作図スクリプトはPNGより後に更新され、入力CSVのチェックサムだけは実行前後で一致しています。",
+        "task": "このフォルダを『再生成可能な最終成果物』として受け取れるか判断し、根拠を示してください。その後、どの順番で何を消さずに退避・再実行・照合すれば、1回の実行に由来する成果物だと確認できるかを設計してください。",
+        "hints": [
+          "入力が不変でも、異なる時点のコードと出力が混ざっていないことまでは証明できません。",
+          "既存成果物を証拠として退避し、空の出力先で1本の入口から再生成した後、行数・人数・画像寸法・メモ・チェックサムを相互照合します。"
+        ],
+        "rubric": [
+          "現在のPNG・CSV・メモは同じ実行に由来すると確認できず、受入不可と判断している",
+          "入力チェックサム一致が、コード版・実行順・出力整合を証明しないと説明している",
+          "既存成果物を削除せず別名または別フォルダへ退避している",
+          "空の出力先で固定したコードと1本の入口スクリプトから全6成果物を再生成している",
+          "3CSVの人数・2PNGの元データと寸法・探索メモの数値・各ファイルのチェックサムを照合している"
+        ],
+        "example": "現状はCSV、PNG、メモの対象人数が一致せず、作図コードも出力後に更新されているため受け入れない。入力MD5の一致はrawを上書きしていない証拠にすぎない。既存outputをtimestamp付きフォルダへ退避し、使用コードとパッケージ情報を固定して、空のoutputへ入口スクリプトを1回実行する。参加者×条件48行・差24行・図の点数と線数・2100×1500 px・メモの人数と数値を照合し、最後に6成果物のチェックサムを記録する。2回目の再実行でも同じ内容になることを確認してから受け入れる。"
+      },
+      "reviewQuestions": [
+        {
+          "id": "step2-review-complete-workflow",
+          "reviewLabel": "V1〜V3の復習",
+          "kind": "selected-response",
+          "cognitiveProcess": "analyze",
+          "prompt": "空のRセッションからSTEP 2の報告を再生成します。これまでの技能を正しい順序でつないだ流れはどれですか。",
+          "choices": [
+            {
+              "id": "complete-flow",
+              "text": "正答試行を参加者×条件へ要約し、条件分布図と参加者内対応図を作り、寸法を固定して保存し、観察と限界を報告する",
+              "diagnostic": "correct"
+            },
+            {
+              "id": "plot-first",
+              "text": "rawの960試行から先に2本の線を描き、その後で参加者数を数える",
+              "diagnostic": "分析単位と対応キーを確認する前に作図している"
+            },
+            {
+              "id": "mean-only",
+              "text": "条件平均2値だけを保存し、個々の点と対応図を省いて差があると報告する",
+              "diagnostic": "分布と参加者内の違いを隠し、主張も成果物を超えている"
+            },
+            {
+              "id": "manual-export",
+              "text": "画面に表示された図を手作業で保存し、PNGが存在すれば再生成可能と判断する",
+              "diagnostic": "保存条件、実行順、コードと出力の対応を再実行できない"
+            }
+          ],
+          "correctChoiceId": "complete-flow",
+          "correctFeedback": "分析単位を決める、分布を隠さず描く、同じ参加者を対応付ける、保存条件と限界を残す、という順でV1〜V3の技能を統合します。",
+          "retryHint": "入力から最終報告までを『要約→2種類の図→保存→解釈』の順に並べます。"
         }
       ]
     }

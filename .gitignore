@@ -1,7 +1,10 @@
 # 依存とビルド成果物
-node_modules/
+/node_modules
+/node_modules 2/
 dist/
+/output/
 /outputs/
+/.playwright-cli/
 
 # 実観察で生じる非公開データ（空の原本・手順書は公開する）
 /quality/**/private/

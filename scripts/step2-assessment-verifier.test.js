@@ -76,4 +76,28 @@ describe("STEP 2内容理解問題", () => {
       "step2-report-and-transfer: 到達目標次元がカリキュラムと一致しません",
     );
   });
+
+  it("任意チャレンジの段階ヒント不足を検出する", () => {
+    const broken = structuredClone(content);
+    broken.assessments.lessons[0].challenge.hints = ["ヒント1件だけ"];
+    expect(validateAssessmentContract(broken)).toContain(
+      "step2-describe-distributions: 任意チャレンジの段階ヒントは2件以上必要です",
+    );
+  });
+
+  it("任意チャレンジの短すぎる解答例を検出する", () => {
+    const broken = structuredClone(content);
+    broken.assessments.lessons[3].challenge.example = "短い解答";
+    expect(validateAssessmentContract(broken)).toContain(
+      "step2-report-and-transfer: 任意チャレンジの解答例は80文字以上必要です",
+    );
+  });
+
+  it("V2以降の累積復習の欠落を検出する", () => {
+    const broken = structuredClone(content);
+    broken.assessments.lessons[1].reviewQuestions = [];
+    expect(validateAssessmentContract(broken)).toContain(
+      "step2-grammar-of-graphics: 累積復習が1件ではありません",
+    );
+  });
 });

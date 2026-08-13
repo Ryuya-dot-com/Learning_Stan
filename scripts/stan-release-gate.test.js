@@ -184,15 +184,14 @@ describe("Stan Release Gateの機械判定", () => {
     const status = passingStatus();
     expect(validateStanReleaseStatus(status)).toEqual([]);
     expect(deriveStanReleaseDecision(status)).toBe("PASS");
-    expect(status.foundationGate.decision).toBe("BLOCKED");
-    expect(status.learnerObservation.eligibleComplete).toBe(0);
     expect(status.delayedRetention.eligibleComplete).toBe(0);
   });
 
-  it("Foundation Gateは改善証拠として記録するが未完了でも公開を止めない", () => {
+  it("公開後フィードバックは人数の下限を設けず、任意の改善証拠として記録できる", () => {
     const status = passingStatus();
-    status.foundationGate.decision = "BLOCKED";
-    status.evidence[0].status = "NOT RUN";
+    const learnerFeedback = status.evidence.find(({ id }) => id === "SRG07");
+    learnerFeedback.status = "RECORDED";
+    learnerFeedback.artifacts = ["feedback/stan/learner-P01-summary.md"];
     expect(validateStanReleaseStatus(status)).toEqual([]);
     expect(deriveStanReleaseDecision(status)).toBe("PASS");
   });
@@ -250,14 +249,7 @@ describe("Stan Release Gateの機械判定", () => {
     expect(validateStanReleaseStatus(mismatched).join("\n")).toContain("状態をNOT RUNまたはRECORDEDで一致");
   });
 
-  it("初学者記録の重複と7〜14日外の保持記録を拒否する", () => {
-    const duplicate = passingStatus();
-    duplicate.learnerObservation = {
-      eligibleComplete: 3,
-      records: ["feedback/P01.md", "feedback/P02.md", "feedback/P02.md"],
-    };
-    expect(validateStanReleaseStatus(duplicate).join("\n")).toContain("初学者観察記録が重複");
-
+  it("7〜14日外の保持記録を拒否する", () => {
     const tooEarly = passingStatus();
     tooEarly.delayedRetention = {
       minimumDays: 7,
@@ -321,8 +313,8 @@ describe("Stan Release Gateの機械判定", () => {
     expect(report.stdout).toContain("Stan Release Gate: PASS");
     expect(report.stdout).toContain("Required: PASS 6/6");
     expect(report.stdout).toContain("Advisory: PASS 0/4, RECORDED 1");
-    expect(report.stdout).toContain("learners: 0/3");
-    expect(report.stdout).toContain("delayed retention: 0/3");
+    expect(report.stdout).toContain("Post-public records: 1");
+    expect(report.stdout).toContain("delayed retention: 0");
 
     const gate = spawnSync(
       process.execPath,
@@ -331,6 +323,6 @@ describe("Stan Release Gateの機械判定", () => {
     );
     expect(gate.status).toBe(0);
     expect(gate.stdout).toContain("Stan Release Gate: PASS");
-    expect(gate.stdout).toContain("Foundation: BLOCKED");
+    expect(gate.stdout).toContain("Post-public records: 1");
   });
 });

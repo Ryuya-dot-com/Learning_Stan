@@ -26,8 +26,8 @@ function memoryStorage(initial = {}) {
 }
 
 describe("進捗保存形式", () => {
-  it("公開中のL1〜L16とStan L34〜L41を識別できる内容版を使う", () => {
-    expect(CONTENT_VERSION).toBe("2026-08-10-l1-l16-stan-l34-l41-v1");
+  it("累積復習を含む現在の教材を識別できる内容版を使う", () => {
+    expect(CONTENT_VERSION).toBe("2026-08-13-steps3-5-v1");
   });
 
   it("版情報を付けて保存し、同じ内容を読み戻す", () => {

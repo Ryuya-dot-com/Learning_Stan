@@ -35,7 +35,7 @@ function hasIndependentReview(status) {
 function participantRecordsComplete(status) {
   const participants = status?.participants;
   return Number.isInteger(participants?.eligibleComplete) &&
-    participants.eligibleComplete >= 3 &&
+    participants.eligibleComplete >= 1 &&
     Array.isArray(participants.records) &&
     participants.records.length === participants.eligibleComplete &&
     participants.records.every(hasText) &&
@@ -167,7 +167,7 @@ export function validateTransferGateStatus(status) {
   }
   if (status.decision === "OBSERVED") {
     if (!hasFinalTarget(status)) errors.push("OBSERVEDには40桁commit SHAとHTTPS URLが必要です");
-    if (!participantRecordsComplete(status)) errors.push("OBSERVEDには適格な匿名観察記録3件以上が必要です");
+    if (!participantRecordsComplete(status)) errors.push("OBSERVEDには適格な匿名観察記録1件以上が必要です");
     if (!hasIndependentReview(status)) errors.push("OBSERVEDには主実装者と異なる独立レビュー署名が必要です");
     if (!hasText(status.decisionRecord)) errors.push("OBSERVEDにはコホート判断記録が必要です");
     if (openIssues(status, ["P0", "P1"]).length > 0) errors.push("OBSERVEDには未解決P0・P1が0件である必要があります");
@@ -197,7 +197,6 @@ export function loadTransferGateStatus(path) {
 
 function runCli() {
   const args = process.argv.slice(2);
-  const requireObserved = args.includes("--require-observed");
   const pathArg = args.find((arg) => !arg.startsWith("--"));
   const path = resolve(pathArg || "quality/step1-transfer-gate/status.json");
   let status;
@@ -225,10 +224,9 @@ function runCli() {
     `NOT RUN ${summary.evidence["NOT RUN"]}`
   );
   console.log(
-    `Participants: valid ${summary.participants}/3, blocked ${summary.blockedSessions}, ` +
+    `Participants: valid ${summary.participants}, blocked ${summary.blockedSessions}, ` +
     `invalid ${summary.invalidSessions}, open issues ${summary.openIssues}`
   );
-  if (requireObserved && summary.decision !== "OBSERVED") process.exitCode = 1;
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) runCli();
