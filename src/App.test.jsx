@@ -229,7 +229,7 @@ describe("学習進捗", () => {
 });
 
 describe("レッスン遷移", () => {
-  it("最後のR基礎レッスンから構想中トラックへ流れ込まない", () => {
+  it("最後のR基礎レッスンからFoundation Checkを飛ばして進まない", () => {
     const lastLearningLesson = LESSONS.find((lesson) => lesson.id === "l9");
 
     expect(nextLessonOf(lastLearningLesson)).toBeNull();
@@ -279,6 +279,85 @@ describe("レッスン遷移", () => {
     expect(screen.getByText("研究上の問い")).toBeTruthy();
     expect(screen.getByText("届いたCSV・区切りテキスト・Excelが、想定した行数・列名・列型で読めたか確かめます。")).toBeTruthy();
     expect(screen.getByText("output/condition_means.csv と output/analysis_note.txt")).toBeTruthy();
+  });
+
+  it("STEP 2を共有URLから開き、学習者向けの教材とケースを表示する", () => {
+    window.history.replaceState(null, "", "#/lesson/step2-describe-distributions");
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "分析単位を決めて分布を要約する", level: 1 })).toBeTruthy();
+    expect(screen.getByText("STEP 2 1 / 4")).toBeTruthy();
+    expect(screen.getByText("STEP 2 ケーススタディ")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "拡大パイロットの探索報告" })).toBeTruthy();
+    expect(screen.getByText("必要なファイルをダウンロードし、表示したProject内の保存先へ置いてください。")).toBeTruthy();
+    expect(screen.queryByText(/一括ZIP/)).toBeNull();
+    expect(screen.getByRole("link", { name: "↓ 拡大パイロットCSVをダウンロード" }).getAttribute("href")).toContain("/data/step2/expanded_pilot_trials.csv");
+    expect(screen.getByRole("link", { name: "↓ Quarto演習ノートをダウンロード" }).getAttribute("href")).toContain("/notebooks/nb2-stats.qmd");
+    expect(screen.getByRole("link", { name: "↓ 記述統計の完成版Rスクリプトをダウンロード" }).getAttribute("href")).toContain("/scripts/step2/step2_descriptive.R");
+    expect(document.body.textContent).not.toMatch(/\bL(?:17|18|19|20)\b|公開ゲート|問題の正本|assessments\.json|非公開ドラフト/);
+  });
+
+  it("STEP 2の任意チャレンジは段階ヒントと自己評価を持ち、修了条件へ混ぜない", async () => {
+    const user = userEvent.setup();
+    const lessonId = "step2-describe-distributions";
+    window.localStorage.setItem(
+      "learning-stan.progress",
+      serializeProgress({
+        done: completedExercises([lessonId]),
+        first: {},
+        missed: {},
+        practice: {},
+      })
+    );
+    window.history.replaceState(null, "", `#/lesson/${lessonId}`);
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "成果物チェック" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "次へ →" }));
+
+    expect(screen.getByText("任意チャレンジ")).toBeTruthy();
+    expect(screen.getByText("歯応えあり・修了条件には含みません")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "欠測と試行数の違いを見落とさない" })).toBeTruthy();
+    expect(screen.getByText("段階ヒント 1")).toBeTruthy();
+    expect(screen.getByText("段階ヒント 2")).toBeTruthy();
+
+    const reveal = screen.getByRole("button", { name: "評価の観点と解答例を見る" });
+    expect(reveal.disabled).toBe(true);
+    await user.type(
+      screen.getByRole("textbox", { name: "自分の設計と判断（本文は保存されません）" }),
+      "参加者と条件の組み合わせごとに件数を確認します。欠測した参加者は差の計算から分け、条件別の人数と除外理由を探索メモに明記します。存在しない値をゼロには置き換えません。"
+    );
+    expect(reveal.disabled).toBe(false);
+    await user.click(reveal);
+    expect(screen.getByText("評価の観点")).toBeTruthy();
+    expect(screen.getByText("解答例")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "まとめへ" }));
+    expect(screen.getByRole("button", { name: "実践チェックへすすむ" })).toBeTruthy();
+    expect(JSON.parse(window.localStorage.getItem("learning-stan.progress"))).not.toHaveProperty("challenge");
+  });
+
+  it("STEP 2の累積復習を基本問題と区別して表示する", async () => {
+    const user = userEvent.setup();
+    const lessonId = "step2-grammar-of-graphics";
+    window.localStorage.setItem(
+      "learning-stan.progress",
+      serializeProgress({
+        done: completedExercises([lessonId]),
+        first: {},
+        missed: {},
+        practice: {},
+      })
+    );
+    window.history.replaceState(null, "", `#/lesson/${lessonId}`);
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "成果物チェック" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "← 前へ" }));
+
+    expect(screen.getByText("累積復習: V1の復習")).toBeTruthy();
+    expect(screen.getByText(/図の1点を「1参加者×1条件の平均」にする/)).toBeTruthy();
+    expect(screen.queryByText("練習問題 6 / 6")).toBeNull();
   });
 
   it("L13では品質チェックに必要な教材だけを先に示す", () => {
@@ -392,11 +471,9 @@ describe("初心者向けホーム導線", () => {
     expect(screen.queryByText("先にR基礎まで終えるのがおすすめです")).toBeNull();
   });
 
-  it("Stanベータの成果物確認まで終えると復習と演習ノートを示す", () => {
-    const foundationPractice = LESSONS.find((lesson) => lesson.id === "l10").practice.items.map((item) => item.id);
-    const dataPractice = LESSONS.find((lesson) => lesson.id === "l16").practice.items.map((item) => item.id);
-    const stanPractice = Object.fromEntries(
-      LESSONS.filter((lesson) => /^l(?:3[4-9]|4[01])$/.test(lesson.id))
+  it("STEP 6までの成果物確認を終えると復習と演習ノートを示す", () => {
+    const completedPractice = Object.fromEntries(
+      LESSONS.filter((lesson) => lesson.practice)
         .map((lesson) => [lesson.id, lesson.practice.items.map((item) => item.id)])
     );
     window.localStorage.setItem(
@@ -405,14 +482,14 @@ describe("初心者向けホーム導線", () => {
         done: completedExercises(LESSONS.map((lesson) => lesson.id)),
         first: {},
         missed: {},
-        practice: { l10: foundationPractice, l16: dataPractice, ...stanPractice },
+        practice: completedPractice,
       })
     );
 
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: "公開中のStanベータまで修了しました" })).toBeTruthy();
-    expect(screen.getByText("L34〜L41の理解問題、4段階の反復練習、成果物チェックまで完了しました。Stan演習ノートで実装・診断・報告の流れを復習できます。")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "R基礎からStanまで修了しました" })).toBeTruthy();
+    expect(screen.getByText("STEP 1〜6の理解問題、4段階の反復練習、成果物チェックまで完了しました。Stan演習ノートで実装・診断・報告の流れを復習できます。")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Stan編を復習する" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Stan演習ノートをダウンロード" })).toBeTruthy();
   });

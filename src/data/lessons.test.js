@@ -112,7 +112,7 @@ describe("レッスンデータ", () => {
     expect(body, `${l.id} の先頭ページに到達目標がない`).toMatch(/できるようになります/);
   });
 
-  it("L9・L10と検索向け説明がSTEP 1の公開状態に追随する", () => {
+  it("L9・L10と検索向け説明が公開中の学習経路に追随する", () => {
     const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
     const prerequisiteText = ["l9", "l10"]
       .map((id) => LESSONS.find((lesson) => lesson.id === id))
@@ -123,7 +123,127 @@ describe("レッスンデータ", () => {
 
     expect(prerequisiteText).not.toContain("今後公開予定のSTEP 1");
     expect(prerequisiteText).toContain("Foundation Checkの後に進むSTEP 1");
-    expect(indexHtml).toContain("CSV・Excelの読み込み、品質検査、要約、保存までを公開中");
+    expect(indexHtml).toContain("回帰、確率、ベイズ更新、brmsを順に学び、Stanでの実装・診断・予測・報告まで進みます");
+  });
+
+  it("STEP 2は各5問にV2以降の累積復習を加えて公開する", () => {
+    const step2Lessons = LESSONS.filter((lesson) => lesson.section === "3-stats");
+
+    expect(step2Lessons.map((lesson) => lesson.id)).toEqual([
+      "step2-describe-distributions",
+      "step2-grammar-of-graphics",
+      "step2-show-individuals",
+      "step2-report-and-transfer",
+    ]);
+    for (const [index, lesson] of step2Lessons.entries()) {
+      expect(lesson.ex.filter((exercise) => !exercise.reviewLabel)).toHaveLength(5);
+      expect(lesson.ex.filter((exercise) => exercise.reviewLabel)).toHaveLength(index === 0 ? 0 : 1);
+      expect(lesson.practiceLadder.steps).toHaveLength(4);
+      expect(lesson.practice.items).toHaveLength(
+        lesson.id === "step2-report-and-transfer" ? 2 : 3
+      );
+    }
+  });
+
+  it("STEP 2の画面へ教材制作側のID・公開判定・内部パスを出さない", () => {
+    const internalMarkers = [
+      ["公開前の状態", /draft-unpublished|非公開ドラフト|公開ゲート|releasePrerequisites/i],
+      ["観察を公開条件にする文言", /初心者観察|初学者観察|学習者観察ゲート/],
+      ["教材制作側の問題ID", /step2-l(?:17|18|19|20)-q\d|問題の正本|assessments\.json/i],
+      ["旧内部レッスン番号", /\bL(?:17|18|19|20)\b/],
+      ["教材制作側の検査用語", /自動検証|自動検査|検証契約/],
+      ["内部ファイルパス", /(?:src\/data|content\/step2|examples\/step2)/i],
+    ];
+
+    for (const lesson of LESSONS.filter((item) => item.section === "3-stats")) {
+      const visibleText = [
+        lesson.title,
+        lesson.tag,
+        ...lesson.pages.flatMap((page) => [page.t, ...(page.b || []), page.code, ...(page.a || [])]),
+        ...lesson.ex.flatMap((exercise) => [
+          exercise.q,
+          exercise.code,
+          ...(exercise.opts || []),
+          exercise.why,
+          exercise.hint,
+          ...(exercise.rubric || []),
+          exercise.example,
+        ]),
+        lesson.practice?.title,
+        lesson.practice?.intro,
+        ...(lesson.practice?.items || []).flatMap((item) => [item.label, item.criterion]),
+        lesson.practiceLadder?.title,
+        lesson.practiceLadder?.intro,
+        ...(lesson.practiceLadder?.steps || []).flatMap((step) => [
+          step.label,
+          step.support,
+          step.task,
+          step.criterion,
+        ]),
+        lesson.challenge?.title,
+        lesson.challenge?.scenario,
+        lesson.challenge?.task,
+        lesson.challenge?.code,
+        ...(lesson.challenge?.hints || []),
+        ...(lesson.challenge?.rubric || []),
+        lesson.challenge?.example,
+      ].filter(Boolean).join("\n");
+
+      for (const [label, pattern] of internalMarkers) {
+        expect(visibleText, `${lesson.id} に${label}が表示されています`).not.toMatch(pattern);
+      }
+    }
+  });
+
+  it("STEP 3〜5を各5問・4段階練習・3成果物・任意チャレンジで公開する", () => {
+    const expected = {
+      "4-sim": ["l21", "l22", "l23"],
+      "5-bayes": ["l24", "l25", "l26"],
+      "6-brms": ["l27", "l28", "l29", "l30", "l31", "l32", "l33"],
+    };
+
+    for (const [section, ids] of Object.entries(expected)) {
+      const lessons = LESSONS.filter((lesson) => lesson.section === section);
+      expect(lessons.map((lesson) => lesson.id)).toEqual(ids);
+      for (const lesson of lessons) {
+        expect(lesson.ex).toHaveLength(5);
+        expect(lesson.practiceLadder.steps).toHaveLength(4);
+        expect(lesson.practice.items).toHaveLength(3);
+        expect(lesson.challenge).toMatchObject({
+          title: expect.any(String),
+          scenario: expect.any(String),
+          task: expect.any(String),
+          hints: expect.any(Array),
+          rubric: expect.any(Array),
+          example: expect.any(String),
+        });
+        expect(lesson.challenge.hints.length).toBeGreaterThanOrEqual(2);
+        expect(lesson.challenge.rubric.length).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
+  it("STEP 3〜5の画面へ教材制作側の文言を出さない", () => {
+    const internalMarkers = [
+      /非公開ドラフト|公開ゲート|releasePrerequisites|学習者観察ゲート|初学者観察/,
+      /content\/bayes-methods|src\/data\/lessons|curriculum\.json|assessments\.json/i,
+      /\bL(?:2[1-9]|3[0-3])\b/,
+    ];
+
+    for (const lesson of LESSONS.filter((item) => ["4-sim", "5-bayes", "6-brms"].includes(item.section))) {
+      const visibleText = JSON.stringify({
+        title: lesson.title,
+        tag: lesson.tag,
+        pages: lesson.pages,
+        exercises: lesson.ex,
+        practice: lesson.practice,
+        practiceLadder: lesson.practiceLadder,
+        challenge: lesson.challenge,
+      });
+      for (const pattern of internalMarkers) {
+        expect(visibleText, `${lesson.id} に教材制作側の文言が表示されています`).not.toMatch(pattern);
+      }
+    }
   });
 
   it("StanベータはL34〜L41を各5問・4段階練習・3成果物で公開する", () => {
@@ -235,13 +355,26 @@ describe("到達目標―評価対応", () => {
 describe("実践チェック", () => {
   const practiceLessons = LESSONS.filter((lesson) => lesson.practice);
 
-  it("Foundation Check・STEP 1成果物・Stan成果物を実機で確認する", () => {
+  it("Foundation Check・STEP 1〜6の成果物を実機で確認する", () => {
     expect(practiceLessons.map((lesson) => lesson.id)).toEqual([
-      "l10", "l16", "l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41",
+      "l10",
+      "l16",
+      "step2-describe-distributions",
+      "step2-grammar-of-graphics",
+      "step2-show-individuals",
+      "step2-report-and-transfer",
+      "l21", "l22", "l23",
+      "l24", "l25", "l26",
+      "l27", "l28", "l29", "l30", "l31", "l32", "l33",
+      "l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41",
     ]);
     expect(practiceLessons[0].practice.items).toHaveLength(5);
     expect(practiceLessons[1].practice.items).toHaveLength(4);
-    for (const lesson of practiceLessons.slice(2)) expect(lesson.practice.items).toHaveLength(3);
+    for (const lesson of practiceLessons.slice(2)) {
+      expect(lesson.practice.items).toHaveLength(
+        lesson.id === "step2-report-and-transfer" ? 2 : 3
+      );
+    }
   });
 
   it.each(practiceLessons.map((lesson) => [lesson.id, lesson]))("%s: ID・説明・コード検証方法が完全", (_, lesson) => {
@@ -471,6 +604,65 @@ describe("STEP 1成果物", () => {
   });
 });
 
+
+describe("STEP 2公開教材", () => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+  const stage = JOURNEY_STAGES.find((item) => item.id === "stats");
+
+  it("画面から案内するデータ・ノート・完成スクリプトがすべて存在する", () => {
+    expect(stage.resources).toHaveLength(6);
+    for (const resource of stage.resources) {
+      expect(
+        existsSync(join(root, "public", resource.path)),
+        `${resource.label}: public/${resource.path} がない`
+      ).toBe(true);
+    }
+  });
+
+  it("NB2が記述統計・条件分布・参加者内差・保存を一周する", () => {
+    const notebook = readFileSync(join(root, "public", "notebooks", "nb2-stats.qmd"), "utf8");
+    for (const fragment of [
+      "expanded_pilot_trials.csv",
+      'source("step2_report_and_transfer.R"',
+      "output/descriptive_statistics.csv",
+      "output/participant_differences.csv",
+      "knitr::include_graphics(",
+      "output/condition_distributions.png",
+      "output/participant_differences.png",
+      "output/exploratory_note.txt",
+      "統計的有意差、母集団差、因果効果",
+    ]) {
+      expect(notebook, `NB2に ${fragment} がない`).toContain(fragment);
+    }
+  });
+});
+
+describe("STEP 5公開教材", () => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+  const stage = JOURNEY_STAGES.find((item) => item.id === "brms");
+
+  it("全レッスンから共通データと演習ノートを取得できる", () => {
+    expect(stage.resources.map((resource) => resource.path)).toEqual([
+      "scripts/step5/step5_data.R",
+      "notebooks/nb5-brms.qmd",
+    ]);
+    for (const resource of stage.resources) {
+      expect(
+        existsSync(join(root, "public", resource.path)),
+        `${resource.label}: public/${resource.path} がない`
+      ).toBe(true);
+    }
+  });
+
+  it("L27〜L33は同じ短い初期化コードから開始できる", () => {
+    for (const lessonId of stage.lessonIds) {
+      const lesson = LESSONS.find((item) => item.id === lessonId);
+      expect(lesson.pages[0].code).toContain('source("step5_data.R")');
+      expect(lesson.pages[0].code).toContain("library(brms)");
+    }
+  });
+});
+
 describe("演習", () => {
   const allEx = LESSONS.flatMap((l) => l.ex.map((ex, i) => [`${l.id} 演習${i + 1}`, ex]));
 
@@ -545,6 +737,17 @@ describe("演習", () => {
         for (const step of l.practiceLadder.steps) {
           texts.push(step.label, step.support, step.task, step.criterion);
         }
+      }
+      if (l.challenge) {
+        texts.push(
+          l.challenge.title,
+          l.challenge.scenario,
+          l.challenge.task,
+          l.challenge.code,
+          ...(l.challenge.hints || []),
+          ...(l.challenge.rubric || []),
+          l.challenge.example
+        );
       }
     }
     for (const t of texts.filter(Boolean)) {

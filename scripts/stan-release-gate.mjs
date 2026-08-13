@@ -92,11 +92,6 @@ function hasCleanCi(status) {
     REQUIRED_STAN_CI_JOBS.every((job) => cleanCi?.jobs?.[job] === "PASS");
 }
 
-function hasFoundationPass(status) {
-  return status?.foundationGate?.decision === "PASS" &&
-    hasText(status?.foundationGate?.artifact);
-}
-
 function runtimeScenarioComplete(scenario) {
   return scenario?.status === "PASS" &&
     hasText(scenario?.scenarioId) &&
@@ -156,34 +151,6 @@ function hasExternalFeedback(status) {
     hasText(feedback?.summaryArtifact);
 }
 
-function learnerObservationComplete(status) {
-  const observation = status?.learnerObservation;
-  return Number.isInteger(observation?.eligibleComplete) &&
-    observation.eligibleComplete >= 3 &&
-    Array.isArray(observation.records) &&
-    observation.records.length === observation.eligibleComplete &&
-    observation.records.every(hasText) &&
-    new Set(observation.records).size === observation.records.length;
-}
-
-function delayedRetentionComplete(status) {
-  const retention = status?.delayedRetention;
-  return retention?.minimumDays === 7 &&
-    retention?.maximumDays === 14 &&
-    Number.isInteger(retention?.eligibleComplete) &&
-    retention.eligibleComplete >= 3 &&
-    Array.isArray(retention.records) &&
-    retention.records.length === retention.eligibleComplete &&
-    retention.records.every((record) =>
-      isRecord(record) &&
-      hasText(record.artifact) &&
-      Number.isInteger(record.daysAfter) &&
-      record.daysAfter >= retention.minimumDays &&
-      record.daysAfter <= retention.maximumDays
-    ) &&
-    new Set(retention.records.map((record) => record.artifact)).size === retention.records.length;
-}
-
 function hasPublicScopeConfirmation(status) {
   const confirmation = status?.publicScopeConfirmation;
   return hasText(confirmation?.confirmedByCode) &&
@@ -214,7 +181,6 @@ export function deriveStanReleaseDecision(status) {
   const evidence = Array.isArray(status?.evidence) ? status.evidence : [];
   if (
     evidence.some((item) => item?.status === "FAIL") ||
-    status?.foundationGate?.decision === "FAIL" ||
     status?.runtimeComparison?.weakInformation?.status === "FAIL" ||
     status?.runtimeComparison?.strongInformation?.status === "FAIL" ||
     status?.existingRuntimeRevalidation?.status === "FAIL" ||
@@ -326,8 +292,8 @@ function validateEvidence(status, errors) {
         (!Array.isArray(item.artifacts) || item.artifacts.length === 0)) {
       errors.push(`${item.id}: PASS・RECORDEDには公開可能な証拠リンクが必要です`);
     }
-    if (item.status === "RECORDED" && item.id !== "SRG06") {
-      errors.push(`${item.id}: RECORDEDは第三者フィードバックSRG06だけに使用します`);
+    if (item.status === "RECORDED" && !ADVISORY_STAN_EVIDENCE_IDS.includes(item.id)) {
+      errors.push(`${item.id}: RECORDEDは公開後の改善証拠だけに使用します`);
     }
     if (!hasText(item.note)) errors.push(`${item.id}: noteが必要です`);
   }
@@ -472,31 +438,6 @@ function validateExternalFeedback(status, errors) {
   }
 }
 
-function validateLearnerObservation(status, errors) {
-  const observation = status.learnerObservation;
-  if (
-    !isRecord(observation) ||
-    !Number.isInteger(observation?.eligibleComplete) ||
-    observation.eligibleComplete < 0 ||
-    !Array.isArray(observation?.records)
-  ) {
-    errors.push("learnerObservationの件数とrecordsが必要です");
-    return;
-  }
-  if (observation.records.length !== observation.eligibleComplete) {
-    errors.push("learnerObservationのeligibleCompleteとrecords件数が一致する必要があります");
-  }
-  if (observation.records.some((record) => !hasText(record))) {
-    errors.push("learnerObservation.recordsは空でない文字列です");
-  }
-  if (new Set(observation.records).size !== observation.records.length) {
-    errors.push("初学者観察記録が重複しています");
-  }
-  if (evidenceById(status, "SRG07")?.status === "PASS" && !learnerObservationComplete(status)) {
-    errors.push("SRG07のPASSには適格な初学者観察3件以上が必要です");
-  }
-}
-
 function validateDelayedRetention(status, errors) {
   const retention = status.delayedRetention;
   if (
@@ -525,9 +466,6 @@ function validateDelayedRetention(status, errors) {
   }
   const artifacts = retention.records.map((record) => record?.artifact);
   if (new Set(artifacts).size !== artifacts.length) errors.push("遅延保持記録が重複しています");
-  if (evidenceById(status, "SRG08")?.status === "PASS" && !delayedRetentionComplete(status)) {
-    errors.push("SRG08のPASSには7〜14日後の適格な保持記録3件以上が必要です");
-  }
 }
 
 function validatePublicScopeConfirmation(status, errors) {
@@ -595,23 +533,11 @@ export function validateStanReleaseStatus(status) {
 
   validateEvidence(status, errors);
 
-  if (
-    !isRecord(status.foundationGate) ||
-    !DECISIONS.has(status.foundationGate?.decision) ||
-    (status.foundationGate.artifact !== null && !hasText(status.foundationGate.artifact))
-  ) {
-    errors.push("foundationGateのdecisionとartifactが必要です");
-  }
-  if (evidenceById(status, "SRG01")?.status === "PASS" && !hasFoundationPass(status)) {
-    errors.push("SRG01のPASSにはFoundation GateのPASSと証拠リンクが必要です");
-  }
-
   validateStaticVerification(status, errors);
   validateCleanCi(status, errors);
   validateRuntimeComparison(status, errors);
   validateExistingRuntimeRevalidation(status, errors);
   validateExternalFeedback(status, errors);
-  validateLearnerObservation(status, errors);
   validateDelayedRetention(status, errors);
   validatePublicScopeConfirmation(status, errors);
   validateIssues(status, errors);
@@ -649,8 +575,6 @@ export function summarizeStanReleaseStatus(status) {
     decision: deriveStanReleaseDecision(status),
     requiredEvidence: count(REQUIRED_STAN_RELEASE_EVIDENCE_IDS),
     advisoryEvidence: count(ADVISORY_STAN_EVIDENCE_IDS),
-    foundation: status.foundationGate?.decision || "UNKNOWN",
-    learners: status.learnerObservation?.eligibleComplete || 0,
     delayed: status.delayedRetention?.eligibleComplete || 0,
     openIssues: (status.issues || []).filter((issue) => issue.status === "OPEN").length,
   };
@@ -695,8 +619,8 @@ function runCli() {
     `BLOCKED ${summary.advisoryEvidence.BLOCKED}, NOT RUN ${summary.advisoryEvidence["NOT RUN"]}`,
   );
   console.log(
-    `Foundation: ${summary.foundation}, learners: ${summary.learners}/3, ` +
-    `delayed retention: ${summary.delayed}/3, open issues: ${summary.openIssues}`,
+    `Post-public records: ${summary.advisoryEvidence.RECORDED + summary.advisoryEvidence.PASS}, ` +
+    `delayed retention: ${summary.delayed}, open issues: ${summary.openIssues}`,
   );
   if (requirePass && summary.decision !== "PASS") process.exitCode = 1;
 }

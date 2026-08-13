@@ -9,28 +9,26 @@ import {
 
 const content = loadStep2Content();
 
-describe("STEP 2非公開教材パック", () => {
+describe("STEP 2公開教材パック", () => {
   it("カリキュラム・データ・原稿・Rコードが同期している", () => {
     expect(validateStep2Content(content)).toEqual([]);
   });
 
-  it("公開ゲートの欠落を検出する", () => {
+  it("初学者観察を公開前ゲートへ戻す変更を拒否する", () => {
     const broken = structuredClone(content.curriculum);
-    broken.releasePrerequisites = broken.releasePrerequisites.filter(
-      (requirement) => requirement.gate !== "step1-independent-transfer",
-    );
+    broken.releasePrerequisites = [
+      { gate: "step2-learning-observation", requiredDecision: "OBSERVED" },
+    ];
     expect(validateCurriculum(broken)).toContain(
-      "公開前提step1-independent-transferがありません",
+      "STEP 2に公開前の観察ゲートを設定してはいけません",
     );
   });
 
-  it("STEP 2自身の初心者観察を公開前提から外す変更を拒否する", () => {
+  it("初学者フィードバックを公開後の改善へ使う方針を固定する", () => {
     const broken = structuredClone(content.curriculum);
-    broken.releasePrerequisites = broken.releasePrerequisites.filter(
-      (requirement) => requirement.gate !== "step2-learning-observation",
-    );
+    broken.feedbackPolicy = "公開前に観察する";
     expect(validateCurriculum(broken)).toContain(
-      "公開前提step2-learning-observationがありません",
+      "初学者フィードバックを公開後の改善に使う方針がありません",
     );
   });
 

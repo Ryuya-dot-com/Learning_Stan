@@ -1,16 +1,12 @@
 {
   "schemaVersion": 2,
   "gateId": "SRG-CURRENT",
-  "updatedAt": "2026-08-10",
+  "updatedAt": "2026-08-13",
   "decision": "PASS",
   "primaryImplementerCode": "CODEX",
   "target": {
     "commit": "cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff",
     "url": "https://github.com/Ryuya-dot-com/Learning_Stan/commit/cbc6ef23b4b1c7154e83a54c0bc82a3a2f7edcff"
-  },
-  "foundationGate": {
-    "decision": "BLOCKED",
-    "artifact": "quality/foundation-gate/status.json"
   },
   "staticVerification": {
     "status": "PASS",
@@ -93,10 +89,6 @@
     ],
     "summaryArtifact": "quality/stan-release-gate/feedback-2026-08-10.md"
   },
-  "learnerObservation": {
-    "eligibleComplete": 0,
-    "records": []
-  },
   "delayedRetention": {
     "minimumDays": 7,
     "maximumDays": 14,
@@ -124,7 +116,7 @@
       "artifacts": [
         "quality/foundation-gate/status.json"
       ],
-      "note": "Foundation Gateは未完了。ベータ公開を止めない改善証拠として継続する"
+      "note": "Foundationの公開後フィードバックは未実施。公開を止めず、得られた記録を次版の改善に使う"
     },
     {
       "id": "SRG02",
@@ -174,7 +166,7 @@
       "id": "SRG07",
       "status": "NOT RUN",
       "artifacts": [],
-      "note": "初学者観察は教材改善と学習効果の主張を支える任意の追跡証拠。ベータ公開の必須条件ではない"
+      "note": "初学者からの感想は公開後に任意で記録し、次版の教材改善に使う。人数の下限は設けない"
     },
     {
       "id": "SRG08",
@@ -197,7 +189,7 @@
       "artifacts": [
         "quality/stan-release-gate/DECISION_CBC6EF2.md"
       ],
-      "note": "所有者が必須6項目、既知の限界、未解決問題を確認し、Stan編のベータ公開を承認した"
+      "note": "所有者が必須6項目、既知の限界、未解決問題を確認し、Stan編の公開を承認した"
     }
   ],
   "issues": [

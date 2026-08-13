@@ -38,13 +38,11 @@ describe("GitHub Pages workflow", () => {
     );
   });
 
-  it("独立転移観察はNOT RUNをCIで検証し、OBSERVED要求を別コマンドにする", () => {
+  it("独立転移観察はNOT RUNをCIで検証し、公開を止める要求コマンドを持たない", () => {
     expect(packageJson.scripts["gate:step1-transfer:status"]).toBe(
       "node scripts/step1-transfer-gate.mjs"
     );
-    expect(packageJson.scripts["gate:step1-transfer:require-observed"]).toBe(
-      "node scripts/step1-transfer-gate.mjs --require-observed"
-    );
+    expect(packageJson.scripts["gate:step1-transfer:require-observed"]).toBeUndefined();
     expect(config.jobs.build.steps.map((step) => step.run).filter(Boolean)).toContain(
       "npm run gate:step1-transfer:status"
     );
@@ -113,6 +111,21 @@ describe("GitHub Pages workflow", () => {
     expect(rJob.steps.map((step) => step.run).filter(Boolean)).toContain("Rscript scripts/verify-step1-transfer-observation-rehearsal.R");
     expect(rJob.steps.map((step) => step.run).filter(Boolean)).toContain("node scripts/r-example-verifier.mjs");
     expect(config.jobs.deploy.needs).toEqual(expect.arrayContaining(["build", "r-verify"]));
+  });
+
+  it("STEP 5の共通データとベイズ教材のRコードをCIで検証する", () => {
+    const runs = config.jobs["r-verify"].steps.map((step) => step.run).filter(Boolean);
+
+    expect(packageJson.scripts["test:step5-data"]).toBe(
+      "Rscript scripts/verify-step5-data.R"
+    );
+    expect(packageJson.scripts["test:bayes-methods-r-syntax"]).toBe(
+      "Rscript scripts/verify-bayes-methods-r-syntax.R"
+    );
+    expect(runs).toEqual(expect.arrayContaining([
+      "npm run test:step5-data",
+      "npm run test:bayes-methods-r-syntax",
+    ]));
   });
 
   it("Stan検証を固定版の独立jobで実行し、成功するまでdeployしない", () => {

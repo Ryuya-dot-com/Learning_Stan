@@ -13,7 +13,7 @@ const readTransfer = (name) => readFileSync(join(transferQualityRoot, name), "ut
 const stanReleaseQualityRoot = join(root, "quality", "stan-release-gate");
 const readStanRelease = (name) => readFileSync(join(stanReleaseQualityRoot, name), "utf8");
 
-describe("Foundation Gate実施キット", () => {
+describe("Foundation 公開後フィードバック", () => {
   it("実施手順・監査票・観察票・判定票を追跡可能な場所に持つ", () => {
     const hub = read("README.md");
 
@@ -45,7 +45,7 @@ describe("Foundation Gate実施キット", () => {
   it("観察プロトコルが少人数結果を一般化せず、支援と外部要因を分離する", () => {
     const protocol = read("LEARNER_OBSERVATION_PROTOCOL.md");
 
-    expect(protocol).toContain("達成率を母集団へ一般化しません");
+    expect(protocol).toContain("達成率を母集団へ一般化せず");
     expect(protocol).toContain("正式な研究、論文、学会発表");
     expect(protocol).toContain("H3");
     expect(protocol).toContain("外部要因");
@@ -63,16 +63,15 @@ describe("Foundation Gate実施キット", () => {
     expect(record).toContain("支援水準を過小申告していない");
   });
 
-  it("Gate判定が未実施を合格にせず、全証拠と重大問題ゼロを要求する", () => {
+  it("改善記録が任意の公開後フィードバックであり、公開条件へ戻さない", () => {
     const gate = read("GATE_DECISION.md");
 
-    expect(gate).toContain("G01–G14がすべて`PASS`");
-    expect(gate).toContain("未解決のP0・P1が0件");
-    expect(gate).toContain("初学者3名以上");
+    expect(gate).toContain("公開後フィードバック");
+    expect(gate).toContain("公開許可、教材完成、または品質ゲートの判定票ではありません");
+    expect(gate).toContain("一つの分類だけでも記録できます");
     expect(gate).toContain("D-001");
     expect(gate).toContain("D-005");
-    expect(gate).toContain("未実施を`FAIL`や`PASS`へ丸めません");
-    expect(gate).toContain("主実装者とは別のレビュー者");
+    expect(gate).toContain("公開前条件へ戻すのではなく");
   });
 
   it("README・ロードマップ・実施キットの相対リンクが実在する", () => {
@@ -139,7 +138,7 @@ describe("STEP 1 Data Quality Gate", () => {
       expect(readStep1(file).length).toBeGreaterThan(1000);
     }
     expect(hub).toContain("現時点の状態は`NOT RUN`");
-    expect(hub).toContain("達成率を母集団へ一般化しません");
+    expect(hub).toContain("達成率を母集団へ一般化せず");
   });
 
   it("L13を見る前の判断、段階支援、raw保全、未見表転移を必須にする", () => {
@@ -322,7 +321,7 @@ describe("Stan Release Gate文書", () => {
     expect(hub).toContain("公開を止めない改善証拠（4項目）");
     expect(hub).toContain("decision`だけを`PASS`へ書き換えても");
     expect(hub).toContain("7〜14日");
-    expect(hub).toContain("未実施でもベータ公開は可能");
+    expect(hub).toContain("これらが未実施でも公開できます");
   });
 
   it("第三者の口頭感想を署名なしの短い改善記録として扱う", () => {

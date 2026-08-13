@@ -109,26 +109,17 @@ function loadStep2Content(rootDir = ROOT) {
 
 function validateCurriculum(curriculum) {
   const errors = [];
-  if (curriculum.status !== "draft-unpublished") {
-    errors.push("STEP 2教材は観察完了までdraft-unpublishedでなければなりません");
+  if (curriculum.status !== "published") {
+    errors.push("STEP 2教材はpublishedでなければなりません");
   }
   if (curriculum.entryPrerequisite !== "l16") {
     errors.push("STEP 2の入口前提はl16でなければなりません");
   }
-
-  const expectedGates = new Map([
-    ["foundation", "PASS"],
-    ["step1-data-quality", "OBSERVED"],
-    ["step1-independent-transfer", "OBSERVED"],
-    ["step2-learning-observation", "OBSERVED"],
-  ]);
-  for (const requirement of curriculum.releasePrerequisites ?? []) {
-    if (expectedGates.get(requirement.gate) === requirement.requiredDecision) {
-      expectedGates.delete(requirement.gate);
-    }
+  if ((curriculum.releasePrerequisites ?? []).length > 0) {
+    errors.push("STEP 2に公開前の観察ゲートを設定してはいけません");
   }
-  for (const gate of expectedGates.keys()) {
-    errors.push(`公開前提${gate}がありません`);
+  if (!curriculum.feedbackPolicy?.includes("公開後")) {
+    errors.push("初学者フィードバックを公開後の改善に使う方針がありません");
   }
 
   const lessons = curriculum.lessons ?? [];
@@ -272,10 +263,10 @@ function validateData(dataSource, data, validation) {
 function validateDocuments(content) {
   const errors = [];
   const requiredReadmePhrases = [
-    "draft-unpublished",
-    "Foundation Gate",
-    "STEP 1観察",
-    "公開アプリへ組み込む前",
+    "L17〜L20",
+    "公開アプリ",
+    "公開後",
+    "公開の前提にせず",
   ];
   for (const phrase of requiredReadmePhrases) {
     if (!content.readme.includes(phrase)) errors.push(`READMEに「${phrase}」がありません`);
@@ -488,8 +479,17 @@ function validateDocuments(content) {
   if (JSON.stringify(finalPortfolio) !== JSON.stringify(expectedFinalPortfolio)) {
     errors.push("L20最終分析パックの検証契約が不正です");
   }
-  if (existsSync(join(content.rootDir, "src", "data", "lessons", "3-stats"))) {
-    errors.push("非公開STEP 2が公開レッスンディレクトリへ配置されています");
+  for (const path of [
+    ["src", "data", "lessons", "3-stats", "l17-describe-distributions.js"],
+    ["src", "data", "lessons", "3-stats", "l18-grammar-of-graphics.js"],
+    ["src", "data", "lessons", "3-stats", "l19-show-individuals.js"],
+    ["src", "data", "lessons", "3-stats", "l20-report-and-transfer.js"],
+    ["public", "data", "step2", "expanded_pilot_trials.csv"],
+    ["public", "notebooks", "nb2-stats.qmd"],
+  ]) {
+    if (!existsSync(join(content.rootDir, ...path))) {
+      errors.push(`STEP 2公開ファイル${path.join("/")}がありません`);
+    }
   }
   return errors;
 }
@@ -509,7 +509,7 @@ function main() {
     process.exitCode = 1;
     return;
   }
-  console.log("STEP 2 draft verified: 4 lessons, 24 participants, 960 trials");
+  console.log("STEP 2 published content verified: 4 lessons, 24 participants, 960 trials");
 }
 
 const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);

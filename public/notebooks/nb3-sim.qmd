@@ -1,0 +1,139 @@
+---
+title: "NB3: 回帰・確率・尤度をシミュレーションで確かめる"
+lang: ja
+format:
+  html:
+    toc: true
+    code-fold: false
+execute:
+  echo: true
+  warning: false
+---
+
+## このノートで行うこと
+
+STEP 2で記述したデータから、次の三つをbase Rだけで確かめます。
+
+1. 連続応答を回帰で予測し、予測値と残差を分ける
+2. 同じ確率でも観測割合が揺れることをシミュレーションする
+3. 成功数と試行数からBinomial尤度を描く
+
+以下のデータはすべて教材用の合成データです。結果を実在の参加者や因果効果の証拠として扱いません。
+
+## Projectの準備
+
+このノートは外部データや追加パッケージを必要としません。新しいRStudio Projectを作り、このファイルをProject直下へ置いて実行できます。
+
+```text
+Project/
+└── nb3-sim.qmd
+```
+
+## 予測値と残差
+
+各行を参加者一人の平均反応時間とし、睡眠時間との関連を線形回帰で要約します。
+
+```{r}
+study <- data.frame(
+  participant = paste0("P0", 1:6),
+  sleep_h = c(5.5, 6.0, 6.5, 7.0, 7.5, 8.0),
+  mean_rt_ms = c(612, 598, 581, 567, 553, 548)
+)
+
+study$sleep_c <- study$sleep_h - mean(study$sleep_h)
+fit <- lm(mean_rt_ms ~ sleep_c, data = study)
+
+study$predicted_rt_ms <- fitted(fit)
+study$residual_ms <- resid(fit)
+study
+```
+
+各行では、観測値 = 予測値 + 残差です。
+
+```{r}
+all.equal(
+  study$mean_rt_ms,
+  study$predicted_rt_ms + study$residual_ms
+)
+```
+
+この回帰は、この合成標本における関連を要約します。自主的な睡眠時間と反応時間の関連だけから、睡眠を増やす介入の因果効果は結論しません。
+
+## 同じ確率でも観測割合は揺れる
+
+一問の正答確率を0.70、各人の試行数を20と仮定します。pは生成に使う確率、各人の正答割合は一度の観測結果です。
+
+```{r}
+set.seed(20260813)
+
+p_correct <- 0.70
+proportion_20 <- rbinom(
+  n = 1000,
+  size = 20,
+  prob = p_correct
+) / 20
+
+hist(
+  proportion_20,
+  breaks = seq(-0.025, 1.025, by = 0.05),
+  xlab = "20問中の正答割合",
+  main = "p = 0.70 から生じる観測割合"
+)
+abline(v = p_correct, col = "firebrick", lwd = 2)
+```
+
+試行数だけを200へ変えると、観測割合の広がりは通常小さくなります。
+
+```{r}
+proportion_200 <- rbinom(
+  n = 1000,
+  size = 200,
+  prob = p_correct
+) / 200
+
+c(
+  sd_20_trials = sd(proportion_20),
+  sd_200_trials = sd(proportion_200)
+)
+```
+
+このシミュレーションは、Binomialという仮定の結果を確かめるものです。試行順による疲労や問題難易度、参加者差がある場合に、現実のデータが同じ生成過程に従うことを証明するものではありません。
+
+## Binomial尤度を描く
+
+20問中16問正答という観測を固定し、候補となる正答確率pごとに、その観測がどれほど整合的かを比べます。
+
+```{r}
+correct <- 16
+trials <- 20
+p_grid <- seq(0.01, 0.99, by = 0.01)
+likelihood <- dbinom(
+  correct,
+  size = trials,
+  prob = p_grid
+)
+
+plot(
+  p_grid,
+  likelihood,
+  type = "l",
+  xlab = "正答確率 p",
+  ylab = "16正答を得る尤度"
+)
+abline(v = correct / trials, col = "firebrick", lty = 2)
+```
+
+尤度は、観測した16正答を固定し、異なるpを比較する関数です。曲線が0.80付近で高くても、p = 0.80が真である確率を直接示すものではありません。次のSTEPでは、priorと尤度を組み合わせてposterior distributionを作ります。
+
+## ここまでの確認
+
+- 回帰の係数、予測値、残差は別の量である
+- 観測割合と生成確率は別の量である
+- 成功数と試行数の両方がBinomial尤度の情報になる
+- シミュレーション、尤度、因果効果の主張は別の問いである
+
+## 一次資料
+
+- [R stats: lm](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html)
+- [R stats: Binomial Distribution](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Binomial.html)
+- [Stan User’s Guide: Regression Models](https://mc-stan.org/docs/stan-users-guide/regression.html)

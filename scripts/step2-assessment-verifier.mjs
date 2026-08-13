@@ -17,6 +17,9 @@ const ALLOWED_KINDS = new Set([
 ]);
 const ALLOWED_PROCESSES = new Set(["explain", "apply", "analyze", "transfer"]);
 const ALLOWED_STRENGTHS = new Set(["supporting", "direct"]);
+const MIN_CHALLENGE_HINTS = 2;
+const MIN_CHALLENGE_RUBRIC_ITEMS = 4;
+const MIN_CHALLENGE_EXAMPLE_LENGTH = 80;
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8").replace(/^\uFEFF/, ""));
@@ -109,13 +112,42 @@ function validateConstructedQuestion(question) {
   return errors;
 }
 
+function validateOptionalChallenge(challenge, lessonId) {
+  const errors = [];
+  if (!challenge || typeof challenge !== "object") {
+    return [`${lessonId}: 任意チャレンジがありません`];
+  }
+  for (const key of ["title", "scenario", "task", "example"]) {
+    if (!challenge[key]?.trim()) errors.push(`${lessonId}: 任意チャレンジの${key}がありません`);
+  }
+  if (!Array.isArray(challenge.hints) || challenge.hints.length < MIN_CHALLENGE_HINTS) {
+    errors.push(`${lessonId}: 任意チャレンジの段階ヒントは${MIN_CHALLENGE_HINTS}件以上必要です`);
+  } else if (challenge.hints.some((hint) => !hint?.trim())) {
+    errors.push(`${lessonId}: 任意チャレンジに空の段階ヒントがあります`);
+  }
+  if (!Array.isArray(challenge.rubric) || challenge.rubric.length < MIN_CHALLENGE_RUBRIC_ITEMS) {
+    errors.push(`${lessonId}: 任意チャレンジの評価観点は${MIN_CHALLENGE_RUBRIC_ITEMS}件以上必要です`);
+  } else {
+    if (challenge.rubric.some((criterion) => !criterion?.trim())) {
+      errors.push(`${lessonId}: 任意チャレンジに空の評価観点があります`);
+    }
+    if (new Set(challenge.rubric).size !== challenge.rubric.length) {
+      errors.push(`${lessonId}: 任意チャレンジの評価観点が重複しています`);
+    }
+  }
+  if ((challenge.example?.trim().length ?? 0) < MIN_CHALLENGE_EXAMPLE_LENGTH) {
+    errors.push(`${lessonId}: 任意チャレンジの解答例は${MIN_CHALLENGE_EXAMPLE_LENGTH}文字以上必要です`);
+  }
+  return errors;
+}
+
 function validateAssessmentContract(content) {
   const errors = [];
   const { assessments, curriculum, manuscripts } = content;
 
   if (assessments.schemaVersion !== 1) errors.push("assessments.schemaVersionは1である必要があります");
-  if (assessments.status !== "draft-unpublished") {
-    errors.push("STEP 2理解問題は公開までdraft-unpublishedでなければなりません");
+  if (assessments.status !== "published") {
+    errors.push("STEP 2理解問題はpublishedでなければなりません");
   }
   if (assessments.designRules?.questionsPerLesson !== 5) {
     errors.push("各レッスンの問題数契約は5でなければなりません");
@@ -126,7 +158,6 @@ function validateAssessmentContract(content) {
   if (assessments.designRules?.shuffleSelectedResponseChoices !== true) {
     errors.push("選択肢IDを維持した並べ替え契約がありません");
   }
-
   const lessons = assessments.lessons ?? [];
   if (lessons.map((lesson) => lesson.lessonId).join("|") !== EXPECTED_LESSONS.join("|")) {
     errors.push("理解問題はL17・L18の順で定義する必要があります");
@@ -153,6 +184,12 @@ function validateAssessmentContract(content) {
     if (questions.length !== assessments.designRules.questionsPerLesson) {
       errors.push(`${assessmentLesson.lessonId}: 理解問題が5件ではありません`);
     }
+    const reviewQuestions = assessmentLesson.reviewQuestions ?? [];
+    const expectedReviewCount = assessmentLesson.lessonId === EXPECTED_LESSONS[0] ? 0 : 1;
+    if (reviewQuestions.length !== expectedReviewCount) {
+      errors.push(`${assessmentLesson.lessonId}: 累積復習が${expectedReviewCount}件ではありません`);
+    }
+    errors.push(...validateOptionalChallenge(assessmentLesson.challenge, assessmentLesson.lessonId));
     const kinds = new Set(questions.map((question) => question.kind));
     for (const requiredKind of assessments.designRules.requiredKinds ?? []) {
       if (!kinds.has(requiredKind)) {
@@ -201,6 +238,25 @@ function validateAssessmentContract(content) {
         errors.push(`${question.id}: 対応原稿に問題IDがありません`);
       }
     }
+
+    for (const question of reviewQuestions) {
+      if (!/^step2-review-[a-z0-9-]+$/.test(question.id ?? "")) {
+        errors.push(`${question.id ?? "IDなし"}: 累積復習ID形式が不正です`);
+      }
+      if (allQuestionIds.has(question.id)) errors.push(`${question.id}: 問題IDが重複しています`);
+      allQuestionIds.add(question.id);
+      if (!question.reviewLabel?.trim()) errors.push(`${question.id}: 復習範囲がありません`);
+      if (!question.prompt?.trim()) errors.push(`${question.id}: 問題文がありません`);
+      if (!question.retryHint?.trim()) errors.push(`${question.id}: 再挑戦ヒントがありません`);
+      if (!ALLOWED_PROCESSES.has(question.cognitiveProcess)) {
+        errors.push(`${question.id}: 認知過程が不正です`);
+      }
+      if (!["selected-response", "output-prediction"].includes(question.kind)) {
+        errors.push(`${question.id}: 累積復習は選択問題でなければなりません`);
+      } else {
+        errors.push(...validateChoiceQuestion(question));
+      }
+    }
     for (const dimension of assessmentLesson.outcomeDimensions) {
       if (!coveredDimensions.has(dimension)) {
         errors.push(`${assessmentLesson.lessonId}: 測定されない次元${dimension}があります`);
@@ -237,7 +293,7 @@ function main() {
     process.exitCode = 1;
     return;
   }
-  console.log("STEP 2 assessments verified: L17-L20, 20 diagnostic questions");
+  console.log("STEP 2 assessments verified: 20 core questions, 3 cumulative reviews, and 4 optional challenges");
 }
 
 const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
@@ -248,4 +304,5 @@ export {
   validateAssessmentContract,
   validateChoiceQuestion,
   validateConstructedQuestion,
+  validateOptionalChallenge,
 };
