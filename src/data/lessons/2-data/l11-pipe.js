@@ -71,7 +71,7 @@ c(nrow(d), ncol(d))`,
   ],
   ex: [
     {
-      k: "choice",
+      id: "l11-q01", revision: 1, k: "choice",
       q: "`x |> mean()` と同じ意味になるコードはどれですか?",
       opts: ["mean(x)", "x(mean)", "mean() |> x"],
       ans: 0,
@@ -79,7 +79,7 @@ c(nrow(d), ncol(d))`,
       hint: "左側の値は、右側の関数のどこへ入るでしょうか。",
     },
     {
-      k: "fill",
+      id: "l11-q02", revision: 1, k: "fill",
       q: "左側のデータを右側の処理へ渡す、R標準のパイプ記号を入力してください。",
       code: "d ___ dplyr::filter(cond == \"cong\")",
       verify: { mode: "manual", reason: "学習者がパイプ記号を補う未完成コードのため" },
@@ -89,7 +89,7 @@ c(nrow(d), ncol(d))`,
       hint: "縦線、より大きい記号の順に並ぶ2文字です。",
     },
     {
-      k: "tf",
+      id: "l11-q03", revision: 1, k: "tf",
       q: "パイプについて、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "値が渡される方向と、libraryの役割を分けて考えます。",
       items: [

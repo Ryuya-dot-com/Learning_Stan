@@ -95,7 +95,7 @@ predict(fit_2x2, newdata = expand.grid(
   ],
   ex: [
     {
-      k: "choice",
+      id: "l21-q01", revision: 1, k: "choice",
       q: "ある参加者の観測反応時間が600 ms、モデルの予測値が575 msでした。残差として正しいのはどれですか。",
       opts: ["25 ms", "-25 ms", "575 ms", "600 / 575"],
       ans: 0,
@@ -103,7 +103,7 @@ predict(fit_2x2, newdata = expand.grid(
       hint: "残差は、実際に観測した値からモデルの予測値を引いた差です。",
     },
     {
-      k: "choice",
+      id: "l21-q02", revision: 1, k: "choice",
       q: "sleep_hを時間、mean_rt_msをmsで測ったとき、sleep_cの係数が-12なら最も適切な説明はどれですか。",
       opts: [
         "この標本のモデルでは、睡眠時間が1時間長いと予測平均反応時間は12 ms小さい。",
@@ -116,7 +116,7 @@ predict(fit_2x2, newdata = expand.grid(
       hint: "係数の単位と、「関連の要約」と「介入効果」の違いを確認します。",
     },
     {
-      k: "fill",
+      id: "l21-q03", revision: 1, k: "fill",
       q: "観測値から予測値を引いた差を何と呼びますか。",
       code: "residual_ms <- observed_value ___ predicted_value",
       verify: {
@@ -129,7 +129,7 @@ predict(fit_2x2, newdata = expand.grid(
       hint: "残差の式 e = y − y_hat をRの記号へ直します。",
     },
     {
-      k: "tf",
+      id: "l21-q04", revision: 1, k: "tf",
       q: "因子と交互作用について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "係数の表現、条件別予測、研究上の主張を分けて考えます。",
       items: [
@@ -151,7 +151,7 @@ predict(fit_2x2, newdata = expand.grid(
       ],
     },
     {
-      k: "reflect",
+      id: "l21-q05", revision: 1, k: "reflect",
       q: "自主的に長く眠った参加者ほど反応時間が短かったという回帰結果について、書けることと、まだ書けないことをそれぞれ一つずつ説明してください。",
       minLength: 80,
       rubric: [

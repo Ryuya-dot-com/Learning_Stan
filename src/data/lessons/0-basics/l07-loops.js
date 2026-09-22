@@ -49,7 +49,7 @@ export default {
   ],
   ex: [
     {
-      k: "choice",
+      id: "l7-q01", revision: 1, k: "choice",
       q: "`for (i in 1:3) print(i)` は何回表示する?",
       opts: ["3回", "1回", "4回"],
       ans: 0,
@@ -57,7 +57,7 @@ export default {
       hint: "`1:3` が何個の値からなる連番か、数えてみましょう。",
     },
     {
-      k: "choice",
+      id: "l7-q02", revision: 1, k: "choice",
       q: "`c(1, 2, 3, 4)` の合計を求めるRらしい書き方はどれでしょう?",
       opts: ["sum(c(1, 2, 3, 4))", "for (i in 1:4) i", "total <- 0"],
       ans: 0,
@@ -65,7 +65,7 @@ export default {
       hint: "このレッスンで学んだ、`for` を使わない求め方を思い出しましょう。",
     },
     {
-      k: "tf",
+      id: "l7-q03", revision: 1, k: "tf",
       q: "次の3つの説明について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "`sum` のようなベクトル化された関数と、`for` ループのちがいを思い出してみましょう。",
       items: [
@@ -87,7 +87,7 @@ export default {
       ],
     },
     {
-      k: "fill",
+      id: "l7-q04", revision: 1, k: "fill",
       q: "1から3を順番に `i` へ入れる `for` 文の空欄を埋めましょう。",
       code: "for (___) {\n  print(i)\n}",
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },
@@ -97,7 +97,7 @@ export default {
       hint: "基本形は `for (変数 in 値の並び)` です。",
     },
     {
-      k: "fill",
+      id: "l7-q05", revision: 1, k: "fill",
       q: "`for` を使わず、`scores` 全体の合計を求める1行を書きましょう。",
       code: "scores <- c(80, 95, 72)\n___",
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },

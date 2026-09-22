@@ -52,7 +52,7 @@ export default {
   ],
   ex: [
     {
-      k: "choice",
+      id: "l8-q01", revision: 1, k: "choice",
       q: "`half <- function(x) { x / 2 }` のとき `half(10)` の結果は?",
       opts: ["[1] 5", "[1] 10", "[1] 2"],
       ans: 0,
@@ -60,7 +60,7 @@ export default {
       hint: "`{}` の中で最後に評価される式が返り値でした。`x` に `10` を入れて計算してみましょう。",
     },
     {
-      k: "fill",
+      id: "l8-q02", revision: 1, k: "fill",
       q: "関数を定義するキーワードの空欄を埋めましょう。",
       code: "square <- ___(x) {\n  x * x\n}",
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },
@@ -70,7 +70,7 @@ export default {
       hint: "このレッスンの中心となるキーワードです。英語で「機能・働き」という意味の単語です。",
     },
     {
-      k: "tf",
+      id: "l8-q03", revision: 1, k: "tf",
       q: "次の3つの説明について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "Rの関数の返り値の決まり方、既定値のはたらき、引数の数について思い出してみましょう。",
       items: [
@@ -92,7 +92,7 @@ export default {
       ],
     },
     {
-      k: "fill",
+      id: "l8-q04", revision: 1, k: "fill",
       q: "入力 `x` を2倍して返す関数の本体を完成させましょう。",
       code: "double <- function(x) {\n  ___\n}\ndouble(4)",
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },

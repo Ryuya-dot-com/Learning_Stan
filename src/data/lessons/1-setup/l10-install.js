@@ -120,7 +120,7 @@ export default {
   ],
   ex: [
     {
-      k: "choice",
+      id: "l10-q01", revision: 1, k: "choice",
       q: "R と RStudio の関係として正しいのは?",
       opts: ["Rが本体で、RStudioは作業画面", "RStudioが本体で、Rは作業画面", "どちらか一方を入れればよい"],
       ans: 0,
@@ -128,7 +128,7 @@ export default {
       hint: "「本体」と「作業画面」、どちらがRで、どちらがRStudioだったか思い出しましょう。",
     },
     {
-      k: "choice",
+      id: "l10-q02", revision: 1, k: "choice",
       q: "パッケージを使うたびに毎回書く必要があるのは?",
       opts: ["library()", "install.packages()", "どちらも毎回必要"],
       ans: 0,
@@ -136,7 +136,7 @@ export default {
       hint: "「入れるのは1回、読み込むのは毎回」でした。",
     },
     {
-      k: "tf",
+      id: "l10-q03", revision: 1, k: "tf",
       q: "次の3つの説明について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "`install.packages()` と `library()` の使い分け、コンソールの性質、Macの種類によるインストーラのちがいを思い出してみましょう。",
       items: [

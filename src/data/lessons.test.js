@@ -645,6 +645,7 @@ describe("STEP 5公開教材", () => {
     expect(stage.resources.map((resource) => resource.path)).toEqual([
       "scripts/step5/step5_data.R",
       "notebooks/nb5-brms.qmd",
+      "downloads/learning-stan-research-case.zip",
     ]);
     for (const resource of stage.resources) {
       expect(
@@ -755,4 +756,14 @@ describe("演習", () => {
       expect(count % 2, `バッククォートが奇数個: ${String(t).slice(0, 40)}…`).toBe(0);
     }
   });
+});
+
+
+it("すべての理解問題に永続IDと正の改訂番号がある", () => {
+  const ids = LESSONS.flatMap(l => l.ex.map(q => `${l.id}:${q.id}`));
+  expect(new Set(ids).size).toBe(ids.length);
+  for (const lesson of LESSONS) for (const question of lesson.ex) {
+    expect(question.id).toMatch(/^[a-z0-9-]+$/);
+    expect(Number.isInteger(question.revision) && question.revision > 0).toBe(true);
+  }
 });

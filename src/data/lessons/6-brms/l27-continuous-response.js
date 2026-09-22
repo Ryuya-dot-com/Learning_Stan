@@ -22,7 +22,7 @@ export default {
       b: [
         "`brm()`には、何を説明するか、データ、応答の分布、priorを明示します。`get_prior()`で置けるparameterを確認してからpriorを書きます。priorの数値は、得点と時間の単位で意味を考えます。",
       ],
-      code: "priors <- c(\n  set_prior(\"normal(70, 15)\", class = \"Intercept\"),\n  set_prior(\"normal(0, 8)\", class = \"b\"),\n  set_prior(\"exponential(1 / 15)\", class = \"sigma\")\n)\n\nfit <- brm(\n  memory ~ practice_c + baseline_c,\n  data = dat, family = gaussian(), prior = priors,\n  chains = 4, iter = 2000, warmup = 1000, seed = 2026\n)",
+      code: "priors <- c(\n  set_prior(\"normal(70, 15)\", class = \"Intercept\"),\n  set_prior(\"normal(0, 8)\", class = \"b\"),\n  set_prior(\"exponential(1.0 / 15)\", class = \"sigma\")\n)\n\nfit <- brm(\n  memory ~ practice_c + baseline_c,\n  data = dat, family = gaussian(), prior = priors,\n  backend = \"cmdstanr\", chains = 4, iter = 2000, warmup = 1000, seed = 2026\n)",
       verify: { mode: "manual", reason: "brmsとCmdStan環境で実行する例のため" },
       a: [
         "推定の出力は一つの正解ではなく、事後分布を表すdrawです。係数表だけで終えず、研究質問に近い`newdata`を作って予測します。",
@@ -43,7 +43,7 @@ export default {
   ],
   ex: [
     {
-      k: "choice",
+      id: "l27-q01", revision: 1, k: "choice",
       q: "`memory ~ practice_c + baseline_c`で、基礎得点が同じ人の練習1時間あたりの平均差に最も直接対応するparameterはどれですか。",
       opts: ["`b_practice_c`", "`sigma`", "`Intercept`", "`R-hat`"],
       ans: 0,
@@ -51,7 +51,7 @@ export default {
       hint: "式でpractice_cに掛かっている係数を探します。",
     },
     {
-      k: "choice",
+      id: "l27-q02", revision: 1, k: "choice",
       q: "同じ`new_dat`に対し、平均予測の90%区間が[68, 76]、一人の予測の90%区間が[48, 94]でした。一人の予測が広い主な理由はどれですか。",
       opts: ["平均の不確実性に加え、個人ごとの残差も含むから", "chain数が4本だから", "中心化すると必ず区間が広がるから", "R-hatが1に近いから"],
       ans: 0,
@@ -59,14 +59,14 @@ export default {
       hint: "平均そのものと、次の一人の値のどちらに残差が入るか考えます。",
     },
     {
-      k: "reflect",
+      id: "l27-q03", revision: 1, k: "reflect",
       q: "`b_practice_c`の事後中央値が3.2、90%信用区間が[0.8, 5.7]でした。単位、条件づけ、区間を含む結果文を一文で書いてください。",
       minLength: 70,
       rubric: ["基礎得点を同じにする条件を明記している", "練習1時間と得点の単位を明記している", "事後中央値と90%信用区間を、モデルに条件づく不確実性として示している"],
       example: "この正規回帰モデルでは、基礎得点が同じ参加者で練習時間が1時間長いことに対応する翌日得点差の事後中央値は3.2点、90%信用区間は[0.8, 5.7]点だった。",
     },
     {
-      k: "reflect",
+      id: "l27-q04", revision: 1, k: "reflect",
       q: "次の予測コードをレビューしてください。何が足りず、どの列を入れるべきですか。",
       code: "new_dat <- data.frame(practice_h = c(1, 2, 3))\nposterior_epred(fit, newdata = new_dat)",
       lang: "R",
@@ -76,7 +76,7 @@ export default {
       example: "fitした式は`practice_c`と`baseline_c`を使うので、この`new_dat`だけでは不足する。元の平均を使って`practice_h`から`practice_c`を作り、平均的な基礎得点を比べるなら`baseline_c = 0`も入れる。",
     },
     {
-      k: "reflect",
+      id: "l27-q05", revision: 1, k: "reflect",
       q: "自主的に長く練習した人ほど高得点で、prior・計算診断・PPCも良好でした。「練習時間を増やす介入が得点を上げる」と結論してよいか説明してください。",
       minLength: 70,
       rubric: ["観察データから得たのは条件付き関連であると述べている", "意欲や事前能力などの交絡候補を一つ以上挙げている", "モデル診断と因果識別は別の根拠を要すると区別している"],

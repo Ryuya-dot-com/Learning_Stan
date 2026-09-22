@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
+const MathBlock = lazy(() => import("./MathBlock.jsx"));
 import { C, MONO } from "./theme.js";
 import { tokenizeLine, TOK_COLOR } from "./highlight.js";
 
@@ -43,6 +44,21 @@ function T({ children }) {
       )}
     </>
   );
+}
+
+function LessonBlock({ value, title }) {
+  if (value?.type === "table") return (
+    <div className="mb-4 overflow-x-auto" role="region" aria-label={`${title}の比較表`} tabIndex={0}>
+      <table className="lesson-table text-sm">
+        <caption className="sr-only">{title}の比較表</caption>
+        <thead><tr>{value.headers.map((cell, i) => <th scope="col" key={i}><T>{cell}</T></th>)}</tr></thead>
+        <tbody>{value.rows.map((row, i) => <tr key={i}>{row.map((cell, j) => <td key={j}><T>{cell}</T></td>)}</tr>)}</tbody>
+      </table>
+    </div>
+  );
+  if (value?.type === "math") return <Suspense fallback={<pre>{value.tex}</pre>}><MathBlock tex={value.tex} /></Suspense>;
+  if (value?.type === "note") return <aside className="lesson-note mb-3 text-sm leading-7"><T>{value.text}</T></aside>;
+  return <p className="mb-3 text-sm leading-7" style={{ color: C.body }}><T>{value}</T></p>;
 }
 
 function CodeBlock({ code, output, error, lang }) {
@@ -216,4 +232,4 @@ function Feedback({ status, why, hint, showHint, onHint }) {
     </div>
   );
 }
-export { T, CodeBlock, LearningMark, Btn, ResetButton, Feedback };
+export { T, LessonBlock, CodeBlock, LearningMark, Btn, ResetButton, Feedback };

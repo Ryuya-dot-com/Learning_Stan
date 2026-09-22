@@ -50,7 +50,7 @@ export default {
   ],
   ex: [
     {
-      k: "choice",
+      id: "l4-q01", revision: 1, k: "choice",
       q: "`c(1, 2, 3) * 2` の結果は?",
       opts: ["[1] 2 4 6", "[1] 1 2 3 2", "[1] 6"],
       ans: 0,
@@ -58,7 +58,7 @@ export default {
       hint: "`scores + 5` のときと同じく、ベクトル全体に計算が一度に適用されます。",
     },
     {
-      k: "fill",
+      id: "l4-q02", revision: 1, k: "fill",
       q: "`scores` の3番目の値を取り出すコードの空欄を埋めましょう。",
       code: "scores[___]",
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },
@@ -68,7 +68,7 @@ export default {
       hint: "Rの添字は0からではなく1から数え始めます。",
     },
     {
-      k: "tf",
+      id: "l4-q03", revision: 1, k: "tf",
       q: "次の3つの説明について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "`c()` の役割と、Rの添字が何番目から始まるかを思い出してみましょう。",
       items: [

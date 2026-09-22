@@ -189,7 +189,7 @@ c(
   ],
   ex: [
     {
-      k: "choice",
+      id: "l16-q01", revision: 1, k: "choice",
       q: "`pivot_wider(names_from = cond, values_from = mean_rt)` で新しい列名になるのはどの値ですか?",
       opts: ["cond列の値", "mean_rt列の値", "id列の値"],
       ans: 0,
@@ -197,7 +197,7 @@ c(
       hint: "names_fromという引数名に注目します。",
     },
     {
-      k: "fill",
+      id: "l16-q02", revision: 1, k: "fill",
       q: "データフレームをCSVとして保存するreadr関数名を入力してください。",
       code: `___(condition_means, "output/condition_means.csv")`,
       verify: { mode: "manual", reason: "学習者が保存関数名を補う未完成コードのため" },
@@ -207,7 +207,7 @@ c(
       hint: "read_csvの反対で、writeとcsvをアンダースコアで結びます。",
     },
     {
-      k: "tf",
+      id: "l16-q03", revision: 1, k: "tf",
       q: "表の変換と保存について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "1行の意味と、再現可能な成果物の作り方を確認します。",
       items: [
@@ -217,7 +217,7 @@ c(
       ],
     },
     {
-      k: "choice",
+      id: "l16-q04", revision: 1, k: "choice",
       q: "`write_excel_csv()` が作るファイルについて正しい説明はどれですか?",
       opts: ["Excelで開きやすいUTF-8のCSVであり、xlsxではない", "複数シートを持つxlsxである", "セル書式と数式を必ず保存する"],
       ans: 0,
@@ -225,7 +225,7 @@ c(
       hint: "関数名の最後がcsvであることに注目します。",
     },
     {
-      k: "reflect",
+      id: "l16-q05", revision: 1, k: "reflect",
       q: "研究室のメンバーへ渡す結果メモを、3〜4文で書いてください。分析対象、3名の条件差、言える範囲の限界をすべて含めます。",
       minLength: 80,
       rubric: [
