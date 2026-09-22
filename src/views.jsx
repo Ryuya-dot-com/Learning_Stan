@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { C, MONO } from "./theme.js";
 import { isCodey } from "./highlight.js";
 import { seededOrder } from "./shuffle.js";
-import { T, CodeBlock, LearningMark, Btn, ResetButton, Feedback } from "./components.jsx";
+import { T, LessonBlock, CodeBlock, LearningMark, Btn, ResetButton, Feedback } from "./components.jsx";
 import OptionalChallenge from "./OptionalChallenge.jsx";
 import { LESSONS } from "./data/lessons/index.js";
 import { SECTIONS } from "./data/sections.js";
@@ -577,15 +577,11 @@ function LessonView({
               {cur.page.t}
             </h2>
             {(cur.page.b || []).map((s, i) => (
-              <p key={i} className="mb-3 text-sm leading-7" style={{ color: C.body }}>
-                <T>{s}</T>
-              </p>
+              <LessonBlock key={i} value={s} title={cur.page.t} />
             ))}
             {cur.page.code && <CodeBlock code={cur.page.code} output={cur.page.out} error={cur.page.err} lang={cur.page.lang} />}
             {(cur.page.a || []).map((s, i) => (
-              <p key={i} className="mb-3 text-sm leading-7" style={{ color: C.body }}>
-                <T>{s}</T>
-              </p>
+              <LessonBlock key={i} value={s} title={cur.page.t} />
             ))}
           </div>
         )}

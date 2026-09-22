@@ -164,6 +164,7 @@ export const JOURNEY_STAGES = Object.freeze([
     resources: [
       { label: "STEP 5共通データ（先にダウンロード）", path: "scripts/step5/step5_data.R", destination: "Project直下（step5_data.R）" },
       { label: "STEP 5演習ノート", path: "notebooks/nb5-brms.qmd", destination: "Project直下" },
+      { label: "研究ケース実践パック（L30・L32・L33）", path: "downloads/learning-stan-research-case.zip", destination: "展開先をProjectにする", lessonIds: ["l30", "l32", "l33"] },
     ],
   },
   {
@@ -176,6 +177,7 @@ export const JOURNEY_STAGES = Object.freeze([
     lessonIds: ["l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41"],
     requiredPracticeLessonIds: ["l34", "l35", "l36", "l37", "l38", "l39", "l40", "l41"],
     notebook: "nb6-stan.qmd",
+    resources: [{ label: "L41卒業制作の実践パック", path: "downloads/learning-stan-research-case.zip", destination: "展開先をProjectにする", lessonIds: ["l41"] }],
   },
 ]);
 

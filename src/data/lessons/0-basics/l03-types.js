@@ -40,7 +40,7 @@ export default {
   ],
   ex: [
     {
-      k: "choice",
+      id: "l3-q01", revision: 1, k: "choice",
       q: "`class(100)` の結果は?",
       opts: ['[1] "numeric"', '[1] "character"', '[1] "logical"'],
       ans: 0,
@@ -48,7 +48,7 @@ export default {
       hint: "100は数字ですね。数字のデータの型は何と呼ばれていましたか?",
     },
     {
-      k: "choice",
+      id: "l3-q02", revision: 1, k: "choice",
       q: '`"TRUE"` と `TRUE` のちがいは?',
       opts: [
         "前者は文字列(character)、後者は論理値(logical)である",
@@ -60,7 +60,7 @@ export default {
       hint: "`\"` で囲まれているかどうかに注目しましょう。",
     },
     {
-      k: "tf",
+      id: "l3-q03", revision: 1, k: "tf",
       q: "次の3つの説明について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "型の名前(numeric・character・logical)と、それぞれどんな値かを思い出してみましょう。",
       items: [

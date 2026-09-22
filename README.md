@@ -22,6 +22,27 @@
 - STEP 3〜5はL21〜L33で、回帰・確率・ベイズ更新・brms・階層モデル・代表的な応答型・生成Stanコードを扱います。各レッスンに理解問題5問、4段階練習、成果物3件、修了条件に含めない任意チャレンジがあり、[STEP 3](https://ryuya-dot-com.github.io/Learning_Stan/notebooks/nb3-sim.qmd)・[STEP 4](https://ryuya-dot-com.github.io/Learning_Stan/notebooks/nb4-bayes.qmd)・[STEP 5](https://ryuya-dot-com.github.io/Learning_Stan/notebooks/nb5-brms.qmd)の演習ノートを使えます。STEP 5を個別レッスンから始める場合は、[共通の練習データ作成スクリプト](https://ryuya-dot-com.github.io/Learning_Stan/scripts/step5/step5_data.R)をProject直下へ保存します
 - 4段階練習・理解問題・実機チェックの進みぐあいは、版付きデータとしてブラウザ内に保存されます（サーバには何も送信しません）。4段階練習は自己記録であり、それだけでは理解済みになりません。記述回答の本文は保存せず、JSONの書き出し・読み込み・明示的なリセットができます
 
+## 研究質問から分析を完結する実践層
+
+L1–L41の入門コアに、[参加者×刺激の研究ケース](public/practice/research-case/README.md)を追加しました。L30・L32・L33・L41の画面から[一括ZIP](https://ryuya-dot-com.github.io/Learning_Stan/downloads/learning-stan-research-case.zip)を取得する構成です（公開サイトへの反映はデプロイ後）。
+
+- 同じ訓練データの3モデル、4種類の予測対象、群ごとの保留評価、診断・PPC・感度分析・報告を一周します。
+- 識別可能性、brmsと手書きStanの同じモデルの照合、打ち切り・測定誤差、固定真値の研究設計シミュレーションを別々の演習にしました。
+- 完成分析・意図的に問題のある分析・未完成のスターター・予測対象と欠測状況を変える転移課題を同梱しています。
+- 入門コア→実践演習→研究領域別の選択コースという三層で整理し、研究領域別コースの拡充は[ロードマップ](ROADMAP.md)で管理します。
+
+[修正と検証の記録](content/practice/revision-2026-09-22.md)に、実行済み・未確認・失敗した条件を分けて記載します。[R基準環境](reproducibility/README.md)はロックされた依存一式を管理し、最低バージョン検査や新しい依存との互換性検査とは区別します。
+
+```sh
+npm run test:nb5          # 短い実行確認。推定精度を主張しない
+npm run test:nb5:full     # 新しいRセッションから推定・診断・予測図まで
+npm run test:research-case
+npm run generate:research-case-bundle
+npm run test:research-case-bundle
+```
+
+理解問題はレッスン内の固定`id`と`revision`で保存します。並べ替えてもIDは変えず、問い・正答・評価する意味が変わるときは`revision`と`CONTENT_VERSION`を更新します。旧版番号の対応は`legacy-question-order.json`に固定し、現在の配列順から推測しません。対応できない旧履歴と改訂された問題だけを再確認にし、実践記録を保持します。番号に見えるIDも永続識別子なので振り直しません。
+
 ## レッスンの追加方法
 
 レッスンは 1本 = 1ファイルです。`src/data/lessons/<セクション>/` にファイルを置くだけで追加されます。

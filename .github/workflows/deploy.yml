@@ -36,6 +36,9 @@ jobs:
       - run: npm run test:step2-assessments
       - run: npm run gate:step1-transfer:status
       - run: npm run gate:stan-release:status
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: npm run gate:stan-release:require-pass
+      - run: npm run test:research-case-bundle
       - run: npm run build
       - run: npm run audit:stan-public-scope
       - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -66,6 +69,7 @@ jobs:
       - run: Rscript scripts/verify-step2-participant-differences.R
       - run: Rscript scripts/verify-step2-report-and-transfer.R
       - run: npm run test:step5-data
+      - run: npm run test:research-case
       - run: npm run test:bayes-methods-r-syntax
       - run: Rscript scripts/verify-stan-link-lab.R
       - run: node scripts/r-example-verifier.mjs
@@ -95,9 +99,112 @@ jobs:
       - run: npm run test:stan-existing-runtime
       - run: npm run test:stan-reparameterization-runtime
 
+  brms-verify:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: r-lib/actions/setup-r@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
+        with:
+          r-version: "4.6.1"
+      - name: Configure reference CmdStan paths
+        run: |
+          echo "LEARNING_STAN_CMDSTAN_ROOT=${RUNNER_TEMP}/brms-cmdstan" >> "${GITHUB_ENV}"
+          echo "LEARNING_STAN_CMDSTAN=${RUNNER_TEMP}/brms-cmdstan/cmdstan-2.39.0" >> "${GITHUB_ENV}"
+      - name: Restore reference R packages (not minimum versions)
+        run: |
+          Rscript --vanilla -e 'install.packages("renv", repos="https://cloud.r-project.org"); renv::restore(lockfile="reproducibility/renv.lock", library=.libPaths()[1], prompt=FALSE)'
+      - run: Rscript --vanilla scripts/install-stan-ci.R
+      - name: NB5 clean-session smoke on PR, full on release/manual run
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          LEARNING_STAN_OUTPUT: ${{ runner.temp }}/nb5
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            Rscript --vanilla scripts/verify-brms-notebook.R --smoke
+          else
+            Rscript --vanilla scripts/verify-brms-notebook.R
+          fi
+      - name: Crossed case and matching hand Stan
+        working-directory: public/practice/research-case
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            LEARNING_STAN_OUTPUT="$RUNNER_TEMP/crossed" Rscript --vanilla run.R --smoke
+            LEARNING_STAN_OUTPUT="$RUNNER_TEMP/equivalence" Rscript --vanilla equivalence.R --smoke
+          else
+            LEARNING_STAN_OUTPUT="$RUNNER_TEMP/crossed" Rscript --vanilla run.R
+            LEARNING_STAN_OUTPUT="$RUNNER_TEMP/equivalence" Rscript --vanilla equivalence.R
+          fi
+      - run: Rscript --vanilla scripts/verify-research-case-outputs.R "$RUNNER_TEMP/crossed"
+      - name: Observation-process full run (release/manual only)
+        if: github.event_name != 'pull_request'
+        working-directory: public/practice/research-case
+        env:
+          LEARNING_STAN_OUTPUT: ${{ runner.temp }}/observation
+        run: Rscript --vanilla observation.R
+      - name: Design simulation execution check (not performance evidence)
+        working-directory: public/practice/research-case
+        env:
+          LEARNING_STAN_OUTPUT: ${{ runner.temp }}/design-smoke
+        run: Rscript --vanilla design.R --smoke
+      - name: Identifiability comparison
+        working-directory: public/practice/research-case
+        env:
+          LEARNING_STAN_OUTPUT: ${{ runner.temp }}/identifiability
+        run: Rscript --vanilla identifiability.R
+
+      - name: Preserve diagnostics and outputs for this tested commit
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: brms-${{ github.sha }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/nb5
+            ${{ runner.temp }}/crossed
+            ${{ runner.temp }}/equivalence
+            ${{ runner.temp }}/observation
+            ${{ runner.temp }}/design-smoke
+            ${{ runner.temp }}/identifiability
+
+  brms-compatibility:
+    if: github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: r-lib/actions/setup-r@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
+        with:
+          r-version: "4.6.1"
+      - name: Configure compatibility CmdStan paths
+        run: |
+          echo "LEARNING_STAN_CMDSTAN_ROOT=${RUNNER_TEMP}/compatible-cmdstan" >> "${GITHUB_ENV}"
+          echo "LEARNING_STAN_CMDSTAN=${RUNNER_TEMP}/compatible-cmdstan/cmdstan-2.39.0" >> "${GITHUB_ENV}"
+          echo "LEARNING_STAN_OUTPUT=${RUNNER_TEMP}/compatible-nb5" >> "${GITHUB_ENV}"
+      - run: Rscript --vanilla scripts/install-r-dependencies.R
+      - run: Rscript --vanilla -e 'install.packages("brms", repos="https://cloud.r-project.org")'
+      - run: Rscript --vanilla scripts/install-stan-ci.R
+      - run: Rscript --vanilla scripts/verify-brms-notebook.R
+
+      - name: Preserve compatibility result
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: brms-compatibility-${{ github.sha }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: ${{ runner.temp }}/compatible-nb5
+
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [build, r-verify, stan-verify]
+    needs: [build, r-verify, stan-verify, brms-verify]
     permissions:
       contents: read
       pages: write

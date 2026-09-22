@@ -11,7 +11,7 @@ import {
 
 const lessons = [{
   id: "l1",
-  ex: [{}, {}, {}],
+  ex: [1, 2, 3].map(n => ({ id: `l1-q0${n}`, revision: 1 })),
   practiceLadder: { steps: [{ id: "imitate" }, { id: "change" }, { id: "recall" }, { id: "transfer" }] },
   practice: { items: [{ id: "check-a" }, { id: "check-b" }] },
 }];
@@ -27,7 +27,7 @@ function memoryStorage(initial = {}) {
 
 describe("進捗保存形式", () => {
   it("累積復習を含む現在の教材を識別できる内容版を使う", () => {
-    expect(CONTENT_VERSION).toBe("2026-08-13-steps3-5-v1");
+    expect(CONTENT_VERSION).toBe("2026-09-22-research-practice-v1");
   });
 
   it("版情報を付けて保存し、同じ内容を読み戻す", () => {
@@ -59,7 +59,7 @@ describe("進捗保存形式", () => {
     expect(decoded.progress.practice).toEqual({});
   });
 
-  it("schema v1を段階練習・実践進捗付きschema v3へ移行する", () => {
+  it("schema v1を段階練習・実践進捗付きschema v4へ移行する", () => {
     const decoded = decodeProgress({
       schemaVersion: 1,
       contentVersion: "2026-08-01-l1-l10-v1",
@@ -79,7 +79,7 @@ describe("進捗保存形式", () => {
     });
   });
 
-  it("schema v2の理解・実践進捗を失わずschema v3へ移行する", () => {
+  it("schema v2の理解・実践進捗を失わずschema v4へ移行する", () => {
     const decoded = decodeProgress({
       schemaVersion: 2,
       contentVersion: "2026-08-01-l1-l16-v3",
@@ -97,7 +97,7 @@ describe("進捗保存形式", () => {
 
   it("L1〜L10版の進捗を失わずL1〜L16版へ移行する", () => {
     const decoded = decodeProgress({
-      schemaVersion: PROGRESS_SCHEMA_VERSION,
+      schemaVersion: 3,
       contentVersion: "2026-08-01-l1-l10-v2",
       done: { l1: [0] },
       first: { l1: [0] },
@@ -116,7 +116,7 @@ describe("進捗保存形式", () => {
     const decoded = decodeProgress(
       {
         schemaVersion: 1,
-        contentVersion: CONTENT_VERSION,
+        contentVersion: "2026-08-13-steps3-5-v1",
         done: { l1: [2, 0, 2, 9], removed: [0] },
         first: { l1: [0, 1, 2] },
         missed: { l1: [2] },
@@ -173,6 +173,45 @@ describe("進捗保存形式", () => {
   it("直列化のたびに不正な値を除去する", () => {
     const stored = JSON.parse(serializeProgress({ done: { l1: [0, -1, "1"] }, first: {}, missed: {} }));
 
-    expect(stored.done.l1).toEqual([0]);
+    expect(stored.done.l1).toEqual(["l1-q01@1"]);
+  });
+});
+
+
+describe("問題のIDと改訂番号", () => {
+  const progress = { done: { l1: [0, 1] }, first: { l1: [0] }, missed: { l1: [1] }, drill: {}, practice: {} };
+  it("問題の並べ替え後も同じ問題へ履歴を戻す", () => {
+    const raw = serializeProgress(progress, lessons);
+    const reordered = [{ ...lessons[0], ex: [...lessons[0].ex].reverse() }];
+    const result = decodeProgress(raw, reordered).progress;
+    expect(result.done.l1).toEqual([1, 2]);
+    expect(result.first.l1).toEqual([2]);
+    expect(result.missed.l1).toEqual([1]);
+  });
+  it("意味を改訂した問題だけ再確認にし、削除・追加で誤対応しない", () => {
+    const raw = serializeProgress(progress, lessons);
+    const changed = [{ ...lessons[0], ex: [
+      { id: "new-question", revision: 1 }, { id: "l1-q01", revision: 2 }, lessons[0].ex[1],
+    ] }];
+    const result = decodeProgress(raw, changed).progress;
+    expect(result.done.l1).toEqual([2]);
+    expect(result.first).toEqual({});
+    expect(result.missed.l1).toEqual([2]);
+  });
+  it("旧番号は固定した当時の対応表を使い、新しい順番から推測しない", () => {
+    const reordered = [{ ...lessons[0], ex: [...lessons[0].ex].reverse() }];
+    const raw = { schemaVersion: 3, contentVersion: "2026-08-13-steps3-5-v1", done: { l1: [0] } };
+    expect(decodeProgress(raw, reordered).progress.done.l1).toEqual([2]);
+  });
+  it("未知の旧内容版の番号は割り当てず実践記録を保持する", () => {
+    const raw = { schemaVersion: 3, contentVersion: "unknown", done: { l1: [0] }, practice: { l1: ["check-a"] } };
+    const result = decodeProgress(raw, lessons);
+    expect(result.progress.done).toEqual({});
+    expect(result.progress.practice.l1).toEqual(["check-a"]);
+    expect(result.message).toContain("再確認");
+  });
+  it("旧L30の識別不十分な設問の正答を改訂問題へ移さない", () => {
+    const result = decodeProgress({ schemaVersion: 3, contentVersion: "2026-08-13-steps3-5-v1", done: { l30: [0, 1, 2] } });
+    expect(result.progress.done.l30).toEqual([0, 2]);
   });
 });

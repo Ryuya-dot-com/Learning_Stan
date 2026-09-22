@@ -176,7 +176,7 @@ unname(c(
   ],
   ex: [
     {
-      k: "choice",
+      id: "l12-q01", revision: 1, k: "choice",
       q: "Project内の `data/rt_data.csv` を再現可能に指定しているのはどれですか?",
       opts: ["data/rt_data.csv", "C:/Users/me/Desktop/rt_data.csv", "rt_data"],
       ans: 0,
@@ -184,7 +184,7 @@ unname(c(
       hint: "特定の利用者名やPCの場所を含まない指定を選びます。",
     },
     {
-      k: "fill",
+      id: "l12-q02", revision: 1, k: "fill",
       q: "CSVをtibbleとして読み込むreadrの関数名を入力してください。",
       code: `rt <- ___("data/rt_data.csv")`,
       verify: { mode: "manual", reason: "学習者が関数名を補う未完成コードのため" },
@@ -194,7 +194,7 @@ unname(c(
       hint: "readrパッケージの、readとcsvをアンダースコアで結ぶ関数です。",
     },
     {
-      k: "tf",
+      id: "l12-q03", revision: 1, k: "tf",
       q: "CSVの読み込みについて、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "読み込み成功と内容確認は別の作業です。",
       items: [
@@ -204,7 +204,7 @@ unname(c(
       ],
     },
     {
-      k: "choice",
+      id: "l12-q04", revision: 1, k: "choice",
       q: "タブ区切りのテキストファイルを読む関数はどれですか?",
       opts: ["readr::read_tsv", "readr::read_csv", "readxl::read_excel"],
       ans: 0,
@@ -212,7 +212,7 @@ unname(c(
       hint: "ファイル名より、列を区切る文字に注目します。",
     },
     {
-      k: "fill",
+      id: "l12-q05", revision: 1, k: "fill",
       q: "Excelブックを読むreadxlの関数名を入力してください。",
       code: `trials <- ___("data/trials.xlsx", sheet = "trials")`,
       verify: { mode: "manual", reason: "学習者がExcel読込関数を補う未完成コードのため" },
@@ -222,7 +222,7 @@ unname(c(
       hint: "readとexcelをアンダースコアで結ぶ関数です。",
     },
     {
-      k: "choice",
+      id: "l12-q06", revision: 1, k: "choice",
       q: "複数Excelを行方向へ結合する前に、最も先に確認すべきことはどれですか?",
       opts: ["対象ファイルがあり、各表の列契約が一致すること", "ファイル名をすべて短くすること", "Excelで各表を1つずつコピーすること"],
       ans: 0,

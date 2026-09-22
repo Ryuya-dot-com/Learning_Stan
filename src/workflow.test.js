@@ -51,7 +51,7 @@ describe("GitHub Pages workflow", () => {
     );
   });
 
-  it("Stan公開判定はBLOCKEDをCIで検証し、PASS要求を公開時の別コマンドにする", () => {
+  it("Stan公開判定のPASS要求はmain公開時に適用する", () => {
     expect(packageJson.scripts["gate:stan-release:status"]).toBe(
       "node scripts/stan-release-gate.mjs"
     );
@@ -61,9 +61,8 @@ describe("GitHub Pages workflow", () => {
     expect(config.jobs.build.steps.map((step) => step.run).filter(Boolean)).toContain(
       "npm run gate:stan-release:status"
     );
-    expect(config.jobs.build.steps.map((step) => step.run).filter(Boolean)).not.toContain(
-      "npm run gate:stan-release:require-pass"
-    );
+    const gate = config.jobs.build.steps.find(step => step.run === "npm run gate:stan-release:require-pass");
+    expect(gate.if).toBe("github.event_name == 'push' && github.ref == 'refs/heads/main'");
   });
 
   it("Excel教材生成ランタイムを固定し、生成物検査をCIで実行する", () => {
@@ -141,7 +140,8 @@ describe("GitHub Pages workflow", () => {
     expect(configurePaths.run).toContain("LEARNING_STAN_CMDSTAN=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0");
     expect(configurePaths.run).toContain("LEARNING_STAN_STANC=${RUNNER_TEMP}/cmdstan/cmdstan-2.39.0/bin/stanc");
     expect(configurePaths.run).not.toMatch(/echo "CMDSTAN=/);
-    expect(workflow).not.toContain("${{ runner.temp }}");
+    for (const job of Object.values(config.jobs))
+      expect(JSON.stringify(job.env || {})).not.toContain("runner.temp");
     expect(stanInstaller).toContain('Sys.getenv("LEARNING_STAN_CMDSTAN_ROOT"');
     expect(stanInstaller).toContain('install.packages("loo", repos = cran_repository)');
     expect(stanInstaller).toContain('install.packages("cmdstanr", repos = repositories)');
@@ -154,7 +154,7 @@ describe("GitHub Pages workflow", () => {
       "npm run test:stan-reparameterization-runtime",
     ]));
     expect(config.jobs.deploy.needs).toEqual(
-      expect.arrayContaining(["build", "r-verify", "stan-verify"])
+      expect.arrayContaining(["build", "r-verify", "stan-verify", "brms-verify"])
     );
   });
 
@@ -182,4 +182,17 @@ describe("GitHub Pages workflow", () => {
       "id-token": "write",
     });
   });
+});
+
+
+it("brms検証は公開の前提となり、失敗時もコミット対応の診断を保存する", () => {
+  expect(config.jobs.deploy.needs).toContain("brms-verify");
+  const job = config.jobs["brms-verify"];
+  expect(job.steps.some(step => step.name?.startsWith("Restore reference R packages"))).toBe(true);
+  const artifact = job.steps.find(step => step.uses?.startsWith("actions/upload-artifact@"));
+  expect(artifact.if).toBe("always()");
+  expect(artifact.with.name).toContain("github.sha");
+  expect(artifact.with.path).toContain("/crossed");
+  expect(artifact.with.path).toContain("/nb5");
+  expect(config.jobs["brms-compatibility"].if).toBe("github.event_name == 'workflow_dispatch'");
 });

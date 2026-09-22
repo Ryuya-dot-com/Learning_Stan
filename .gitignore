@@ -32,3 +32,8 @@ dist/
 
 # ローカルの作業メモ(スキル基盤)。sdd/ 以外にも書き出すツールがあるため親ごと除外
 /.superpowers/
+
+# Optional isolated R package library for the reference environment
+/r-library/
+/public/practice/research-case/r-library/
+/public/practice/research-case/outputs/

@@ -49,7 +49,7 @@ export default {
   ],
   ex: [
     {
-      k: "choice",
+      id: "l5-q01", revision: 1, k: "choice",
       q: '`paste0("P", "01")` の結果は?',
       opts: ['[1] "P01"', '[1] "P 01"', '[1] "P" "01"'],
       ans: 0,
@@ -57,7 +57,7 @@ export default {
       hint: "`paste0` の `0` は「区切りなし」という意味でしたね。",
     },
     {
-      k: "choice",
+      id: "l5-q02", revision: 1, k: "choice",
       q: "実験条件(易・難)のように、あらかじめ決まったカテゴリを表すのに適した型は?",
       opts: ["factor(因子)", "character(文字列)", "numeric(数値)"],
       ans: 0,
@@ -65,7 +65,7 @@ export default {
       hint: "「取りうる値の一覧(Levels)」を持つ型は何と呼ばれていましたか?",
     },
     {
-      k: "tf",
+      id: "l5-q03", revision: 1, k: "tf",
       q: "次の3つの説明について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "`paste0` と `paste` のちがい、そして factor と Levels の関係を思い出してみましょう。",
       items: [
@@ -87,7 +87,7 @@ export default {
       ],
     },
     {
-      k: "fill",
+      id: "l5-q04", revision: 1, k: "fill",
       q: "`prefix` と `\"01\"` を空白なしでつなぐコードを完成させましょう。",
       code: 'prefix <- "P"\n___',
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },
@@ -97,7 +97,7 @@ export default {
       hint: "文字列を区切りなしでつなぐ関数を、引数も含めて書きましょう。",
     },
     {
-      k: "fill",
+      id: "l5-q05", revision: 1, k: "fill",
       q: "`condition` を、`易`、`難` の順に水準を持つfactorへ変換するコードを完成させましょう。",
       code: 'condition <- c("難", "易", "難")\n___',
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },

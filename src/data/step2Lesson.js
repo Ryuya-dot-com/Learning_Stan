@@ -162,6 +162,7 @@ function questionToExercise(question) {
     : {};
   if (question.choices) {
     return {
+      id: question.id, revision: question.revision ?? 1,
       k: "choice",
       reviewLabel: question.reviewLabel,
       q: question.prompt,
@@ -174,6 +175,7 @@ function questionToExercise(question) {
   }
 
   return {
+    id: question.id, revision: question.revision ?? 1,
     k: "reflect",
     reviewLabel: question.reviewLabel,
     q: [question.scenario, question.prompt].filter(Boolean).join("\n\n"),

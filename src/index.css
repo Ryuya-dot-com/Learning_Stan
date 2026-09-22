@@ -271,3 +271,8 @@ select {
     box-shadow: none;
   }
 }
+
+.lesson-table { border-collapse: collapse; min-width: 100%; }
+.lesson-table th, .lesson-table td { border: 1px solid #ccd5dc; padding: .65rem; text-align: left; vertical-align: top; }
+.lesson-table th { background: #edf4f7; }
+.lesson-note { border-left: 3px solid #426b7b; padding: .6rem 1rem; background: #f0f6f7; }

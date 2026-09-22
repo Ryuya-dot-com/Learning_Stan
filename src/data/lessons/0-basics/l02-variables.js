@@ -42,7 +42,7 @@ export default {
   ],
   ex: [
     {
-      k: "choice",
+      id: "l2-q01", revision: 1, k: "choice",
       q: "`x <- 5` のあと `x + 3` の結果は?",
       opts: ["[1] 8", "[1] 5", "[1] 3"],
       ans: 0,
@@ -50,7 +50,7 @@ export default {
       hint: "`x` の中身が何かを、まず確認してみましょう。",
     },
     {
-      k: "fill",
+      id: "l2-q02", revision: 1, k: "fill",
       q: "10 を `n` という名前に入れるコードの空欄を埋めましょう。",
       code: "n ___ 10",
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },
@@ -60,7 +60,7 @@ export default {
       hint: "代入に使う記号でしたね。左向きの矢印の形です。",
     },
     {
-      k: "tf",
+      id: "l2-q03", revision: 1, k: "tf",
       q: "次の3つの説明について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "`<-` と `==` は形が似ていますが、役割はまったく違いましたね。",
       items: [

@@ -141,3 +141,14 @@ Stan教材パックの一次資料は`mc-stan.org`に限定し、最終確認日
 
 乱数を使う例は `set.seed()` を置いていますが、Rのバージョンや乱数生成器の既定が変わると
 結果はわずかに動きます。
+
+
+## 2026-09-22 研究実践の改訂
+
+- 新規群への予測と`sample_new_levels`：[brms prepare_predictions](https://paulbuerkner.com/brms/reference/prepare_predictions.html)
+- 明示切片と内部中心化した切片のprior：[brms set_prior](https://paulbuerkner.com/brms/reference/set_prior.html)
+- backendの既定と明示指定：[brms brm](https://paulbuerkner.com/brms/reference/brm.html)
+- 非識別・冗長なparameter：[Stan problematic posteriors](https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html)
+- SBCと自己相関の点検：[Stan simulation-based calibration](https://mc-stan.org/docs/stan-users-guide/simulation-based-calibration.html)
+- 数式からMathMLへの描画：[KaTeX API](https://katex.org/docs/api.html)
+- 環境復元の範囲：[renv introduction](https://rstudio.github.io/renv/articles/renv.html)

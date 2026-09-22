@@ -223,7 +223,8 @@ describe("初心者向け学習パス", () => {
 
     for (const lessonId of ["l27", "l28", "l29", "l30", "l31", "l32", "l33"]) {
       expect(getLessonPathMeta(lessonId).resources.map((resource) => resource.path)).toEqual(
-        expectedPaths
+        ["l30", "l32", "l33"].includes(lessonId)
+          ? [...expectedPaths, "downloads/learning-stan-research-case.zip"] : expectedPaths
       );
     }
   });

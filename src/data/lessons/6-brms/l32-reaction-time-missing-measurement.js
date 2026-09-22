@@ -9,7 +9,7 @@ export default {
         "このレッスンでは、反応時間の正の歪み、欠測、測定誤差を観測過程として点検し、値を削除する前に分析方針を立てることができるようになります。",
         "正答試行の反応時間`rt_ms`は0より大きく、遅い試行へ長い裾を持つことがよくあります。正規尤度を最初の候補にしてもよい場合はありますが、負の複製値や裾の再現をPPCで確かめます。正の連続量を表す`lognormal()`は、わかりやすい別候補です。",
       ],
-      code: "# 先にダウンロードしたstep5_data.RをProject直下から読み込む\nsource(\"step5_data.R\")\nlibrary(brms)\n\n# 値域の検査は、削除の前に行う\nstopifnot(all(correct_trials$rt_ms > 0))\n\nrt_priors <- c(\n  prior(normal(log(600), 0.5), class = Intercept),\n  prior(normal(0, 0.3), class = b),\n  prior(exponential(1), class = sigma),\n  prior(exponential(1), class = sd)\n)\nfit_rt <- brm(\n  rt_ms ~ condition + (1 | participant),\n  data = correct_trials, family = lognormal(),\n  prior = rt_priors, chains = 4, seed = 2026\n)\npp_check(fit_rt, type = \"dens_overlay\")",
+      code: "# 先にダウンロードしたstep5_data.RをProject直下から読み込む\nsource(\"step5_data.R\")\nlibrary(brms)\n\n# 値域の検査は、削除の前に行う\nstopifnot(all(correct_trials$rt_ms > 0))\n\nrt_priors <- c(\n  prior(normal(log(600), 0.5), class = Intercept),\n  prior(normal(0, 0.3), class = b),\n  prior(exponential(1), class = sigma),\n  prior(exponential(1), class = sd)\n)\nfit_rt <- brm(\n  rt_ms ~ condition + (1 | participant),\n  data = correct_trials, family = lognormal(),\n  prior = rt_priors, backend = \"cmdstanr\", chains = 4, seed = 2026\n)\npp_check(fit_rt, type = \"dens_overlay\")",
       a: ["速すぎる反応、誤答、タイムアウトをどのような観測として扱うかは、分析前に決めて記録します。機械的な閾値で消すだけでは、なぜその値が生じたかを失います。タイムアウトは単なる欠測ではなく、右打切りとして表す必要がある場合もあります。"],
     },
     {
@@ -29,11 +29,11 @@ export default {
     verify: page.verify ?? { mode: "manual", reason: "brmsとCmdStan環境で実行する例のため" },
   } : page),
   ex: [
-    { k: "choice", q: "反応時間を`lognormal()`で扱うとき、最初に確認すべき値域はどれですか。", opts: ["分析対象の反応時間がすべて正である", "反応時間が0か1である", "反応時間が必ず1〜5である", "反応時間の平均が0である"], ans: 0, why: "lognormal分布の応答は正です。0や負の値があれば、記録・単位・観測過程を確認してから扱いを決めます。", hint: "反応時間の取り得る下限を考えます。" },
-    { k: "choice", q: "正規モデルよりlognormalモデルの事後予測では、通常どの特徴が期待されますか。", opts: ["負の反応時間を作らず、右に長い裾を表しやすい", "反応時間を必ず同じ値にする", "欠測を自動的に直す", "因果効果を識別する"], ans: 0, why: "lognormalの支持範囲は正で、右に歪んだ連続量を表しやすい分布です。適切かどうかはPPCで確かめます。", hint: "分布の値域と形の二つを考えます。" },
-    { k: "reflect", q: "条件Aで欠測が5%、条件Bで欠測が25%でした。分析メモに最初に書くべき内容を説明してください。", minLength: 80, rubric: ["条件別の欠測率と対象列を明記している", "欠測理由または発生時点を調べる提案をしている", "単純な削除が分析対象や偏りを変え得ることに触れている"], example: "`rt_ms`の欠測率はAで5%、Bで25%だったと記録する。タイムアウト、機器エラー、離脱などの理由と発生時点を調べ、完全ケースだけにすると条件比較の対象が変わる可能性を検討する。" },
-    { k: "reflect", q: "次の処理をレビューしてください。なぜすぐに実行しない方がよいですか。", code: "analysis_data <- na.omit(trials)\nfit <- brm(rt_ms ~ condition, data = analysis_data)", lang: "R", minLength: 80, rubric: ["どの列のどの欠測行が消えるか不明と指摘している", "欠測の量・条件差・理由を先に調べる提案をしている", "削除後の対象集団や偏りが変わる可能性を説明している"], example: "`na.omit()`はどの列の欠測でも行を消すため、何を除外したかが見えにくい。まず列別・条件別の欠測を確認し、理由を記録する。完全ケース分析を選ぶ場合も、対象が変わる可能性とその仮定を報告する。" },
-    { k: "reflect", q: "測定誤差を含むモデルで練習時間の傾きが正でした。「真の基礎能力を測定したので交絡は解決した」と書けるか説明してください。", minLength: 80, rubric: ["`mi()`を使う式が予測子の測定誤差を扱う候補であると述べている", "測定誤差モデルにも標準誤差などの仮定があると述べている", "交絡・因果識別は別の問題と区別している"], example: "`mi()`を使う式は基礎能力を誤差なく観測したとみなさないための候補だが、標準誤差などの仮定に依存する。測定誤差を扱っても、練習と得点の交絡を自動で解決するわけではない。" },
+    { id: "l32-q01", revision: 1, k: "choice", q: "反応時間を`lognormal()`で扱うとき、最初に確認すべき値域はどれですか。", opts: ["分析対象の反応時間がすべて正である", "反応時間が0か1である", "反応時間が必ず1〜5である", "反応時間の平均が0である"], ans: 0, why: "lognormal分布の応答は正です。0や負の値があれば、記録・単位・観測過程を確認してから扱いを決めます。", hint: "反応時間の取り得る下限を考えます。" },
+    { id: "l32-q02", revision: 1, k: "choice", q: "正規モデルよりlognormalモデルの事後予測では、通常どの特徴が期待されますか。", opts: ["負の反応時間を作らず、右に長い裾を表しやすい", "反応時間を必ず同じ値にする", "欠測を自動的に直す", "因果効果を識別する"], ans: 0, why: "lognormalの支持範囲は正で、右に歪んだ連続量を表しやすい分布です。適切かどうかはPPCで確かめます。", hint: "分布の値域と形の二つを考えます。" },
+    { id: "l32-q03", revision: 1, k: "reflect", q: "条件Aで欠測が5%、条件Bで欠測が25%でした。分析メモに最初に書くべき内容を説明してください。", minLength: 80, rubric: ["条件別の欠測率と対象列を明記している", "欠測理由または発生時点を調べる提案をしている", "単純な削除が分析対象や偏りを変え得ることに触れている"], example: "`rt_ms`の欠測率はAで5%、Bで25%だったと記録する。タイムアウト、機器エラー、離脱などの理由と発生時点を調べ、完全ケースだけにすると条件比較の対象が変わる可能性を検討する。" },
+    { id: "l32-q04", revision: 1, k: "reflect", q: "次の処理をレビューしてください。なぜすぐに実行しない方がよいですか。", code: "analysis_data <- na.omit(trials)\nfit <- brm(rt_ms ~ condition, data = analysis_data)", lang: "R", minLength: 80, rubric: ["どの列のどの欠測行が消えるか不明と指摘している", "欠測の量・条件差・理由を先に調べる提案をしている", "削除後の対象集団や偏りが変わる可能性を説明している"], example: "`na.omit()`はどの列の欠測でも行を消すため、何を除外したかが見えにくい。まず列別・条件別の欠測を確認し、理由を記録する。完全ケース分析を選ぶ場合も、対象が変わる可能性とその仮定を報告する。" },
+    { id: "l32-q05", revision: 1, k: "reflect", q: "測定誤差を含むモデルで練習時間の傾きが正でした。「真の基礎能力を測定したので交絡は解決した」と書けるか説明してください。", minLength: 80, rubric: ["`mi()`を使う式が予測子の測定誤差を扱う候補であると述べている", "測定誤差モデルにも標準誤差などの仮定があると述べている", "交絡・因果識別は別の問題と区別している"], example: "`mi()`を使う式は基礎能力を誤差なく観測したとみなさないための候補だが、標準誤差などの仮定に依存する。測定誤差を扱っても、練習と得点の交絡を自動で解決するわけではない。" },
   ].map((exercise) => exercise.code ? {
     ...exercise,
     verify: exercise.verify ?? { mode: "manual", reason: "レビュー用または環境依存のコードを確認するため" },

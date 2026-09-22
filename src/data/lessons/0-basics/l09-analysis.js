@@ -66,7 +66,7 @@ export default {
   ],
   ex: [
     {
-      k: "choice",
+      id: "l9-q01", revision: 1, k: "choice",
       q: "`d$rt` は何を取り出す?",
       opts: ["表 d の rt 列", "表 d の rt 行", "rt という名前の表"],
       ans: 0,
@@ -74,7 +74,7 @@ export default {
       hint: "`$` が何を指す記号だったか思い出しましょう。",
     },
     {
-      k: "choice",
+      id: "l9-q02", revision: 1, k: "choice",
       q: "`mean(c(1, NA, 3))` の結果は?",
       opts: ["[1] NA", "[1] 2", "[1] 4"],
       ans: 0,
@@ -82,7 +82,7 @@ export default {
       hint: "欠損値が1つでも混ざっていると、既定の `mean` はどうなるでしょうか。",
     },
     {
-      k: "tf",
+      id: "l9-q03", revision: 1, k: "tf",
       q: "次の3つの説明について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "`na.rm` のはたらきと、欠損値が混ざったときの `mean` の既定の挙動を思い出してみましょう。",
       items: [
@@ -104,7 +104,7 @@ export default {
       ],
     },
     {
-      k: "fill",
+      id: "l9-q04", revision: 1, k: "fill",
       q: "表 `d` の `rt` 列について、欠損値を除いて平均を求めるコードを書きましょう。",
       code: "___",
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },
@@ -114,7 +114,7 @@ export default {
       hint: "`mean` の第1引数に `d$rt`、名前付き引数に `na.rm = TRUE` を渡します。",
     },
     {
-      k: "fill",
+      id: "l9-q05", revision: 1, k: "fill",
       q: "表 `d` の `rt` 列の標準偏差を求めるコードを書きましょう。",
       code: "___",
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },

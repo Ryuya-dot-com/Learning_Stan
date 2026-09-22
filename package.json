@@ -56,10 +56,16 @@
     "gate:stan-release:require-pass": "node scripts/stan-release-gate.mjs --require-pass",
     "gate:status": "node scripts/foundation-feedback.mjs",
     "gate:step1-transfer:status": "node scripts/step1-transfer-gate.mjs",
-    "postinstall": "node scripts/dropbox-ignore.mjs"
+    "postinstall": "node scripts/dropbox-ignore.mjs",
+    "test:nb5": "Rscript --vanilla scripts/verify-brms-notebook.R --smoke",
+    "test:nb5:full": "Rscript --vanilla scripts/verify-brms-notebook.R",
+    "test:research-case": "Rscript --vanilla scripts/verify-research-case.R",
+    "generate:research-case-bundle": "node scripts/generate-research-case-bundle.mjs",
+    "test:research-case-bundle": "node scripts/generate-research-case-bundle.mjs --check"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "katex": "^0.18.7",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3"

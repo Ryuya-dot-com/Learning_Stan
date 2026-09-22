@@ -16,15 +16,21 @@ function flushParagraph(lines, target) {
   lines.length = 0;
 }
 
-function tableToParagraph(lines) {
-  const rows = lines
-    .map((line) => line.split("|").slice(1, -1).map((cell) => cleanInline(cell)))
-    .filter((cells) => !cells.every((cell) => /^:?-{3,}:?$/.test(cell)));
-  if (rows.length < 2) return cleanInline(lines.join(" "));
-  const [headers, ...body] = rows;
-  return body
-    .map((cells) => cells.map((cell, index) => `${headers[index] || `列${index + 1}`}: ${cell}`).join(" / "))
-    .join("。 ");
+function tableBlock(lines) {
+  const rows = lines.map(line => {
+    // パイプ入りコード（`y | x`）やエスケープ済みパイプはセルを分けない。
+    const cells = []; let cell = ""; let inCode = false;
+    for (let i = 1; i < line.length - 1; i += 1) {
+      const char = line[i];
+      if (char === "\\" && line[i + 1] === "|") { cell += "|"; i += 1; }
+      else if (char === "`") { inCode = !inCode; cell += char; }
+      else if (char === "|" && !inCode) { cells.push(cleanInline(cell)); cell = ""; }
+      else cell += char;
+    }
+    cells.push(cleanInline(cell));
+    return cells;
+  }).filter(cells => !cells.every(cell => /^:?-{3,}:?$/.test(cell)));
+  return { type: "table", headers: rows[0], rows: rows.slice(1) };
 }
 
 function languageLabel(language) {
@@ -44,11 +50,12 @@ export function manuscriptToPages(markdown, outcome) {
   let inCode = false;
   let afterCode = false;
   let continuation = 1;
+  let math = null;
 
   const target = () => (afterCode ? page.a : page.b);
   const flushTable = () => {
     if (!page || table.length === 0) return;
-    target().push(tableToParagraph(table));
+    target().push(tableBlock(table));
     table = [];
   };
   const flushText = () => {
@@ -78,11 +85,11 @@ export function manuscriptToPages(markdown, outcome) {
 
   for (const rawLine of markdown.replaceAll("\r\n", "\n").split("\n")) {
     const line = rawLine.trimEnd();
-    if (/^##\s+(内容理解問題|直接評価|公式資料)/.test(line)) break;
-    if (/^#\s+/.test(line) || (!page && (/^>/.test(line) || line.trim() === ""))) continue;
+    if (!inCode && math === null && /^##\s+(内容理解問題|直接評価|公式資料)/.test(line)) break;
+    if (!inCode && math === null && (/^#\s+/.test(line) || (!page && (/^>/.test(line) || line.trim() === "")))) continue;
 
     const section = line.match(/^##\s+(.+)$/);
-    if (section) {
+    if (!inCode && math === null && section) {
       startPage(section[1]);
       continue;
     }
@@ -113,6 +120,19 @@ export function manuscriptToPages(markdown, outcome) {
       continue;
     }
 
+    if (line.trim() === "$$" || line.trim() === "\\[" || line.trim() === "\\]") {
+      flushText();
+      if (math === null) math = [];
+      else { target().push({ type: "math", tex: math.join("\n") }); math = null; }
+      continue;
+    }
+    if (math !== null) { math.push(rawLine); continue; }
+    const singleMath = line.trim().match(/^\$\$(.+)\$\$$/);
+    if (singleMath) { flushText(); target().push({ type: "math", tex: singleMath[1] }); continue; }
+    if (/^>\s*/.test(line)) {
+      flushText(); target().push({ type: "note", text: cleanInline(line) }); continue;
+    }
+
     const subsection = line.match(/^###\s+(.+)$/);
     if (subsection) {
       flushText();
@@ -136,6 +156,7 @@ export function manuscriptToPages(markdown, outcome) {
     }
     prose.push(line.trim());
   }
+  if (math !== null || inCode) throw new Error("Unclosed manuscript math or code block");
   pushPage();
 
   if (pages.length === 0) throw new Error("Stan manuscript produced no lesson pages");
@@ -159,6 +180,7 @@ function questionToExercise(question) {
     : {};
   if (question.choices) {
     return {
+      id: question.id, revision: question.revision ?? 1,
       k: "choice",
       q: question.prompt,
       ...codeMeta,
@@ -170,6 +192,7 @@ function questionToExercise(question) {
   }
 
   return {
+    id: question.id, revision: question.revision ?? 1,
     k: "reflect",
     q: [question.scenario, question.prompt].filter(Boolean).join("\n\n"),
     ...codeMeta,

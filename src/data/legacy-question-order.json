@@ -1,0 +1,279 @@
+{
+  "l1": [
+    "l1-q01@1",
+    "l1-q02@1",
+    "l1-q03@1",
+    "l1-q04@1"
+  ],
+  "l2": [
+    "l2-q01@1",
+    "l2-q02@1",
+    "l2-q03@1"
+  ],
+  "l3": [
+    "l3-q01@1",
+    "l3-q02@1",
+    "l3-q03@1"
+  ],
+  "l4": [
+    "l4-q01@1",
+    "l4-q02@1",
+    "l4-q03@1"
+  ],
+  "l5": [
+    "l5-q01@1",
+    "l5-q02@1",
+    "l5-q03@1",
+    "l5-q04@1",
+    "l5-q05@1"
+  ],
+  "l6": [
+    "l6-q01@1",
+    "l6-q02@1",
+    "l6-q03@1",
+    "l6-q04@1"
+  ],
+  "l7": [
+    "l7-q01@1",
+    "l7-q02@1",
+    "l7-q03@1",
+    "l7-q04@1",
+    "l7-q05@1"
+  ],
+  "l8": [
+    "l8-q01@1",
+    "l8-q02@1",
+    "l8-q03@1",
+    "l8-q04@1"
+  ],
+  "l9": [
+    "l9-q01@1",
+    "l9-q02@1",
+    "l9-q03@1",
+    "l9-q04@1",
+    "l9-q05@1"
+  ],
+  "l10": [
+    "l10-q01@1",
+    "l10-q02@1",
+    "l10-q03@1"
+  ],
+  "l11": [
+    "l11-q01@1",
+    "l11-q02@1",
+    "l11-q03@1"
+  ],
+  "l12": [
+    "l12-q01@1",
+    "l12-q02@1",
+    "l12-q03@1",
+    "l12-q04@1",
+    "l12-q05@1",
+    "l12-q06@1"
+  ],
+  "l13": [
+    "l13-q01@1",
+    "l13-q02@1",
+    "l13-q03@1",
+    "l13-q04@1",
+    "l13-q05@1",
+    "l13-q06@1"
+  ],
+  "l14": [
+    "l14-q01@1",
+    "l14-q02@1",
+    "l14-q03@1",
+    "l14-q04@1"
+  ],
+  "l15": [
+    "l15-q01@1",
+    "l15-q02@1",
+    "l15-q03@1",
+    "l15-q04@1"
+  ],
+  "l16": [
+    "l16-q01@1",
+    "l16-q02@1",
+    "l16-q03@1",
+    "l16-q04@1",
+    "l16-q05@1"
+  ],
+  "step2-describe-distributions": [
+    "step2-l17-q1-row-count@1",
+    "step2-l17-q2-row-meaning@1",
+    "step2-l17-q3-iqr@1",
+    "step2-l17-q4-independence-explanation@1",
+    "step2-l17-q5-transfer-diary@1"
+  ],
+  "step2-grammar-of-graphics": [
+    "step2-l18-q1-aes-roles@1",
+    "step2-l18-q2-point-count@1",
+    "step2-l18-q3-mapped-vs-fixed@1",
+    "step2-l18-q4-why-points@1",
+    "step2-l18-q5-transfer-yield@1",
+    "step2-review-analysis-unit-for-plot@1"
+  ],
+  "step2-show-individuals": [
+    "step2-l19-q1-group-id@1",
+    "step2-l19-q2-layer-counts@1",
+    "step2-l19-q3-missing-group@1",
+    "step2-l19-q4-compare-plots@1",
+    "step2-l19-q5-transfer-blood-pressure@1",
+    "step2-review-summary-and-mapping@1"
+  ],
+  "step2-report-and-transfer": [
+    "step2-l20-q1-pixel-contract@1",
+    "step2-l20-q2-supported-claim@1",
+    "step2-l20-q3-audit-gap@1",
+    "step2-l20-q4-final-report@1",
+    "step2-l20-q5-transfer-sleep@1",
+    "step2-review-complete-workflow@1"
+  ],
+  "l21": [
+    "l21-q01@1",
+    "l21-q02@1",
+    "l21-q03@1",
+    "l21-q04@1",
+    "l21-q05@1"
+  ],
+  "l22": [
+    "l22-q01@1",
+    "l22-q02@1",
+    "l22-q03@1",
+    "l22-q04@1",
+    "l22-q05@1"
+  ],
+  "l23": [
+    "l23-q01@1",
+    "l23-q02@1",
+    "l23-q03@1",
+    "l23-q04@1",
+    "l23-q05@1"
+  ],
+  "l24": [
+    "imitate-q01@1",
+    "imitate-q02@1",
+    "imitate-q03@1",
+    "imitate-q04@1",
+    "imitate-q05@1"
+  ],
+  "l25": [
+    "imitate-q01@1",
+    "imitate-q02@1",
+    "imitate-q03@1",
+    "imitate-q04@1",
+    "imitate-q05@1"
+  ],
+  "l26": [
+    "imitate-q01@1",
+    "imitate-q02@1",
+    "imitate-q03@1",
+    "imitate-q04@1",
+    "imitate-q05@1"
+  ],
+  "l27": [
+    "l27-q01@1",
+    "l27-q02@1",
+    "l27-q03@1",
+    "l27-q04@1",
+    "l27-q05@1"
+  ],
+  "l28": [
+    "l28-q01@1",
+    "l28-q02@1",
+    "l28-q03@1",
+    "l28-q04@1",
+    "l28-q05@1"
+  ],
+  "l29": [
+    "l29-q01@1",
+    "l29-q02@1",
+    "l29-q03@1",
+    "l29-q04@1",
+    "l29-q05@1"
+  ],
+  "l30": [
+    "l30-q01@1",
+    "l30-q02@1",
+    "l30-q03@1",
+    "l30-q04@1",
+    "l30-q05@1"
+  ],
+  "l31": [
+    "l31-q01@1",
+    "l31-q02@1",
+    "l31-q03@1",
+    "l31-q04@1",
+    "l31-q05@1"
+  ],
+  "l32": [
+    "l32-q01@1",
+    "l32-q02@1",
+    "l32-q03@1",
+    "l32-q04@1",
+    "l32-q05@1"
+  ],
+  "l33": [
+    "l33-q01@1",
+    "l33-q02@1",
+    "l33-q03@1",
+    "l33-q04@1",
+    "l33-q05@1"
+  ],
+  "l34": [
+    "stan-l34-q1-responsibility@1",
+    "stan-l34-q2-contract@1",
+    "stan-l34-q3-repair-list@1",
+    "stan-l34-q4-syntax-meaning@1",
+    "stan-l34-q5-transfer-binomial@1"
+  ],
+  "l35": [
+    "stan-l35-q1-block-order@1",
+    "stan-l35-q2-scope@1",
+    "stan-l35-q3-array-vector@1",
+    "stan-l35-q4-constraint-prior@1",
+    "stan-l35-q5-transfer-binary@1"
+  ],
+  "l36": [
+    "stan-l36-q1-target-semantics@1",
+    "stan-l36-q2-vectorized-equivalence@1",
+    "stan-l36-q3-translate-regression@1",
+    "stan-l36-q4-missing-prior@1",
+    "stan-l36-q5-transfer-logit@1"
+  ],
+  "l37": [
+    "stan-l37-q1-execution-stages@1",
+    "stan-l37-q2-output-lifetime@1",
+    "stan-l37-q3-reproduction-record@1",
+    "stan-l37-q4-chains-parallelism@1",
+    "stan-l37-q5-transfer-logit-run@1"
+  ],
+  "l38": [
+    "stan-l38-q1-divergence-priority@1",
+    "stan-l38-q2-diagnostic-scope@1",
+    "stan-l38-q3-mcse-decision@1",
+    "stan-l38-q4-treedepth-severity@1",
+    "stan-l38-q5-transfer-valid-wrong@1"
+  ],
+  "l39": [
+    "stan-l39-q1-generated-roles@1",
+    "stan-l39-q2-case-evidence@1",
+    "stan-l39-q3-repair-pointwise@1",
+    "stan-l39-q4-pareto-before-rank@1",
+    "stan-l39-q5-transfer-grouped@1"
+  ],
+  "l40": [
+    "stan-l40-q1-weak-groups@1",
+    "stan-l40-q2-implied-distribution@1",
+    "stan-l40-q3-rewrite-noncentered@1",
+    "stan-l40-q4-strong-groups@1",
+    "stan-l40-q5-transfer-varying-slope@1"
+  ],
+  "l41": [
+    "stan-l41-q1-prior-predictive-gate@1",
+    "stan-l41-q2-evidence-ladder@1",
+    "stan-l41-q3-claim-evidence-limit@1",
+    "stan-l41-q4-sensitivity-classification@1",
+    "stan-l41-q5-transfer-capstone@1"
+  ]
+}

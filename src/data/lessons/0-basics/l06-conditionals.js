@@ -43,7 +43,7 @@ export default {
   ],
   ex: [
     {
-      k: "choice",
+      id: "l6-q01", revision: 1, k: "choice",
       q: '`x <- 3` のとき `if (x > 5) print("大") else print("小")` の結果は?',
       opts: ['[1] "小"', '[1] "大"', "何も表示されない"],
       ans: 0,
@@ -51,7 +51,7 @@ export default {
       hint: "`x` の中身が5より大きいかどうかを確かめてみましょう。",
     },
     {
-      k: "choice",
+      id: "l6-q02", revision: 1, k: "choice",
       q: "ベクトルの全要素を条件で振り分けるのはどちら?",
       opts: ["ifelse", "if", "else"],
       ans: 0,
@@ -59,7 +59,7 @@ export default {
       hint: "`rts` のような複数の値をまとめて判定した命令は何でしたか。",
     },
     {
-      k: "tf",
+      id: "l6-q03", revision: 1, k: "tf",
       q: "次の3つの説明について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "`==` と `<-` のちがい、`if` と `ifelse` の使い分けを思い出してみましょう。",
       items: [
@@ -81,7 +81,7 @@ export default {
       ],
     },
     {
-      k: "fill",
+      id: "l6-q04", revision: 1, k: "fill",
       q: "`rt` が500未満のときに `\"速い\"` を表示する条件を完成させましょう。",
       code: 'rt <- 450\nif (___) {\n  print("速い")\n} else {\n  print("遅い")\n}',
       verify: { mode: "manual", reason: "学習者が空欄を埋める未完成コードのため" },

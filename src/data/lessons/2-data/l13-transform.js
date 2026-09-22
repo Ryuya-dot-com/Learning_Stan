@@ -171,7 +171,7 @@ file.exists(c(
   ],
   ex: [
     {
-      k: "choice",
+      id: "l13-q01", revision: 1, k: "choice",
       q: "条件を満たす行だけを残す関数はどれですか?",
       opts: ["filter", "select", "mutate"],
       ans: 0,
@@ -179,7 +179,7 @@ file.exists(c(
       hint: "条件という網を通して行を絞る操作です。",
     },
     {
-      k: "fill",
+      id: "l13-q02", revision: 1, k: "fill",
       q: "正答行だけを残すため、空欄へ関数名を入力してください。",
       code: "rt |>\n  ___(correct)",
       verify: { mode: "manual", reason: "学習者が行操作の関数名を補う未完成コードのため" },
@@ -189,7 +189,7 @@ file.exists(c(
       hint: "行を条件で絞るdplyr関数です。",
     },
     {
-      k: "fill",
+      id: "l13-q03", revision: 1, k: "fill",
       q: "`rt` を1000で割った新しい列 `rt_sec` を作る関数名を入力してください。",
       code: "rt |>\n  ___(rt_sec = rt / 1000)",
       verify: { mode: "manual", reason: "学習者が列作成の関数名を補う未完成コードのため" },
@@ -199,7 +199,7 @@ file.exists(c(
       hint: "列を作成・変更するdplyr関数です。",
     },
     {
-      k: "tf",
+      id: "l13-q04", revision: 1, k: "tf",
       q: "データ操作について、正しい(○)か、まちがっている(×)かを判定しましょう。",
       hint: "4つの動詞が、行・列・値・順序のどれを扱うか確認します。",
       items: [
@@ -209,7 +209,7 @@ file.exists(c(
       ],
     },
     {
-      k: "choice",
+      id: "l13-q05", revision: 1, k: "choice",
       q: "問題を含むrawデータを扱う方法として、最も追跡しやすいものはどれですか?",
       opts: [
         "rawは上書きせず、問題を記録してprocessedへ別名保存する",
@@ -221,7 +221,7 @@ file.exists(c(
       hint: "後から元の観測値と判断過程を再確認できる方法を選びます。",
     },
     {
-      k: "fill",
+      id: "l13-q06", revision: 1, k: "fill",
       q: "参加者表に存在しないIDだけを返す結合関数名を入力してください。",
       code: "dirty |>\n  dplyr::distinct(id) |>\n  ___(participants |> dplyr::distinct(id), by = \"id\")",
       verify: { mode: "manual", reason: "学習者が不一致IDを抽出する結合関数を補う未完成コードのため" },

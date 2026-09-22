@@ -1,0 +1,22 @@
+# Invoked by Rscript --vanilla; executes the actual distributed notebook chunks.
+args <- commandArgs(trailingOnly=TRUE)
+smoke <- "--smoke" %in% args
+Sys.setenv(LEARNING_STAN_MODE = if (smoke) "smoke" else "full")
+root <- normalizePath(".")
+out <- Sys.getenv("LEARNING_STAN_OUTPUT", tempfile("nb5-verification-"))
+dir.create(out, recursive=TRUE, showWarnings=FALSE)
+out <- normalizePath(out)
+Sys.setenv(LEARNING_STAN_OUTPUT=out)
+notebook <- file.path(root, "public/notebooks/nb5-brms.qmd")
+code <- file.path(out,"notebook.R")
+knitr::purl(notebook, output=code, quiet=TRUE)
+setwd(out)
+pdf(file.path(out,"notebook-plots.pdf"))
+source(code, local=new.env(), echo=FALSE, print.eval=TRUE)
+dev.off()
+required <- c("data.csv","diagnostics.csv","nuts.csv","energy.csv","predictions.csv",
+  "prior-predictive.png","posterior-predictive.png","predictions.png","environment.txt","fit.rds","status.txt")
+stopifnot(all(file.info(file.path(out,required))$size > 0))
+pred <- read.csv(file.path(out,"predictions.csv"))
+stopifnot(nrow(pred)==3, all(is.finite(as.matrix(pred))))
+cat("NB5", if(smoke) "SMOKE execution PASS" else "full execution and diagnostic PASS", "\nArtifacts:",out,"\n")
