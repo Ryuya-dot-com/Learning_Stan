@@ -5,7 +5,7 @@ const root = "public/practice/research-case";
 function files(dir) {
   return readdirSync(dir, { withFileTypes: true }).sort((a,b)=>a.name.localeCompare(b.name)).flatMap(entry =>
     entry.isDirectory() ? (["outputs", "r-library"].includes(entry.name) ? [] : files(join(dir, entry.name))) :
-      /\.(R|stan|md)$/.test(entry.name) ? [join(dir, entry.name)] : []);
+      /\.(R|stan|md|csv|png)$/.test(entry.name) ? [join(dir, entry.name)] : []);
 }
 const zip = new JSZip();
 for (const path of files(root)) zip.file(`research-case/${path.slice(root.length+1)}`, readFileSync(path), { date: new Date("2026-09-22T00:00:00Z") });

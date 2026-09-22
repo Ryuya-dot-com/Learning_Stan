@@ -146,6 +146,17 @@ jobs:
         env:
           LEARNING_STAN_OUTPUT: ${{ runner.temp }}/observation
         run: Rscript --vanilla observation.R
+      - name: Measurement-error sensitivity and equivalence
+        working-directory: public/practice/research-case
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          LEARNING_STAN_OUTPUT: ${{ runner.temp }}/measurement-sensitivity
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            Rscript --vanilla measurement-sensitivity.R --smoke
+          else
+            Rscript --vanilla measurement-sensitivity.R
+          fi
       - name: Design simulation execution check (not performance evidence)
         working-directory: public/practice/research-case
         env:
@@ -169,6 +180,7 @@ jobs:
             ${{ runner.temp }}/crossed
             ${{ runner.temp }}/equivalence
             ${{ runner.temp }}/observation
+            ${{ runner.temp }}/measurement-sensitivity
             ${{ runner.temp }}/design-smoke
             ${{ runner.temp }}/identifiability
 

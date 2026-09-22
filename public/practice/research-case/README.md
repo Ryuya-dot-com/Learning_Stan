@@ -17,13 +17,14 @@ brmsで完結する提出は`run.R`と報告までです。手書きStanを検�
 
 ## 新しいRセッションから実行する
 
-ZIPを展開した`research-case`をRStudio Projectのルートにします。L26でR、brms、CmdStanR、CmdStanを用意しておきます。追加するRパッケージはbrms・cmdstanr・posterior・ggplot2です。通常実行は4 chains、各2000 iterations（前半1000はwarmup）です。
+ZIPを展開した`research-case`をRStudio Projectのルートにします。L26でR、brms、CmdStanR、CmdStanを用意しておきます。追加するRパッケージはbrms・cmdstanr・posterior・ggplot2です。通常実行は4 chains、各2000 iterations（前半1000はwarmup）です。測定誤差の積分モデルと詳細な感度分析では、各2000 warmup＋4000 samplingを使います。
 
 ```sh
 Rscript --vanilla run.R
 Rscript --vanilla equivalence.R
 Rscript --vanilla identifiability.R
 Rscript --vanilla observation.R
+Rscript --vanilla measurement-sensitivity.R
 # 計算量の大きい、固定真値の研究設計シミュレーション
 Rscript --vanilla design.R
 ```
@@ -119,7 +120,9 @@ log scoreは各反応の**周辺予測確率**の対数を平均した値です�
 
 `observation.R`の前半は、全反応の潜在時間をlognormalから生成し、800msの締切を設けます。「締切までに反応しなかった」行を削除する分析、800msの正確な観測として扱う分析、800ms以上とする右打ち切り分析を比較します。正答試行だけのRTという別の対象ではありません。削除分析は締切前に完了した反応へ対象を変え、代入は観測事実と異なる尤度を使います。打ち切りモデルも潜在時間分布と締切機構への仮定に依存します。
 
-後半は真の説明変数に測定誤差を加え、誤差無視と`mi()`で潜在変数を表すモデルを比較します。測定誤差SD=0.7は外部情報として与え、0.75倍・1倍・1.25倍を比較します。1回の誤差を含む測定だけから誤差分散まで自由に識別できるとは仮定しません。`MEASUREMENT_SCALES`で比較範囲を変更できます。1.25倍（および別runの1.1倍）の検証では診断の停止条件に達しました。コードは診断失敗の行をSTOP・推定値NAとして記録し、数値比較から除外します。基準の1倍が失敗すれば演習を停止します。感度分析に失敗があれば`INCOMPLETE_SENSITIVITY`となり、その範囲の頑健性は主張できません。これはより広い仮定範囲を検証済みという意味ではありません。結果が変わったら、複雑な方を自動で採用せず、外部SD・正規潜在分布・独立誤差の仮定を説明します。
+後半は真の説明変数に測定誤差を加え、誤差無視と測定誤差を表すモデルを比較します。測定誤差SD=0.7は外部情報として与え、0.75倍・1倍・1.25倍を比較します。1回の誤差を含む測定だけから誤差分散まで自由に識別できるとは仮定しません。`MEASUREMENT_SCALES`で比較範囲を変更できます。
+
+初版のbrms `mi()`による1.25倍条件は診断停止しました。現在は正規の潜在変数を積分消去した同じ尤度・priorのStan実装を使い、1.25倍でも診断を通過しています。[詳細な感度分析](measurement-sensitivity.md)ではSDの6条件とpriorの8条件、brmsとの照合、独立seedでの再実行を確認しました。方向は正のままでも、SDを1倍から1.25倍にすると係数平均が約40%変わり、**大きさの頑健性を確認した結果ではありません**。基準の1倍が失敗すれば停止し、他の診断失敗も推定値NA・`INCOMPLETE_SENSITIVITY`として残す方針は維持します。外部SD・正規潜在分布・独立誤差の仮定とともに解釈してください。
 
 ### 研究設計：何の性能を測っているか
 
