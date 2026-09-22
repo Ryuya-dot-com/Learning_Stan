@@ -33,6 +33,8 @@ L1–L41の入門コアに、[参加者×刺激の研究ケース](public/practi
 
 [修正と検証の記録](content/practice/revision-2026-09-22.md)に、実行済み・未確認・失敗した条件を分けて記載します。[R基準環境](reproducibility/README.md)はロックされた依存一式を管理し、最低バージョン検査や新しい依存との互換性検査とは区別します。
 
+[測定誤差SDの感度分析](public/practice/research-case/measurement-sensitivity.md)では、SDの6条件とpriorの8条件を通常設定で実行しました。同じ尤度を積分したStan実装で旧版の1.25倍条件の診断停止を解消し、係数の方向と大きさの感度を分けて報告しています。再実行用コード、参照CSV、図を配布ZIPに含みます。
+
 ```sh
 npm run test:nb5          # 短い実行確認。推定精度を主張しない
 npm run test:nb5:full     # 新しいRセッションから推定・診断・予測図まで

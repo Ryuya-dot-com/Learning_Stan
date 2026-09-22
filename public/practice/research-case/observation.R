@@ -1,4 +1,5 @@
 source("common.R")
+source("measurement.R")
 library(brms)
 cfg <- setup_run("observation")
 set.seed(20260922)
@@ -21,9 +22,7 @@ write.csv(do.call(rbind, lapply(seq_along(fits), function(i) {
     mean = mean(b), t(quantile(b, c(.05, .5, .95))), check.names = FALSE)
 })), file.path(cfg$out, "timeout-comparison.csv"), row.names = FALSE)
 # Measurement error: the error SD is external information, not estimated from one noisy measurement.
-set.seed(20260923)
-x <- rnorm(n)
-e <- data.frame(y = rnorm(n, .8*x, .6), xobs = x + rnorm(n, 0, .7), se = .7)
+e <- measurement_data()
 write.csv(e, file.path(cfg$out, "measurement-data.csv"), row.names = FALSE)
 naive <- fit_case(y ~ xobs, e, c(set_prior("normal(0, 1)", class="b"),
   set_prior("normal(0, 1)", class="Intercept"), set_prior("exponential(1)", class="sigma")), cfg, "measurement-naive", gaussian())
@@ -35,19 +34,14 @@ measurement <- list(summarize_slope("naive", as.data.frame(naive)$b_xobs,
   if(cfg$smoke) "SMOKE_ONLY" else "PASS"))
 scales <- as.numeric(strsplit(Sys.getenv("MEASUREMENT_SCALES", ".75,1,1.25"), ",", fixed=TRUE)[[1]])
 stopifnot(length(scales)>0, all(is.finite(scales) & scales>0), 1 %in% scales)
+model <- cmdstanr::cmdstan_model("models/measurement-error-marginal.stan",dir=cfg$out)
 for (scale in scales) {
   e$se <- .7*scale
-  form <- bf(y ~ mi(xobs)) + bf(xobs | mi(se) ~ 1) + set_rescor(FALSE)
-  priors <- c(set_prior("normal(0, 1)", class="b", resp="y"),
-    set_prior("normal(0, 1)", class="Intercept", resp="y"),
-    set_prior("normal(0, 1)", class="Intercept", resp="xobs"),
-    set_prior("exponential(1)", class="sigma", resp="y"),
-    set_prior("exponential(1)", class="sigma", resp="xobs"))
   # Only a diagnosed sampling failure is a scientific comparison outcome.
   # Syntax, API and filesystem errors still abort rather than being relabeled as model failure.
   row <- tryCatch({
-    fit <- fit_case(form, e, priors, cfg, paste0("measurement-", scale), gaussian())
-    summarize_slope(paste0("error_sd_x",scale), as.data.frame(fit)$bsp_y_mixobs,
+    fit <- fit_measurement(model,e,cfg,paste0("measurement-",scale))
+    summarize_slope(paste0("error_sd_x",scale), as.numeric(fit$draws("beta",format="matrix")),
       if(cfg$smoke) "SMOKE_ONLY" else "PASS")
   }, stan_diagnostic_stop=function(e) data.frame(method=paste0("error_sd_x",scale),
     status=conditionMessage(e), true_slope=.8, mean=NA_real_, low=NA_real_, high=NA_real_))
@@ -63,6 +57,8 @@ writeLines(c("Synthetic examples, not a demonstration that more complex models a
  "Timeout: deletion conditions on response before deadline; replacement asserts an exact time; censoring asserts only rt>=800.",
  "The censoring model assumes lognormal latent time and a known fixed deadline; it does not model all causes of nonresponse.",
  "Measurement error: normal latent predictor distribution and independent normal error with externally supplied SD.",
+ "Latent x is analytically marginalized with the same likelihood and priors as the brms mi() model.",
+ "See measurement-sensitivity.R and measurement-sensitivity.md for the extended grid and validation.",
  "A larger SD assumption may conflict with observed spread: inspect diagnostics and prior dependence, do not prefer it automatically.",
  "A single replication is not a bias/coverage study. Check intervals, diagnostics and the observation assumptions before reporting."),
  file.path(cfg$out, "observation-record.txt"))

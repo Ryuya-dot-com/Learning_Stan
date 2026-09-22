@@ -194,5 +194,9 @@ it("brms検証は公開の前提となり、失敗時もコミット対応の診
   expect(artifact.with.name).toContain("github.sha");
   expect(artifact.with.path).toContain("/crossed");
   expect(artifact.with.path).toContain("/nb5");
+  expect(artifact.with.path).toContain("/measurement-sensitivity");
+  const sensitivity = job.steps.find(step => step.name === "Measurement-error sensitivity and equivalence");
+  expect(sensitivity.run).toContain("measurement-sensitivity.R --smoke");
+  expect(sensitivity.run).toContain("Rscript --vanilla measurement-sensitivity.R\n");
   expect(config.jobs["brms-compatibility"].if).toBe("github.event_name == 'workflow_dispatch'");
 });
